@@ -9,6 +9,10 @@ class Stations extends Table {
 
   TextColumn get nameEn => text().nullable()();
 
+  TextColumn get nameJp => text().nullable()();
+
+  TextColumn get nameCh => text().nullable()();
+
   RealColumn get latitude => real().nullable()();
 
   RealColumn get longitude => real().nullable()();

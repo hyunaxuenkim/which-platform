@@ -51,6 +51,24 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _nameJpMeta = const VerificationMeta('nameJp');
+  @override
+  late final GeneratedColumn<String> nameJp = GeneratedColumn<String>(
+    'name_jp',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameChMeta = const VerificationMeta('nameCh');
+  @override
+  late final GeneratedColumn<String> nameCh = GeneratedColumn<String>(
+    'name_ch',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _latitudeMeta = const VerificationMeta(
     'latitude',
   );
@@ -103,6 +121,8 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
     stationKey,
     nameKo,
     nameEn,
+    nameJp,
+    nameCh,
     latitude,
     longitude,
     createdAt,
@@ -143,6 +163,18 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
       context.handle(
         _nameEnMeta,
         nameEn.isAcceptableOrUnknown(data['name_en']!, _nameEnMeta),
+      );
+    }
+    if (data.containsKey('name_jp')) {
+      context.handle(
+        _nameJpMeta,
+        nameJp.isAcceptableOrUnknown(data['name_jp']!, _nameJpMeta),
+      );
+    }
+    if (data.containsKey('name_ch')) {
+      context.handle(
+        _nameChMeta,
+        nameCh.isAcceptableOrUnknown(data['name_ch']!, _nameChMeta),
       );
     }
     if (data.containsKey('latitude')) {
@@ -194,6 +226,14 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
         DriftSqlType.string,
         data['${effectivePrefix}name_en'],
       ),
+      nameJp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_jp'],
+      ),
+      nameCh: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_ch'],
+      ),
       latitude: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}latitude'],
@@ -224,6 +264,8 @@ class Station extends DataClass implements Insertable<Station> {
   final String stationKey;
   final String nameKo;
   final String? nameEn;
+  final String? nameJp;
+  final String? nameCh;
   final double? latitude;
   final double? longitude;
   final DateTime createdAt;
@@ -233,6 +275,8 @@ class Station extends DataClass implements Insertable<Station> {
     required this.stationKey,
     required this.nameKo,
     this.nameEn,
+    this.nameJp,
+    this.nameCh,
     this.latitude,
     this.longitude,
     required this.createdAt,
@@ -246,6 +290,12 @@ class Station extends DataClass implements Insertable<Station> {
     map['name_ko'] = Variable<String>(nameKo);
     if (!nullToAbsent || nameEn != null) {
       map['name_en'] = Variable<String>(nameEn);
+    }
+    if (!nullToAbsent || nameJp != null) {
+      map['name_jp'] = Variable<String>(nameJp);
+    }
+    if (!nullToAbsent || nameCh != null) {
+      map['name_ch'] = Variable<String>(nameCh);
     }
     if (!nullToAbsent || latitude != null) {
       map['latitude'] = Variable<double>(latitude);
@@ -266,6 +316,12 @@ class Station extends DataClass implements Insertable<Station> {
       nameEn: nameEn == null && nullToAbsent
           ? const Value.absent()
           : Value(nameEn),
+      nameJp: nameJp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nameJp),
+      nameCh: nameCh == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nameCh),
       latitude: latitude == null && nullToAbsent
           ? const Value.absent()
           : Value(latitude),
@@ -287,6 +343,8 @@ class Station extends DataClass implements Insertable<Station> {
       stationKey: serializer.fromJson<String>(json['stationKey']),
       nameKo: serializer.fromJson<String>(json['nameKo']),
       nameEn: serializer.fromJson<String?>(json['nameEn']),
+      nameJp: serializer.fromJson<String?>(json['nameJp']),
+      nameCh: serializer.fromJson<String?>(json['nameCh']),
       latitude: serializer.fromJson<double?>(json['latitude']),
       longitude: serializer.fromJson<double?>(json['longitude']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -301,6 +359,8 @@ class Station extends DataClass implements Insertable<Station> {
       'stationKey': serializer.toJson<String>(stationKey),
       'nameKo': serializer.toJson<String>(nameKo),
       'nameEn': serializer.toJson<String?>(nameEn),
+      'nameJp': serializer.toJson<String?>(nameJp),
+      'nameCh': serializer.toJson<String?>(nameCh),
       'latitude': serializer.toJson<double?>(latitude),
       'longitude': serializer.toJson<double?>(longitude),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -313,6 +373,8 @@ class Station extends DataClass implements Insertable<Station> {
     String? stationKey,
     String? nameKo,
     Value<String?> nameEn = const Value.absent(),
+    Value<String?> nameJp = const Value.absent(),
+    Value<String?> nameCh = const Value.absent(),
     Value<double?> latitude = const Value.absent(),
     Value<double?> longitude = const Value.absent(),
     DateTime? createdAt,
@@ -322,6 +384,8 @@ class Station extends DataClass implements Insertable<Station> {
     stationKey: stationKey ?? this.stationKey,
     nameKo: nameKo ?? this.nameKo,
     nameEn: nameEn.present ? nameEn.value : this.nameEn,
+    nameJp: nameJp.present ? nameJp.value : this.nameJp,
+    nameCh: nameCh.present ? nameCh.value : this.nameCh,
     latitude: latitude.present ? latitude.value : this.latitude,
     longitude: longitude.present ? longitude.value : this.longitude,
     createdAt: createdAt ?? this.createdAt,
@@ -335,6 +399,8 @@ class Station extends DataClass implements Insertable<Station> {
           : this.stationKey,
       nameKo: data.nameKo.present ? data.nameKo.value : this.nameKo,
       nameEn: data.nameEn.present ? data.nameEn.value : this.nameEn,
+      nameJp: data.nameJp.present ? data.nameJp.value : this.nameJp,
+      nameCh: data.nameCh.present ? data.nameCh.value : this.nameCh,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -349,6 +415,8 @@ class Station extends DataClass implements Insertable<Station> {
           ..write('stationKey: $stationKey, ')
           ..write('nameKo: $nameKo, ')
           ..write('nameEn: $nameEn, ')
+          ..write('nameJp: $nameJp, ')
+          ..write('nameCh: $nameCh, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
@@ -363,6 +431,8 @@ class Station extends DataClass implements Insertable<Station> {
     stationKey,
     nameKo,
     nameEn,
+    nameJp,
+    nameCh,
     latitude,
     longitude,
     createdAt,
@@ -376,6 +446,8 @@ class Station extends DataClass implements Insertable<Station> {
           other.stationKey == this.stationKey &&
           other.nameKo == this.nameKo &&
           other.nameEn == this.nameEn &&
+          other.nameJp == this.nameJp &&
+          other.nameCh == this.nameCh &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
           other.createdAt == this.createdAt &&
@@ -387,6 +459,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
   final Value<String> stationKey;
   final Value<String> nameKo;
   final Value<String?> nameEn;
+  final Value<String?> nameJp;
+  final Value<String?> nameCh;
   final Value<double?> latitude;
   final Value<double?> longitude;
   final Value<DateTime> createdAt;
@@ -396,6 +470,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
     this.stationKey = const Value.absent(),
     this.nameKo = const Value.absent(),
     this.nameEn = const Value.absent(),
+    this.nameJp = const Value.absent(),
+    this.nameCh = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -406,6 +482,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
     required String stationKey,
     required String nameKo,
     this.nameEn = const Value.absent(),
+    this.nameJp = const Value.absent(),
+    this.nameCh = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -417,6 +495,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
     Expression<String>? stationKey,
     Expression<String>? nameKo,
     Expression<String>? nameEn,
+    Expression<String>? nameJp,
+    Expression<String>? nameCh,
     Expression<double>? latitude,
     Expression<double>? longitude,
     Expression<DateTime>? createdAt,
@@ -427,6 +507,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
       if (stationKey != null) 'station_key': stationKey,
       if (nameKo != null) 'name_ko': nameKo,
       if (nameEn != null) 'name_en': nameEn,
+      if (nameJp != null) 'name_jp': nameJp,
+      if (nameCh != null) 'name_ch': nameCh,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
       if (createdAt != null) 'created_at': createdAt,
@@ -439,6 +521,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
     Value<String>? stationKey,
     Value<String>? nameKo,
     Value<String?>? nameEn,
+    Value<String?>? nameJp,
+    Value<String?>? nameCh,
     Value<double?>? latitude,
     Value<double?>? longitude,
     Value<DateTime>? createdAt,
@@ -449,6 +533,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
       stationKey: stationKey ?? this.stationKey,
       nameKo: nameKo ?? this.nameKo,
       nameEn: nameEn ?? this.nameEn,
+      nameJp: nameJp ?? this.nameJp,
+      nameCh: nameCh ?? this.nameCh,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       createdAt: createdAt ?? this.createdAt,
@@ -470,6 +556,12 @@ class StationsCompanion extends UpdateCompanion<Station> {
     }
     if (nameEn.present) {
       map['name_en'] = Variable<String>(nameEn.value);
+    }
+    if (nameJp.present) {
+      map['name_jp'] = Variable<String>(nameJp.value);
+    }
+    if (nameCh.present) {
+      map['name_ch'] = Variable<String>(nameCh.value);
     }
     if (latitude.present) {
       map['latitude'] = Variable<double>(latitude.value);
@@ -493,6 +585,8 @@ class StationsCompanion extends UpdateCompanion<Station> {
           ..write('stationKey: $stationKey, ')
           ..write('nameKo: $nameKo, ')
           ..write('nameEn: $nameEn, ')
+          ..write('nameJp: $nameJp, ')
+          ..write('nameCh: $nameCh, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
@@ -1613,6 +1707,1049 @@ class LineStationsCompanion extends UpdateCompanion<LineStation> {
   }
 }
 
+class $DirectionPoliciesTable extends DirectionPolicies
+    with TableInfo<$DirectionPoliciesTable, DirectionPolicy> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DirectionPoliciesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _lineIdMeta = const VerificationMeta('lineId');
+  @override
+  late final GeneratedColumn<int> lineId = GeneratedColumn<int>(
+    'line_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES lines (id)',
+    ),
+  );
+  static const VerificationMeta _branchKeyMeta = const VerificationMeta(
+    'branchKey',
+  );
+  @override
+  late final GeneratedColumn<String> branchKey = GeneratedColumn<String>(
+    'branch_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('MAIN'),
+  );
+  static const VerificationMeta _servicePatternKeyMeta = const VerificationMeta(
+    'servicePatternKey',
+  );
+  @override
+  late final GeneratedColumn<String> servicePatternKey =
+      GeneratedColumn<String>(
+        'service_pattern_key',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _directionKindMeta = const VerificationMeta(
+    'directionKind',
+  );
+  @override
+  late final GeneratedColumn<String> directionKind = GeneratedColumn<String>(
+    'direction_kind',
+    aliasedName,
+    false,
+    check: () => directionKind.isIn(const <String>[
+      'UP',
+      'DOWN',
+      'INNER',
+      'OUTER',
+      'TERMINAL',
+      'BRANCH',
+    ]),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _apiDirectionMeta = const VerificationMeta(
+    'apiDirection',
+  );
+  @override
+  late final GeneratedColumn<String> apiDirection = GeneratedColumn<String>(
+    'api_direction',
+    aliasedName,
+    true,
+    check: () => apiDirection.isIn(const <String>['상행', '하행', '내선', '외선']),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _apiTerminalStationCodeMeta =
+      const VerificationMeta('apiTerminalStationCode');
+  @override
+  late final GeneratedColumn<String> apiTerminalStationCode =
+      GeneratedColumn<String>(
+        'api_terminal_station_code',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _apiTerminalStationNameMeta =
+      const VerificationMeta('apiTerminalStationName');
+  @override
+  late final GeneratedColumn<String> apiTerminalStationName =
+      GeneratedColumn<String>(
+        'api_terminal_station_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _destinationStationIdMeta =
+      const VerificationMeta('destinationStationId');
+  @override
+  late final GeneratedColumn<int> destinationStationId = GeneratedColumn<int>(
+    'destination_station_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES stations (id)',
+    ),
+  );
+  static const VerificationMeta _displayLabelKoMeta = const VerificationMeta(
+    'displayLabelKo',
+  );
+  @override
+  late final GeneratedColumn<String> displayLabelKo = GeneratedColumn<String>(
+    'display_label_ko',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayLabelEnMeta = const VerificationMeta(
+    'displayLabelEn',
+  );
+  @override
+  late final GeneratedColumn<String> displayLabelEn = GeneratedColumn<String>(
+    'display_label_en',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _displayLabelJpMeta = const VerificationMeta(
+    'displayLabelJp',
+  );
+  @override
+  late final GeneratedColumn<String> displayLabelJp = GeneratedColumn<String>(
+    'display_label_jp',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _displayLabelChMeta = const VerificationMeta(
+    'displayLabelCh',
+  );
+  @override
+  late final GeneratedColumn<String> displayLabelCh = GeneratedColumn<String>(
+    'display_label_ch',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<int> priority = GeneratedColumn<int>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    lineId,
+    branchKey,
+    servicePatternKey,
+    directionKind,
+    apiDirection,
+    apiTerminalStationCode,
+    apiTerminalStationName,
+    destinationStationId,
+    displayLabelKo,
+    displayLabelEn,
+    displayLabelJp,
+    displayLabelCh,
+    priority,
+    isActive,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'direction_policies';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DirectionPolicy> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('line_id')) {
+      context.handle(
+        _lineIdMeta,
+        lineId.isAcceptableOrUnknown(data['line_id']!, _lineIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lineIdMeta);
+    }
+    if (data.containsKey('branch_key')) {
+      context.handle(
+        _branchKeyMeta,
+        branchKey.isAcceptableOrUnknown(data['branch_key']!, _branchKeyMeta),
+      );
+    }
+    if (data.containsKey('service_pattern_key')) {
+      context.handle(
+        _servicePatternKeyMeta,
+        servicePatternKey.isAcceptableOrUnknown(
+          data['service_pattern_key']!,
+          _servicePatternKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_servicePatternKeyMeta);
+    }
+    if (data.containsKey('direction_kind')) {
+      context.handle(
+        _directionKindMeta,
+        directionKind.isAcceptableOrUnknown(
+          data['direction_kind']!,
+          _directionKindMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_directionKindMeta);
+    }
+    if (data.containsKey('api_direction')) {
+      context.handle(
+        _apiDirectionMeta,
+        apiDirection.isAcceptableOrUnknown(
+          data['api_direction']!,
+          _apiDirectionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('api_terminal_station_code')) {
+      context.handle(
+        _apiTerminalStationCodeMeta,
+        apiTerminalStationCode.isAcceptableOrUnknown(
+          data['api_terminal_station_code']!,
+          _apiTerminalStationCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('api_terminal_station_name')) {
+      context.handle(
+        _apiTerminalStationNameMeta,
+        apiTerminalStationName.isAcceptableOrUnknown(
+          data['api_terminal_station_name']!,
+          _apiTerminalStationNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('destination_station_id')) {
+      context.handle(
+        _destinationStationIdMeta,
+        destinationStationId.isAcceptableOrUnknown(
+          data['destination_station_id']!,
+          _destinationStationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('display_label_ko')) {
+      context.handle(
+        _displayLabelKoMeta,
+        displayLabelKo.isAcceptableOrUnknown(
+          data['display_label_ko']!,
+          _displayLabelKoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_displayLabelKoMeta);
+    }
+    if (data.containsKey('display_label_en')) {
+      context.handle(
+        _displayLabelEnMeta,
+        displayLabelEn.isAcceptableOrUnknown(
+          data['display_label_en']!,
+          _displayLabelEnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('display_label_jp')) {
+      context.handle(
+        _displayLabelJpMeta,
+        displayLabelJp.isAcceptableOrUnknown(
+          data['display_label_jp']!,
+          _displayLabelJpMeta,
+        ),
+      );
+    }
+    if (data.containsKey('display_label_ch')) {
+      context.handle(
+        _displayLabelChMeta,
+        displayLabelCh.isAcceptableOrUnknown(
+          data['display_label_ch']!,
+          _displayLabelChMeta,
+        ),
+      );
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {
+      lineId,
+      branchKey,
+      servicePatternKey,
+      directionKind,
+      apiDirection,
+      apiTerminalStationCode,
+    },
+  ];
+  @override
+  DirectionPolicy map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DirectionPolicy(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      lineId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}line_id'],
+      )!,
+      branchKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}branch_key'],
+      )!,
+      servicePatternKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}service_pattern_key'],
+      )!,
+      directionKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direction_kind'],
+      )!,
+      apiDirection: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}api_direction'],
+      ),
+      apiTerminalStationCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}api_terminal_station_code'],
+      ),
+      apiTerminalStationName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}api_terminal_station_name'],
+      ),
+      destinationStationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}destination_station_id'],
+      ),
+      displayLabelKo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_label_ko'],
+      )!,
+      displayLabelEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_label_en'],
+      ),
+      displayLabelJp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_label_jp'],
+      ),
+      displayLabelCh: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_label_ch'],
+      ),
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DirectionPoliciesTable createAlias(String alias) {
+    return $DirectionPoliciesTable(attachedDatabase, alias);
+  }
+}
+
+class DirectionPolicy extends DataClass implements Insertable<DirectionPolicy> {
+  final int id;
+  final int lineId;
+  final String branchKey;
+  final String servicePatternKey;
+  final String directionKind;
+  final String? apiDirection;
+  final String? apiTerminalStationCode;
+  final String? apiTerminalStationName;
+  final int? destinationStationId;
+  final String displayLabelKo;
+  final String? displayLabelEn;
+  final String? displayLabelJp;
+  final String? displayLabelCh;
+  final int priority;
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const DirectionPolicy({
+    required this.id,
+    required this.lineId,
+    required this.branchKey,
+    required this.servicePatternKey,
+    required this.directionKind,
+    this.apiDirection,
+    this.apiTerminalStationCode,
+    this.apiTerminalStationName,
+    this.destinationStationId,
+    required this.displayLabelKo,
+    this.displayLabelEn,
+    this.displayLabelJp,
+    this.displayLabelCh,
+    required this.priority,
+    required this.isActive,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['line_id'] = Variable<int>(lineId);
+    map['branch_key'] = Variable<String>(branchKey);
+    map['service_pattern_key'] = Variable<String>(servicePatternKey);
+    map['direction_kind'] = Variable<String>(directionKind);
+    if (!nullToAbsent || apiDirection != null) {
+      map['api_direction'] = Variable<String>(apiDirection);
+    }
+    if (!nullToAbsent || apiTerminalStationCode != null) {
+      map['api_terminal_station_code'] = Variable<String>(
+        apiTerminalStationCode,
+      );
+    }
+    if (!nullToAbsent || apiTerminalStationName != null) {
+      map['api_terminal_station_name'] = Variable<String>(
+        apiTerminalStationName,
+      );
+    }
+    if (!nullToAbsent || destinationStationId != null) {
+      map['destination_station_id'] = Variable<int>(destinationStationId);
+    }
+    map['display_label_ko'] = Variable<String>(displayLabelKo);
+    if (!nullToAbsent || displayLabelEn != null) {
+      map['display_label_en'] = Variable<String>(displayLabelEn);
+    }
+    if (!nullToAbsent || displayLabelJp != null) {
+      map['display_label_jp'] = Variable<String>(displayLabelJp);
+    }
+    if (!nullToAbsent || displayLabelCh != null) {
+      map['display_label_ch'] = Variable<String>(displayLabelCh);
+    }
+    map['priority'] = Variable<int>(priority);
+    map['is_active'] = Variable<bool>(isActive);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DirectionPoliciesCompanion toCompanion(bool nullToAbsent) {
+    return DirectionPoliciesCompanion(
+      id: Value(id),
+      lineId: Value(lineId),
+      branchKey: Value(branchKey),
+      servicePatternKey: Value(servicePatternKey),
+      directionKind: Value(directionKind),
+      apiDirection: apiDirection == null && nullToAbsent
+          ? const Value.absent()
+          : Value(apiDirection),
+      apiTerminalStationCode: apiTerminalStationCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(apiTerminalStationCode),
+      apiTerminalStationName: apiTerminalStationName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(apiTerminalStationName),
+      destinationStationId: destinationStationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(destinationStationId),
+      displayLabelKo: Value(displayLabelKo),
+      displayLabelEn: displayLabelEn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayLabelEn),
+      displayLabelJp: displayLabelJp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayLabelJp),
+      displayLabelCh: displayLabelCh == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayLabelCh),
+      priority: Value(priority),
+      isActive: Value(isActive),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory DirectionPolicy.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DirectionPolicy(
+      id: serializer.fromJson<int>(json['id']),
+      lineId: serializer.fromJson<int>(json['lineId']),
+      branchKey: serializer.fromJson<String>(json['branchKey']),
+      servicePatternKey: serializer.fromJson<String>(json['servicePatternKey']),
+      directionKind: serializer.fromJson<String>(json['directionKind']),
+      apiDirection: serializer.fromJson<String?>(json['apiDirection']),
+      apiTerminalStationCode: serializer.fromJson<String?>(
+        json['apiTerminalStationCode'],
+      ),
+      apiTerminalStationName: serializer.fromJson<String?>(
+        json['apiTerminalStationName'],
+      ),
+      destinationStationId: serializer.fromJson<int?>(
+        json['destinationStationId'],
+      ),
+      displayLabelKo: serializer.fromJson<String>(json['displayLabelKo']),
+      displayLabelEn: serializer.fromJson<String?>(json['displayLabelEn']),
+      displayLabelJp: serializer.fromJson<String?>(json['displayLabelJp']),
+      displayLabelCh: serializer.fromJson<String?>(json['displayLabelCh']),
+      priority: serializer.fromJson<int>(json['priority']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'lineId': serializer.toJson<int>(lineId),
+      'branchKey': serializer.toJson<String>(branchKey),
+      'servicePatternKey': serializer.toJson<String>(servicePatternKey),
+      'directionKind': serializer.toJson<String>(directionKind),
+      'apiDirection': serializer.toJson<String?>(apiDirection),
+      'apiTerminalStationCode': serializer.toJson<String?>(
+        apiTerminalStationCode,
+      ),
+      'apiTerminalStationName': serializer.toJson<String?>(
+        apiTerminalStationName,
+      ),
+      'destinationStationId': serializer.toJson<int?>(destinationStationId),
+      'displayLabelKo': serializer.toJson<String>(displayLabelKo),
+      'displayLabelEn': serializer.toJson<String?>(displayLabelEn),
+      'displayLabelJp': serializer.toJson<String?>(displayLabelJp),
+      'displayLabelCh': serializer.toJson<String?>(displayLabelCh),
+      'priority': serializer.toJson<int>(priority),
+      'isActive': serializer.toJson<bool>(isActive),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  DirectionPolicy copyWith({
+    int? id,
+    int? lineId,
+    String? branchKey,
+    String? servicePatternKey,
+    String? directionKind,
+    Value<String?> apiDirection = const Value.absent(),
+    Value<String?> apiTerminalStationCode = const Value.absent(),
+    Value<String?> apiTerminalStationName = const Value.absent(),
+    Value<int?> destinationStationId = const Value.absent(),
+    String? displayLabelKo,
+    Value<String?> displayLabelEn = const Value.absent(),
+    Value<String?> displayLabelJp = const Value.absent(),
+    Value<String?> displayLabelCh = const Value.absent(),
+    int? priority,
+    bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => DirectionPolicy(
+    id: id ?? this.id,
+    lineId: lineId ?? this.lineId,
+    branchKey: branchKey ?? this.branchKey,
+    servicePatternKey: servicePatternKey ?? this.servicePatternKey,
+    directionKind: directionKind ?? this.directionKind,
+    apiDirection: apiDirection.present ? apiDirection.value : this.apiDirection,
+    apiTerminalStationCode: apiTerminalStationCode.present
+        ? apiTerminalStationCode.value
+        : this.apiTerminalStationCode,
+    apiTerminalStationName: apiTerminalStationName.present
+        ? apiTerminalStationName.value
+        : this.apiTerminalStationName,
+    destinationStationId: destinationStationId.present
+        ? destinationStationId.value
+        : this.destinationStationId,
+    displayLabelKo: displayLabelKo ?? this.displayLabelKo,
+    displayLabelEn: displayLabelEn.present
+        ? displayLabelEn.value
+        : this.displayLabelEn,
+    displayLabelJp: displayLabelJp.present
+        ? displayLabelJp.value
+        : this.displayLabelJp,
+    displayLabelCh: displayLabelCh.present
+        ? displayLabelCh.value
+        : this.displayLabelCh,
+    priority: priority ?? this.priority,
+    isActive: isActive ?? this.isActive,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  DirectionPolicy copyWithCompanion(DirectionPoliciesCompanion data) {
+    return DirectionPolicy(
+      id: data.id.present ? data.id.value : this.id,
+      lineId: data.lineId.present ? data.lineId.value : this.lineId,
+      branchKey: data.branchKey.present ? data.branchKey.value : this.branchKey,
+      servicePatternKey: data.servicePatternKey.present
+          ? data.servicePatternKey.value
+          : this.servicePatternKey,
+      directionKind: data.directionKind.present
+          ? data.directionKind.value
+          : this.directionKind,
+      apiDirection: data.apiDirection.present
+          ? data.apiDirection.value
+          : this.apiDirection,
+      apiTerminalStationCode: data.apiTerminalStationCode.present
+          ? data.apiTerminalStationCode.value
+          : this.apiTerminalStationCode,
+      apiTerminalStationName: data.apiTerminalStationName.present
+          ? data.apiTerminalStationName.value
+          : this.apiTerminalStationName,
+      destinationStationId: data.destinationStationId.present
+          ? data.destinationStationId.value
+          : this.destinationStationId,
+      displayLabelKo: data.displayLabelKo.present
+          ? data.displayLabelKo.value
+          : this.displayLabelKo,
+      displayLabelEn: data.displayLabelEn.present
+          ? data.displayLabelEn.value
+          : this.displayLabelEn,
+      displayLabelJp: data.displayLabelJp.present
+          ? data.displayLabelJp.value
+          : this.displayLabelJp,
+      displayLabelCh: data.displayLabelCh.present
+          ? data.displayLabelCh.value
+          : this.displayLabelCh,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DirectionPolicy(')
+          ..write('id: $id, ')
+          ..write('lineId: $lineId, ')
+          ..write('branchKey: $branchKey, ')
+          ..write('servicePatternKey: $servicePatternKey, ')
+          ..write('directionKind: $directionKind, ')
+          ..write('apiDirection: $apiDirection, ')
+          ..write('apiTerminalStationCode: $apiTerminalStationCode, ')
+          ..write('apiTerminalStationName: $apiTerminalStationName, ')
+          ..write('destinationStationId: $destinationStationId, ')
+          ..write('displayLabelKo: $displayLabelKo, ')
+          ..write('displayLabelEn: $displayLabelEn, ')
+          ..write('displayLabelJp: $displayLabelJp, ')
+          ..write('displayLabelCh: $displayLabelCh, ')
+          ..write('priority: $priority, ')
+          ..write('isActive: $isActive, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    lineId,
+    branchKey,
+    servicePatternKey,
+    directionKind,
+    apiDirection,
+    apiTerminalStationCode,
+    apiTerminalStationName,
+    destinationStationId,
+    displayLabelKo,
+    displayLabelEn,
+    displayLabelJp,
+    displayLabelCh,
+    priority,
+    isActive,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DirectionPolicy &&
+          other.id == this.id &&
+          other.lineId == this.lineId &&
+          other.branchKey == this.branchKey &&
+          other.servicePatternKey == this.servicePatternKey &&
+          other.directionKind == this.directionKind &&
+          other.apiDirection == this.apiDirection &&
+          other.apiTerminalStationCode == this.apiTerminalStationCode &&
+          other.apiTerminalStationName == this.apiTerminalStationName &&
+          other.destinationStationId == this.destinationStationId &&
+          other.displayLabelKo == this.displayLabelKo &&
+          other.displayLabelEn == this.displayLabelEn &&
+          other.displayLabelJp == this.displayLabelJp &&
+          other.displayLabelCh == this.displayLabelCh &&
+          other.priority == this.priority &&
+          other.isActive == this.isActive &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DirectionPoliciesCompanion extends UpdateCompanion<DirectionPolicy> {
+  final Value<int> id;
+  final Value<int> lineId;
+  final Value<String> branchKey;
+  final Value<String> servicePatternKey;
+  final Value<String> directionKind;
+  final Value<String?> apiDirection;
+  final Value<String?> apiTerminalStationCode;
+  final Value<String?> apiTerminalStationName;
+  final Value<int?> destinationStationId;
+  final Value<String> displayLabelKo;
+  final Value<String?> displayLabelEn;
+  final Value<String?> displayLabelJp;
+  final Value<String?> displayLabelCh;
+  final Value<int> priority;
+  final Value<bool> isActive;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const DirectionPoliciesCompanion({
+    this.id = const Value.absent(),
+    this.lineId = const Value.absent(),
+    this.branchKey = const Value.absent(),
+    this.servicePatternKey = const Value.absent(),
+    this.directionKind = const Value.absent(),
+    this.apiDirection = const Value.absent(),
+    this.apiTerminalStationCode = const Value.absent(),
+    this.apiTerminalStationName = const Value.absent(),
+    this.destinationStationId = const Value.absent(),
+    this.displayLabelKo = const Value.absent(),
+    this.displayLabelEn = const Value.absent(),
+    this.displayLabelJp = const Value.absent(),
+    this.displayLabelCh = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  DirectionPoliciesCompanion.insert({
+    this.id = const Value.absent(),
+    required int lineId,
+    this.branchKey = const Value.absent(),
+    required String servicePatternKey,
+    required String directionKind,
+    this.apiDirection = const Value.absent(),
+    this.apiTerminalStationCode = const Value.absent(),
+    this.apiTerminalStationName = const Value.absent(),
+    this.destinationStationId = const Value.absent(),
+    required String displayLabelKo,
+    this.displayLabelEn = const Value.absent(),
+    this.displayLabelJp = const Value.absent(),
+    this.displayLabelCh = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : lineId = Value(lineId),
+       servicePatternKey = Value(servicePatternKey),
+       directionKind = Value(directionKind),
+       displayLabelKo = Value(displayLabelKo);
+  static Insertable<DirectionPolicy> custom({
+    Expression<int>? id,
+    Expression<int>? lineId,
+    Expression<String>? branchKey,
+    Expression<String>? servicePatternKey,
+    Expression<String>? directionKind,
+    Expression<String>? apiDirection,
+    Expression<String>? apiTerminalStationCode,
+    Expression<String>? apiTerminalStationName,
+    Expression<int>? destinationStationId,
+    Expression<String>? displayLabelKo,
+    Expression<String>? displayLabelEn,
+    Expression<String>? displayLabelJp,
+    Expression<String>? displayLabelCh,
+    Expression<int>? priority,
+    Expression<bool>? isActive,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (lineId != null) 'line_id': lineId,
+      if (branchKey != null) 'branch_key': branchKey,
+      if (servicePatternKey != null) 'service_pattern_key': servicePatternKey,
+      if (directionKind != null) 'direction_kind': directionKind,
+      if (apiDirection != null) 'api_direction': apiDirection,
+      if (apiTerminalStationCode != null)
+        'api_terminal_station_code': apiTerminalStationCode,
+      if (apiTerminalStationName != null)
+        'api_terminal_station_name': apiTerminalStationName,
+      if (destinationStationId != null)
+        'destination_station_id': destinationStationId,
+      if (displayLabelKo != null) 'display_label_ko': displayLabelKo,
+      if (displayLabelEn != null) 'display_label_en': displayLabelEn,
+      if (displayLabelJp != null) 'display_label_jp': displayLabelJp,
+      if (displayLabelCh != null) 'display_label_ch': displayLabelCh,
+      if (priority != null) 'priority': priority,
+      if (isActive != null) 'is_active': isActive,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  DirectionPoliciesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? lineId,
+    Value<String>? branchKey,
+    Value<String>? servicePatternKey,
+    Value<String>? directionKind,
+    Value<String?>? apiDirection,
+    Value<String?>? apiTerminalStationCode,
+    Value<String?>? apiTerminalStationName,
+    Value<int?>? destinationStationId,
+    Value<String>? displayLabelKo,
+    Value<String?>? displayLabelEn,
+    Value<String?>? displayLabelJp,
+    Value<String?>? displayLabelCh,
+    Value<int>? priority,
+    Value<bool>? isActive,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return DirectionPoliciesCompanion(
+      id: id ?? this.id,
+      lineId: lineId ?? this.lineId,
+      branchKey: branchKey ?? this.branchKey,
+      servicePatternKey: servicePatternKey ?? this.servicePatternKey,
+      directionKind: directionKind ?? this.directionKind,
+      apiDirection: apiDirection ?? this.apiDirection,
+      apiTerminalStationCode:
+          apiTerminalStationCode ?? this.apiTerminalStationCode,
+      apiTerminalStationName:
+          apiTerminalStationName ?? this.apiTerminalStationName,
+      destinationStationId: destinationStationId ?? this.destinationStationId,
+      displayLabelKo: displayLabelKo ?? this.displayLabelKo,
+      displayLabelEn: displayLabelEn ?? this.displayLabelEn,
+      displayLabelJp: displayLabelJp ?? this.displayLabelJp,
+      displayLabelCh: displayLabelCh ?? this.displayLabelCh,
+      priority: priority ?? this.priority,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (lineId.present) {
+      map['line_id'] = Variable<int>(lineId.value);
+    }
+    if (branchKey.present) {
+      map['branch_key'] = Variable<String>(branchKey.value);
+    }
+    if (servicePatternKey.present) {
+      map['service_pattern_key'] = Variable<String>(servicePatternKey.value);
+    }
+    if (directionKind.present) {
+      map['direction_kind'] = Variable<String>(directionKind.value);
+    }
+    if (apiDirection.present) {
+      map['api_direction'] = Variable<String>(apiDirection.value);
+    }
+    if (apiTerminalStationCode.present) {
+      map['api_terminal_station_code'] = Variable<String>(
+        apiTerminalStationCode.value,
+      );
+    }
+    if (apiTerminalStationName.present) {
+      map['api_terminal_station_name'] = Variable<String>(
+        apiTerminalStationName.value,
+      );
+    }
+    if (destinationStationId.present) {
+      map['destination_station_id'] = Variable<int>(destinationStationId.value);
+    }
+    if (displayLabelKo.present) {
+      map['display_label_ko'] = Variable<String>(displayLabelKo.value);
+    }
+    if (displayLabelEn.present) {
+      map['display_label_en'] = Variable<String>(displayLabelEn.value);
+    }
+    if (displayLabelJp.present) {
+      map['display_label_jp'] = Variable<String>(displayLabelJp.value);
+    }
+    if (displayLabelCh.present) {
+      map['display_label_ch'] = Variable<String>(displayLabelCh.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DirectionPoliciesCompanion(')
+          ..write('id: $id, ')
+          ..write('lineId: $lineId, ')
+          ..write('branchKey: $branchKey, ')
+          ..write('servicePatternKey: $servicePatternKey, ')
+          ..write('directionKind: $directionKind, ')
+          ..write('apiDirection: $apiDirection, ')
+          ..write('apiTerminalStationCode: $apiTerminalStationCode, ')
+          ..write('apiTerminalStationName: $apiTerminalStationName, ')
+          ..write('destinationStationId: $destinationStationId, ')
+          ..write('displayLabelKo: $displayLabelKo, ')
+          ..write('displayLabelEn: $displayLabelEn, ')
+          ..write('displayLabelJp: $displayLabelJp, ')
+          ..write('displayLabelCh: $displayLabelCh, ')
+          ..write('priority: $priority, ')
+          ..write('isActive: $isActive, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TransfersTable extends Transfers
     with TableInfo<$TransfersTable, Transfer> {
   @override
@@ -2154,6 +3291,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StationsTable stations = $StationsTable(this);
   late final $LinesTable lines = $LinesTable(this);
   late final $LineStationsTable lineStations = $LineStationsTable(this);
+  late final $DirectionPoliciesTable directionPolicies =
+      $DirectionPoliciesTable(this);
   late final $TransfersTable transfers = $TransfersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -2163,6 +3302,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     stations,
     lines,
     lineStations,
+    directionPolicies,
     transfers,
   ];
 }
@@ -2173,6 +3313,8 @@ typedef $$StationsTableCreateCompanionBuilder =
       required String stationKey,
       required String nameKo,
       Value<String?> nameEn,
+      Value<String?> nameJp,
+      Value<String?> nameCh,
       Value<double?> latitude,
       Value<double?> longitude,
       Value<DateTime> createdAt,
@@ -2184,6 +3326,8 @@ typedef $$StationsTableUpdateCompanionBuilder =
       Value<String> stationKey,
       Value<String> nameKo,
       Value<String?> nameEn,
+      Value<String?> nameJp,
+      Value<String?> nameCh,
       Value<double?> latitude,
       Value<double?> longitude,
       Value<DateTime> createdAt,
@@ -2207,6 +3351,33 @@ final class $$StationsTableReferences
     ).filter((f) => f.stationId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_lineStationsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$DirectionPoliciesTable, List<DirectionPolicy>>
+  _directionPoliciesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.directionPolicies,
+        aliasName: $_aliasNameGenerator(
+          db.stations.id,
+          db.directionPolicies.destinationStationId,
+        ),
+      );
+
+  $$DirectionPoliciesTableProcessedTableManager get directionPoliciesRefs {
+    final manager =
+        $$DirectionPoliciesTableTableManager(
+          $_db,
+          $_db.directionPolicies,
+        ).filter(
+          (f) => f.destinationStationId.id.sqlEquals($_itemColumn<int>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _directionPoliciesRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2239,6 +3410,16 @@ class $$StationsTableFilterComposer
 
   ColumnFilters<String> get nameEn => $composableBuilder(
     column: $table.nameEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameJp => $composableBuilder(
+    column: $table.nameJp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameCh => $composableBuilder(
+    column: $table.nameCh,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2286,6 +3467,31 @@ class $$StationsTableFilterComposer
     );
     return f(composer);
   }
+
+  Expression<bool> directionPoliciesRefs(
+    Expression<bool> Function($$DirectionPoliciesTableFilterComposer f) f,
+  ) {
+    final $$DirectionPoliciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.directionPolicies,
+      getReferencedColumn: (t) => t.destinationStationId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DirectionPoliciesTableFilterComposer(
+            $db: $db,
+            $table: $db.directionPolicies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$StationsTableOrderingComposer
@@ -2314,6 +3520,16 @@ class $$StationsTableOrderingComposer
 
   ColumnOrderings<String> get nameEn => $composableBuilder(
     column: $table.nameEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nameJp => $composableBuilder(
+    column: $table.nameJp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nameCh => $composableBuilder(
+    column: $table.nameCh,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2361,6 +3577,12 @@ class $$StationsTableAnnotationComposer
   GeneratedColumn<String> get nameEn =>
       $composableBuilder(column: $table.nameEn, builder: (column) => column);
 
+  GeneratedColumn<String> get nameJp =>
+      $composableBuilder(column: $table.nameJp, builder: (column) => column);
+
+  GeneratedColumn<String> get nameCh =>
+      $composableBuilder(column: $table.nameCh, builder: (column) => column);
+
   GeneratedColumn<double> get latitude =>
       $composableBuilder(column: $table.latitude, builder: (column) => column);
 
@@ -2397,6 +3619,32 @@ class $$StationsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> directionPoliciesRefs<T extends Object>(
+    Expression<T> Function($$DirectionPoliciesTableAnnotationComposer a) f,
+  ) {
+    final $$DirectionPoliciesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.directionPolicies,
+          getReferencedColumn: (t) => t.destinationStationId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DirectionPoliciesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.directionPolicies,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$StationsTableTableManager
@@ -2412,7 +3660,10 @@ class $$StationsTableTableManager
           $$StationsTableUpdateCompanionBuilder,
           (Station, $$StationsTableReferences),
           Station,
-          PrefetchHooks Function({bool lineStationsRefs})
+          PrefetchHooks Function({
+            bool lineStationsRefs,
+            bool directionPoliciesRefs,
+          })
         > {
   $$StationsTableTableManager(_$AppDatabase db, $StationsTable table)
     : super(
@@ -2431,6 +3682,8 @@ class $$StationsTableTableManager
                 Value<String> stationKey = const Value.absent(),
                 Value<String> nameKo = const Value.absent(),
                 Value<String?> nameEn = const Value.absent(),
+                Value<String?> nameJp = const Value.absent(),
+                Value<String?> nameCh = const Value.absent(),
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -2440,6 +3693,8 @@ class $$StationsTableTableManager
                 stationKey: stationKey,
                 nameKo: nameKo,
                 nameEn: nameEn,
+                nameJp: nameJp,
+                nameCh: nameCh,
                 latitude: latitude,
                 longitude: longitude,
                 createdAt: createdAt,
@@ -2451,6 +3706,8 @@ class $$StationsTableTableManager
                 required String stationKey,
                 required String nameKo,
                 Value<String?> nameEn = const Value.absent(),
+                Value<String?> nameJp = const Value.absent(),
+                Value<String?> nameCh = const Value.absent(),
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -2460,6 +3717,8 @@ class $$StationsTableTableManager
                 stationKey: stationKey,
                 nameKo: nameKo,
                 nameEn: nameEn,
+                nameJp: nameJp,
+                nameCh: nameCh,
                 latitude: latitude,
                 longitude: longitude,
                 createdAt: createdAt,
@@ -2473,35 +3732,63 @@ class $$StationsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({lineStationsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (lineStationsRefs) db.lineStations],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (lineStationsRefs)
-                    await $_getPrefetchedData<
-                      Station,
-                      $StationsTable,
-                      LineStation
-                    >(
-                      currentTable: table,
-                      referencedTable: $$StationsTableReferences
-                          ._lineStationsRefsTable(db),
-                      managerFromTypedResult: (p0) => $$StationsTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).lineStationsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.stationId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({lineStationsRefs = false, directionPoliciesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (lineStationsRefs) db.lineStations,
+                    if (directionPoliciesRefs) db.directionPolicies,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (lineStationsRefs)
+                        await $_getPrefetchedData<
+                          Station,
+                          $StationsTable,
+                          LineStation
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StationsTableReferences
+                              ._lineStationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lineStationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.stationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (directionPoliciesRefs)
+                        await $_getPrefetchedData<
+                          Station,
+                          $StationsTable,
+                          DirectionPolicy
+                        >(
+                          currentTable: table,
+                          referencedTable: $$StationsTableReferences
+                              ._directionPoliciesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$StationsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).directionPoliciesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.destinationStationId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2518,7 +3805,10 @@ typedef $$StationsTableProcessedTableManager =
       $$StationsTableUpdateCompanionBuilder,
       (Station, $$StationsTableReferences),
       Station,
-      PrefetchHooks Function({bool lineStationsRefs})
+      PrefetchHooks Function({
+        bool lineStationsRefs,
+        bool directionPoliciesRefs,
+      })
     >;
 typedef $$LinesTableCreateCompanionBuilder =
     LinesCompanion Function({
@@ -2560,6 +3850,30 @@ final class $$LinesTableReferences
     ).filter((f) => f.lineId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_lineStationsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$DirectionPoliciesTable, List<DirectionPolicy>>
+  _directionPoliciesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.directionPolicies,
+        aliasName: $_aliasNameGenerator(
+          db.lines.id,
+          db.directionPolicies.lineId,
+        ),
+      );
+
+  $$DirectionPoliciesTableProcessedTableManager get directionPoliciesRefs {
+    final manager = $$DirectionPoliciesTableTableManager(
+      $_db,
+      $_db.directionPolicies,
+    ).filter((f) => f.lineId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _directionPoliciesRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2630,6 +3944,31 @@ class $$LinesTableFilterComposer extends Composer<_$AppDatabase, $LinesTable> {
           }) => $$LineStationsTableFilterComposer(
             $db: $db,
             $table: $db.lineStations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> directionPoliciesRefs(
+    Expression<bool> Function($$DirectionPoliciesTableFilterComposer f) f,
+  ) {
+    final $$DirectionPoliciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.directionPolicies,
+      getReferencedColumn: (t) => t.lineId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DirectionPoliciesTableFilterComposer(
+            $db: $db,
+            $table: $db.directionPolicies,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2747,6 +4086,32 @@ class $$LinesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> directionPoliciesRefs<T extends Object>(
+    Expression<T> Function($$DirectionPoliciesTableAnnotationComposer a) f,
+  ) {
+    final $$DirectionPoliciesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.directionPolicies,
+          getReferencedColumn: (t) => t.lineId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DirectionPoliciesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.directionPolicies,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$LinesTableTableManager
@@ -2762,7 +4127,10 @@ class $$LinesTableTableManager
           $$LinesTableUpdateCompanionBuilder,
           (Line, $$LinesTableReferences),
           Line,
-          PrefetchHooks Function({bool lineStationsRefs})
+          PrefetchHooks Function({
+            bool lineStationsRefs,
+            bool directionPoliciesRefs,
+          })
         > {
   $$LinesTableTableManager(_$AppDatabase db, $LinesTable table)
     : super(
@@ -2821,31 +4189,63 @@ class $$LinesTableTableManager
                     (e.readTable(table), $$LinesTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({lineStationsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (lineStationsRefs) db.lineStations],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (lineStationsRefs)
-                    await $_getPrefetchedData<Line, $LinesTable, LineStation>(
-                      currentTable: table,
-                      referencedTable: $$LinesTableReferences
-                          ._lineStationsRefsTable(db),
-                      managerFromTypedResult: (p0) => $$LinesTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).lineStationsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.lineId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({lineStationsRefs = false, directionPoliciesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (lineStationsRefs) db.lineStations,
+                    if (directionPoliciesRefs) db.directionPolicies,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (lineStationsRefs)
+                        await $_getPrefetchedData<
+                          Line,
+                          $LinesTable,
+                          LineStation
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LinesTableReferences
+                              ._lineStationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LinesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).lineStationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.lineId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (directionPoliciesRefs)
+                        await $_getPrefetchedData<
+                          Line,
+                          $LinesTable,
+                          DirectionPolicy
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LinesTableReferences
+                              ._directionPoliciesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LinesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).directionPoliciesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.lineId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2862,7 +4262,10 @@ typedef $$LinesTableProcessedTableManager =
       $$LinesTableUpdateCompanionBuilder,
       (Line, $$LinesTableReferences),
       Line,
-      PrefetchHooks Function({bool lineStationsRefs})
+      PrefetchHooks Function({
+        bool lineStationsRefs,
+        bool directionPoliciesRefs,
+      })
     >;
 typedef $$LineStationsTableCreateCompanionBuilder =
     LineStationsCompanion Function({
@@ -3573,6 +4976,676 @@ typedef $$LineStationsTableProcessedTableManager =
         bool incomingTransfers,
       })
     >;
+typedef $$DirectionPoliciesTableCreateCompanionBuilder =
+    DirectionPoliciesCompanion Function({
+      Value<int> id,
+      required int lineId,
+      Value<String> branchKey,
+      required String servicePatternKey,
+      required String directionKind,
+      Value<String?> apiDirection,
+      Value<String?> apiTerminalStationCode,
+      Value<String?> apiTerminalStationName,
+      Value<int?> destinationStationId,
+      required String displayLabelKo,
+      Value<String?> displayLabelEn,
+      Value<String?> displayLabelJp,
+      Value<String?> displayLabelCh,
+      Value<int> priority,
+      Value<bool> isActive,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$DirectionPoliciesTableUpdateCompanionBuilder =
+    DirectionPoliciesCompanion Function({
+      Value<int> id,
+      Value<int> lineId,
+      Value<String> branchKey,
+      Value<String> servicePatternKey,
+      Value<String> directionKind,
+      Value<String?> apiDirection,
+      Value<String?> apiTerminalStationCode,
+      Value<String?> apiTerminalStationName,
+      Value<int?> destinationStationId,
+      Value<String> displayLabelKo,
+      Value<String?> displayLabelEn,
+      Value<String?> displayLabelJp,
+      Value<String?> displayLabelCh,
+      Value<int> priority,
+      Value<bool> isActive,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+final class $$DirectionPoliciesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $DirectionPoliciesTable,
+          DirectionPolicy
+        > {
+  $$DirectionPoliciesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $LinesTable _lineIdTable(_$AppDatabase db) => db.lines.createAlias(
+    $_aliasNameGenerator(db.directionPolicies.lineId, db.lines.id),
+  );
+
+  $$LinesTableProcessedTableManager get lineId {
+    final $_column = $_itemColumn<int>('line_id')!;
+
+    final manager = $$LinesTableTableManager(
+      $_db,
+      $_db.lines,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_lineIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $StationsTable _destinationStationIdTable(_$AppDatabase db) =>
+      db.stations.createAlias(
+        $_aliasNameGenerator(
+          db.directionPolicies.destinationStationId,
+          db.stations.id,
+        ),
+      );
+
+  $$StationsTableProcessedTableManager? get destinationStationId {
+    final $_column = $_itemColumn<int>('destination_station_id');
+    if ($_column == null) return null;
+    final manager = $$StationsTableTableManager(
+      $_db,
+      $_db.stations,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _destinationStationIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DirectionPoliciesTableFilterComposer
+    extends Composer<_$AppDatabase, $DirectionPoliciesTable> {
+  $$DirectionPoliciesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get branchKey => $composableBuilder(
+    column: $table.branchKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get servicePatternKey => $composableBuilder(
+    column: $table.servicePatternKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get directionKind => $composableBuilder(
+    column: $table.directionKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get apiDirection => $composableBuilder(
+    column: $table.apiDirection,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get apiTerminalStationCode => $composableBuilder(
+    column: $table.apiTerminalStationCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get apiTerminalStationName => $composableBuilder(
+    column: $table.apiTerminalStationName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayLabelKo => $composableBuilder(
+    column: $table.displayLabelKo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayLabelEn => $composableBuilder(
+    column: $table.displayLabelEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayLabelJp => $composableBuilder(
+    column: $table.displayLabelJp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayLabelCh => $composableBuilder(
+    column: $table.displayLabelCh,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LinesTableFilterComposer get lineId {
+    final $$LinesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lineId,
+      referencedTable: $db.lines,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LinesTableFilterComposer(
+            $db: $db,
+            $table: $db.lines,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StationsTableFilterComposer get destinationStationId {
+    final $$StationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.destinationStationId,
+      referencedTable: $db.stations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StationsTableFilterComposer(
+            $db: $db,
+            $table: $db.stations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DirectionPoliciesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DirectionPoliciesTable> {
+  $$DirectionPoliciesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get branchKey => $composableBuilder(
+    column: $table.branchKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get servicePatternKey => $composableBuilder(
+    column: $table.servicePatternKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get directionKind => $composableBuilder(
+    column: $table.directionKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get apiDirection => $composableBuilder(
+    column: $table.apiDirection,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get apiTerminalStationCode => $composableBuilder(
+    column: $table.apiTerminalStationCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get apiTerminalStationName => $composableBuilder(
+    column: $table.apiTerminalStationName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayLabelKo => $composableBuilder(
+    column: $table.displayLabelKo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayLabelEn => $composableBuilder(
+    column: $table.displayLabelEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayLabelJp => $composableBuilder(
+    column: $table.displayLabelJp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayLabelCh => $composableBuilder(
+    column: $table.displayLabelCh,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LinesTableOrderingComposer get lineId {
+    final $$LinesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lineId,
+      referencedTable: $db.lines,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LinesTableOrderingComposer(
+            $db: $db,
+            $table: $db.lines,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StationsTableOrderingComposer get destinationStationId {
+    final $$StationsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.destinationStationId,
+      referencedTable: $db.stations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StationsTableOrderingComposer(
+            $db: $db,
+            $table: $db.stations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DirectionPoliciesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DirectionPoliciesTable> {
+  $$DirectionPoliciesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get branchKey =>
+      $composableBuilder(column: $table.branchKey, builder: (column) => column);
+
+  GeneratedColumn<String> get servicePatternKey => $composableBuilder(
+    column: $table.servicePatternKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get directionKind => $composableBuilder(
+    column: $table.directionKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get apiDirection => $composableBuilder(
+    column: $table.apiDirection,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get apiTerminalStationCode => $composableBuilder(
+    column: $table.apiTerminalStationCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get apiTerminalStationName => $composableBuilder(
+    column: $table.apiTerminalStationName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayLabelKo => $composableBuilder(
+    column: $table.displayLabelKo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayLabelEn => $composableBuilder(
+    column: $table.displayLabelEn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayLabelJp => $composableBuilder(
+    column: $table.displayLabelJp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayLabelCh => $composableBuilder(
+    column: $table.displayLabelCh,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$LinesTableAnnotationComposer get lineId {
+    final $$LinesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lineId,
+      referencedTable: $db.lines,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LinesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.lines,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StationsTableAnnotationComposer get destinationStationId {
+    final $$StationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.destinationStationId,
+      referencedTable: $db.stations,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.stations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DirectionPoliciesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DirectionPoliciesTable,
+          DirectionPolicy,
+          $$DirectionPoliciesTableFilterComposer,
+          $$DirectionPoliciesTableOrderingComposer,
+          $$DirectionPoliciesTableAnnotationComposer,
+          $$DirectionPoliciesTableCreateCompanionBuilder,
+          $$DirectionPoliciesTableUpdateCompanionBuilder,
+          (DirectionPolicy, $$DirectionPoliciesTableReferences),
+          DirectionPolicy,
+          PrefetchHooks Function({bool lineId, bool destinationStationId})
+        > {
+  $$DirectionPoliciesTableTableManager(
+    _$AppDatabase db,
+    $DirectionPoliciesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DirectionPoliciesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DirectionPoliciesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DirectionPoliciesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> lineId = const Value.absent(),
+                Value<String> branchKey = const Value.absent(),
+                Value<String> servicePatternKey = const Value.absent(),
+                Value<String> directionKind = const Value.absent(),
+                Value<String?> apiDirection = const Value.absent(),
+                Value<String?> apiTerminalStationCode = const Value.absent(),
+                Value<String?> apiTerminalStationName = const Value.absent(),
+                Value<int?> destinationStationId = const Value.absent(),
+                Value<String> displayLabelKo = const Value.absent(),
+                Value<String?> displayLabelEn = const Value.absent(),
+                Value<String?> displayLabelJp = const Value.absent(),
+                Value<String?> displayLabelCh = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => DirectionPoliciesCompanion(
+                id: id,
+                lineId: lineId,
+                branchKey: branchKey,
+                servicePatternKey: servicePatternKey,
+                directionKind: directionKind,
+                apiDirection: apiDirection,
+                apiTerminalStationCode: apiTerminalStationCode,
+                apiTerminalStationName: apiTerminalStationName,
+                destinationStationId: destinationStationId,
+                displayLabelKo: displayLabelKo,
+                displayLabelEn: displayLabelEn,
+                displayLabelJp: displayLabelJp,
+                displayLabelCh: displayLabelCh,
+                priority: priority,
+                isActive: isActive,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int lineId,
+                Value<String> branchKey = const Value.absent(),
+                required String servicePatternKey,
+                required String directionKind,
+                Value<String?> apiDirection = const Value.absent(),
+                Value<String?> apiTerminalStationCode = const Value.absent(),
+                Value<String?> apiTerminalStationName = const Value.absent(),
+                Value<int?> destinationStationId = const Value.absent(),
+                required String displayLabelKo,
+                Value<String?> displayLabelEn = const Value.absent(),
+                Value<String?> displayLabelJp = const Value.absent(),
+                Value<String?> displayLabelCh = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => DirectionPoliciesCompanion.insert(
+                id: id,
+                lineId: lineId,
+                branchKey: branchKey,
+                servicePatternKey: servicePatternKey,
+                directionKind: directionKind,
+                apiDirection: apiDirection,
+                apiTerminalStationCode: apiTerminalStationCode,
+                apiTerminalStationName: apiTerminalStationName,
+                destinationStationId: destinationStationId,
+                displayLabelKo: displayLabelKo,
+                displayLabelEn: displayLabelEn,
+                displayLabelJp: displayLabelJp,
+                displayLabelCh: displayLabelCh,
+                priority: priority,
+                isActive: isActive,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DirectionPoliciesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({lineId = false, destinationStationId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (lineId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.lineId,
+                                    referencedTable:
+                                        $$DirectionPoliciesTableReferences
+                                            ._lineIdTable(db),
+                                    referencedColumn:
+                                        $$DirectionPoliciesTableReferences
+                                            ._lineIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (destinationStationId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.destinationStationId,
+                                    referencedTable:
+                                        $$DirectionPoliciesTableReferences
+                                            ._destinationStationIdTable(db),
+                                    referencedColumn:
+                                        $$DirectionPoliciesTableReferences
+                                            ._destinationStationIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$DirectionPoliciesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DirectionPoliciesTable,
+      DirectionPolicy,
+      $$DirectionPoliciesTableFilterComposer,
+      $$DirectionPoliciesTableOrderingComposer,
+      $$DirectionPoliciesTableAnnotationComposer,
+      $$DirectionPoliciesTableCreateCompanionBuilder,
+      $$DirectionPoliciesTableUpdateCompanionBuilder,
+      (DirectionPolicy, $$DirectionPoliciesTableReferences),
+      DirectionPolicy,
+      PrefetchHooks Function({bool lineId, bool destinationStationId})
+    >;
 typedef $$TransfersTableCreateCompanionBuilder =
     TransfersCompanion Function({
       Value<int> id,
@@ -4049,6 +6122,8 @@ class $AppDatabaseManager {
       $$LinesTableTableManager(_db, _db.lines);
   $$LineStationsTableTableManager get lineStations =>
       $$LineStationsTableTableManager(_db, _db.lineStations);
+  $$DirectionPoliciesTableTableManager get directionPolicies =>
+      $$DirectionPoliciesTableTableManager(_db, _db.directionPolicies);
   $$TransfersTableTableManager get transfers =>
       $$TransfersTableTableManager(_db, _db.transfers);
 }
