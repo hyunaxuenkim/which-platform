@@ -13,6 +13,10 @@ class Transfers extends Table {
 
   IntColumn get walkingSeconds => integer()();
 
+  IntColumn get transferDistanceM => integer().nullable()();
+
+  TextColumn get transferTimeText => text().nullable()();
+
   TextColumn get transferType => text()
       .nullable()
       .check(

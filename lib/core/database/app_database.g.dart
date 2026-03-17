@@ -21,18 +21,6 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _stationKeyMeta = const VerificationMeta(
-    'stationKey',
-  );
-  @override
-  late final GeneratedColumn<String> stationKey = GeneratedColumn<String>(
-    'station_key',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
-  );
   static const VerificationMeta _nameKoMeta = const VerificationMeta('nameKo');
   @override
   late final GeneratedColumn<String> nameKo = GeneratedColumn<String>(
@@ -69,28 +57,6 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _latitudeMeta = const VerificationMeta(
-    'latitude',
-  );
-  @override
-  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
-    'latitude',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _longitudeMeta = const VerificationMeta(
-    'longitude',
-  );
-  @override
-  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
-    'longitude',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -118,13 +84,10 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    stationKey,
     nameKo,
     nameEn,
     nameJp,
     nameCh,
-    latitude,
-    longitude,
     createdAt,
     updatedAt,
   ];
@@ -142,14 +105,6 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('station_key')) {
-      context.handle(
-        _stationKeyMeta,
-        stationKey.isAcceptableOrUnknown(data['station_key']!, _stationKeyMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_stationKeyMeta);
     }
     if (data.containsKey('name_ko')) {
       context.handle(
@@ -177,18 +132,6 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
         nameCh.isAcceptableOrUnknown(data['name_ch']!, _nameChMeta),
       );
     }
-    if (data.containsKey('latitude')) {
-      context.handle(
-        _latitudeMeta,
-        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
-      );
-    }
-    if (data.containsKey('longitude')) {
-      context.handle(
-        _longitudeMeta,
-        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -214,10 +157,6 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      stationKey: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}station_key'],
-      )!,
       nameKo: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name_ko'],
@@ -233,14 +172,6 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
       nameCh: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name_ch'],
-      ),
-      latitude: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}latitude'],
-      ),
-      longitude: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}longitude'],
       ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -261,24 +192,18 @@ class $StationsTable extends Stations with TableInfo<$StationsTable, Station> {
 
 class Station extends DataClass implements Insertable<Station> {
   final int id;
-  final String stationKey;
   final String nameKo;
   final String? nameEn;
   final String? nameJp;
   final String? nameCh;
-  final double? latitude;
-  final double? longitude;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Station({
     required this.id,
-    required this.stationKey,
     required this.nameKo,
     this.nameEn,
     this.nameJp,
     this.nameCh,
-    this.latitude,
-    this.longitude,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -286,7 +211,6 @@ class Station extends DataClass implements Insertable<Station> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['station_key'] = Variable<String>(stationKey);
     map['name_ko'] = Variable<String>(nameKo);
     if (!nullToAbsent || nameEn != null) {
       map['name_en'] = Variable<String>(nameEn);
@@ -297,12 +221,6 @@ class Station extends DataClass implements Insertable<Station> {
     if (!nullToAbsent || nameCh != null) {
       map['name_ch'] = Variable<String>(nameCh);
     }
-    if (!nullToAbsent || latitude != null) {
-      map['latitude'] = Variable<double>(latitude);
-    }
-    if (!nullToAbsent || longitude != null) {
-      map['longitude'] = Variable<double>(longitude);
-    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -311,7 +229,6 @@ class Station extends DataClass implements Insertable<Station> {
   StationsCompanion toCompanion(bool nullToAbsent) {
     return StationsCompanion(
       id: Value(id),
-      stationKey: Value(stationKey),
       nameKo: Value(nameKo),
       nameEn: nameEn == null && nullToAbsent
           ? const Value.absent()
@@ -322,12 +239,6 @@ class Station extends DataClass implements Insertable<Station> {
       nameCh: nameCh == null && nullToAbsent
           ? const Value.absent()
           : Value(nameCh),
-      latitude: latitude == null && nullToAbsent
-          ? const Value.absent()
-          : Value(latitude),
-      longitude: longitude == null && nullToAbsent
-          ? const Value.absent()
-          : Value(longitude),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -340,13 +251,10 @@ class Station extends DataClass implements Insertable<Station> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Station(
       id: serializer.fromJson<int>(json['id']),
-      stationKey: serializer.fromJson<String>(json['stationKey']),
       nameKo: serializer.fromJson<String>(json['nameKo']),
       nameEn: serializer.fromJson<String?>(json['nameEn']),
       nameJp: serializer.fromJson<String?>(json['nameJp']),
       nameCh: serializer.fromJson<String?>(json['nameCh']),
-      latitude: serializer.fromJson<double?>(json['latitude']),
-      longitude: serializer.fromJson<double?>(json['longitude']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -356,13 +264,10 @@ class Station extends DataClass implements Insertable<Station> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'stationKey': serializer.toJson<String>(stationKey),
       'nameKo': serializer.toJson<String>(nameKo),
       'nameEn': serializer.toJson<String?>(nameEn),
       'nameJp': serializer.toJson<String?>(nameJp),
       'nameCh': serializer.toJson<String?>(nameCh),
-      'latitude': serializer.toJson<double?>(latitude),
-      'longitude': serializer.toJson<double?>(longitude),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -370,39 +275,28 @@ class Station extends DataClass implements Insertable<Station> {
 
   Station copyWith({
     int? id,
-    String? stationKey,
     String? nameKo,
     Value<String?> nameEn = const Value.absent(),
     Value<String?> nameJp = const Value.absent(),
     Value<String?> nameCh = const Value.absent(),
-    Value<double?> latitude = const Value.absent(),
-    Value<double?> longitude = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Station(
     id: id ?? this.id,
-    stationKey: stationKey ?? this.stationKey,
     nameKo: nameKo ?? this.nameKo,
     nameEn: nameEn.present ? nameEn.value : this.nameEn,
     nameJp: nameJp.present ? nameJp.value : this.nameJp,
     nameCh: nameCh.present ? nameCh.value : this.nameCh,
-    latitude: latitude.present ? latitude.value : this.latitude,
-    longitude: longitude.present ? longitude.value : this.longitude,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   Station copyWithCompanion(StationsCompanion data) {
     return Station(
       id: data.id.present ? data.id.value : this.id,
-      stationKey: data.stationKey.present
-          ? data.stationKey.value
-          : this.stationKey,
       nameKo: data.nameKo.present ? data.nameKo.value : this.nameKo,
       nameEn: data.nameEn.present ? data.nameEn.value : this.nameEn,
       nameJp: data.nameJp.present ? data.nameJp.value : this.nameJp,
       nameCh: data.nameCh.present ? data.nameCh.value : this.nameCh,
-      latitude: data.latitude.present ? data.latitude.value : this.latitude,
-      longitude: data.longitude.present ? data.longitude.value : this.longitude,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -412,13 +306,10 @@ class Station extends DataClass implements Insertable<Station> {
   String toString() {
     return (StringBuffer('Station(')
           ..write('id: $id, ')
-          ..write('stationKey: $stationKey, ')
           ..write('nameKo: $nameKo, ')
           ..write('nameEn: $nameEn, ')
           ..write('nameJp: $nameJp, ')
           ..write('nameCh: $nameCh, ')
-          ..write('latitude: $latitude, ')
-          ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -426,91 +317,62 @@ class Station extends DataClass implements Insertable<Station> {
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    stationKey,
-    nameKo,
-    nameEn,
-    nameJp,
-    nameCh,
-    latitude,
-    longitude,
-    createdAt,
-    updatedAt,
-  );
+  int get hashCode =>
+      Object.hash(id, nameKo, nameEn, nameJp, nameCh, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Station &&
           other.id == this.id &&
-          other.stationKey == this.stationKey &&
           other.nameKo == this.nameKo &&
           other.nameEn == this.nameEn &&
           other.nameJp == this.nameJp &&
           other.nameCh == this.nameCh &&
-          other.latitude == this.latitude &&
-          other.longitude == this.longitude &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
 
 class StationsCompanion extends UpdateCompanion<Station> {
   final Value<int> id;
-  final Value<String> stationKey;
   final Value<String> nameKo;
   final Value<String?> nameEn;
   final Value<String?> nameJp;
   final Value<String?> nameCh;
-  final Value<double?> latitude;
-  final Value<double?> longitude;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const StationsCompanion({
     this.id = const Value.absent(),
-    this.stationKey = const Value.absent(),
     this.nameKo = const Value.absent(),
     this.nameEn = const Value.absent(),
     this.nameJp = const Value.absent(),
     this.nameCh = const Value.absent(),
-    this.latitude = const Value.absent(),
-    this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   StationsCompanion.insert({
     this.id = const Value.absent(),
-    required String stationKey,
     required String nameKo,
     this.nameEn = const Value.absent(),
     this.nameJp = const Value.absent(),
     this.nameCh = const Value.absent(),
-    this.latitude = const Value.absent(),
-    this.longitude = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-  }) : stationKey = Value(stationKey),
-       nameKo = Value(nameKo);
+  }) : nameKo = Value(nameKo);
   static Insertable<Station> custom({
     Expression<int>? id,
-    Expression<String>? stationKey,
     Expression<String>? nameKo,
     Expression<String>? nameEn,
     Expression<String>? nameJp,
     Expression<String>? nameCh,
-    Expression<double>? latitude,
-    Expression<double>? longitude,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (stationKey != null) 'station_key': stationKey,
       if (nameKo != null) 'name_ko': nameKo,
       if (nameEn != null) 'name_en': nameEn,
       if (nameJp != null) 'name_jp': nameJp,
       if (nameCh != null) 'name_ch': nameCh,
-      if (latitude != null) 'latitude': latitude,
-      if (longitude != null) 'longitude': longitude,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -518,25 +380,19 @@ class StationsCompanion extends UpdateCompanion<Station> {
 
   StationsCompanion copyWith({
     Value<int>? id,
-    Value<String>? stationKey,
     Value<String>? nameKo,
     Value<String?>? nameEn,
     Value<String?>? nameJp,
     Value<String?>? nameCh,
-    Value<double?>? latitude,
-    Value<double?>? longitude,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
     return StationsCompanion(
       id: id ?? this.id,
-      stationKey: stationKey ?? this.stationKey,
       nameKo: nameKo ?? this.nameKo,
       nameEn: nameEn ?? this.nameEn,
       nameJp: nameJp ?? this.nameJp,
       nameCh: nameCh ?? this.nameCh,
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -547,9 +403,6 @@ class StationsCompanion extends UpdateCompanion<Station> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
-    }
-    if (stationKey.present) {
-      map['station_key'] = Variable<String>(stationKey.value);
     }
     if (nameKo.present) {
       map['name_ko'] = Variable<String>(nameKo.value);
@@ -562,12 +415,6 @@ class StationsCompanion extends UpdateCompanion<Station> {
     }
     if (nameCh.present) {
       map['name_ch'] = Variable<String>(nameCh.value);
-    }
-    if (latitude.present) {
-      map['latitude'] = Variable<double>(latitude.value);
-    }
-    if (longitude.present) {
-      map['longitude'] = Variable<double>(longitude.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -582,13 +429,10 @@ class StationsCompanion extends UpdateCompanion<Station> {
   String toString() {
     return (StringBuffer('StationsCompanion(')
           ..write('id: $id, ')
-          ..write('stationKey: $stationKey, ')
           ..write('nameKo: $nameKo, ')
           ..write('nameEn: $nameEn, ')
           ..write('nameJp: $nameJp, ')
           ..write('nameCh: $nameCh, ')
-          ..write('latitude: $latitude, ')
-          ..write('longitude: $longitude, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -613,18 +457,6 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
-  );
-  static const VerificationMeta _lineKeyMeta = const VerificationMeta(
-    'lineKey',
-  );
-  @override
-  late final GeneratedColumn<String> lineKey = GeneratedColumn<String>(
-    'line_key',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -652,10 +484,10 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
   late final GeneratedColumn<String> lineType = GeneratedColumn<String>(
     'line_type',
     aliasedName,
-    false,
+    true,
     check: () => lineType.isIn(const <String>['LINEAR', 'LOOP', 'BRANCH']),
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _operatorMeta = const VerificationMeta(
     'operator',
@@ -695,7 +527,6 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    lineKey,
     name,
     color,
     lineType,
@@ -718,14 +549,6 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('line_key')) {
-      context.handle(
-        _lineKeyMeta,
-        lineKey.isAcceptableOrUnknown(data['line_key']!, _lineKeyMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_lineKeyMeta);
-    }
     if (data.containsKey('name')) {
       context.handle(
         _nameMeta,
@@ -745,8 +568,6 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
         _lineTypeMeta,
         lineType.isAcceptableOrUnknown(data['line_type']!, _lineTypeMeta),
       );
-    } else if (isInserting) {
-      context.missing(_lineTypeMeta);
     }
     if (data.containsKey('operator')) {
       context.handle(
@@ -779,10 +600,6 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      lineKey: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}line_key'],
-      )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -794,7 +611,7 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
       lineType: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}line_type'],
-      )!,
+      ),
       operator: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}operator'],
@@ -818,19 +635,17 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
 
 class Line extends DataClass implements Insertable<Line> {
   final int id;
-  final String lineKey;
   final String name;
   final String? color;
-  final String lineType;
+  final String? lineType;
   final String? operator;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Line({
     required this.id,
-    required this.lineKey,
     required this.name,
     this.color,
-    required this.lineType,
+    this.lineType,
     this.operator,
     required this.createdAt,
     required this.updatedAt,
@@ -839,12 +654,13 @@ class Line extends DataClass implements Insertable<Line> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['line_key'] = Variable<String>(lineKey);
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || color != null) {
       map['color'] = Variable<String>(color);
     }
-    map['line_type'] = Variable<String>(lineType);
+    if (!nullToAbsent || lineType != null) {
+      map['line_type'] = Variable<String>(lineType);
+    }
     if (!nullToAbsent || operator != null) {
       map['operator'] = Variable<String>(operator);
     }
@@ -856,12 +672,13 @@ class Line extends DataClass implements Insertable<Line> {
   LinesCompanion toCompanion(bool nullToAbsent) {
     return LinesCompanion(
       id: Value(id),
-      lineKey: Value(lineKey),
       name: Value(name),
       color: color == null && nullToAbsent
           ? const Value.absent()
           : Value(color),
-      lineType: Value(lineType),
+      lineType: lineType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lineType),
       operator: operator == null && nullToAbsent
           ? const Value.absent()
           : Value(operator),
@@ -877,10 +694,9 @@ class Line extends DataClass implements Insertable<Line> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Line(
       id: serializer.fromJson<int>(json['id']),
-      lineKey: serializer.fromJson<String>(json['lineKey']),
       name: serializer.fromJson<String>(json['name']),
       color: serializer.fromJson<String?>(json['color']),
-      lineType: serializer.fromJson<String>(json['lineType']),
+      lineType: serializer.fromJson<String?>(json['lineType']),
       operator: serializer.fromJson<String?>(json['operator']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -891,10 +707,9 @@ class Line extends DataClass implements Insertable<Line> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'lineKey': serializer.toJson<String>(lineKey),
       'name': serializer.toJson<String>(name),
       'color': serializer.toJson<String?>(color),
-      'lineType': serializer.toJson<String>(lineType),
+      'lineType': serializer.toJson<String?>(lineType),
       'operator': serializer.toJson<String?>(operator),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -903,19 +718,17 @@ class Line extends DataClass implements Insertable<Line> {
 
   Line copyWith({
     int? id,
-    String? lineKey,
     String? name,
     Value<String?> color = const Value.absent(),
-    String? lineType,
+    Value<String?> lineType = const Value.absent(),
     Value<String?> operator = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Line(
     id: id ?? this.id,
-    lineKey: lineKey ?? this.lineKey,
     name: name ?? this.name,
     color: color.present ? color.value : this.color,
-    lineType: lineType ?? this.lineType,
+    lineType: lineType.present ? lineType.value : this.lineType,
     operator: operator.present ? operator.value : this.operator,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -923,7 +736,6 @@ class Line extends DataClass implements Insertable<Line> {
   Line copyWithCompanion(LinesCompanion data) {
     return Line(
       id: data.id.present ? data.id.value : this.id,
-      lineKey: data.lineKey.present ? data.lineKey.value : this.lineKey,
       name: data.name.present ? data.name.value : this.name,
       color: data.color.present ? data.color.value : this.color,
       lineType: data.lineType.present ? data.lineType.value : this.lineType,
@@ -937,7 +749,6 @@ class Line extends DataClass implements Insertable<Line> {
   String toString() {
     return (StringBuffer('Line(')
           ..write('id: $id, ')
-          ..write('lineKey: $lineKey, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
           ..write('lineType: $lineType, ')
@@ -949,22 +760,13 @@ class Line extends DataClass implements Insertable<Line> {
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    lineKey,
-    name,
-    color,
-    lineType,
-    operator,
-    createdAt,
-    updatedAt,
-  );
+  int get hashCode =>
+      Object.hash(id, name, color, lineType, operator, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Line &&
           other.id == this.id &&
-          other.lineKey == this.lineKey &&
           other.name == this.name &&
           other.color == this.color &&
           other.lineType == this.lineType &&
@@ -975,16 +777,14 @@ class Line extends DataClass implements Insertable<Line> {
 
 class LinesCompanion extends UpdateCompanion<Line> {
   final Value<int> id;
-  final Value<String> lineKey;
   final Value<String> name;
   final Value<String?> color;
-  final Value<String> lineType;
+  final Value<String?> lineType;
   final Value<String?> operator;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const LinesCompanion({
     this.id = const Value.absent(),
-    this.lineKey = const Value.absent(),
     this.name = const Value.absent(),
     this.color = const Value.absent(),
     this.lineType = const Value.absent(),
@@ -994,19 +794,15 @@ class LinesCompanion extends UpdateCompanion<Line> {
   });
   LinesCompanion.insert({
     this.id = const Value.absent(),
-    required String lineKey,
     required String name,
     this.color = const Value.absent(),
-    required String lineType,
+    this.lineType = const Value.absent(),
     this.operator = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-  }) : lineKey = Value(lineKey),
-       name = Value(name),
-       lineType = Value(lineType);
+  }) : name = Value(name);
   static Insertable<Line> custom({
     Expression<int>? id,
-    Expression<String>? lineKey,
     Expression<String>? name,
     Expression<String>? color,
     Expression<String>? lineType,
@@ -1016,7 +812,6 @@ class LinesCompanion extends UpdateCompanion<Line> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (lineKey != null) 'line_key': lineKey,
       if (name != null) 'name': name,
       if (color != null) 'color': color,
       if (lineType != null) 'line_type': lineType,
@@ -1028,17 +823,15 @@ class LinesCompanion extends UpdateCompanion<Line> {
 
   LinesCompanion copyWith({
     Value<int>? id,
-    Value<String>? lineKey,
     Value<String>? name,
     Value<String?>? color,
-    Value<String>? lineType,
+    Value<String?>? lineType,
     Value<String?>? operator,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
     return LinesCompanion(
       id: id ?? this.id,
-      lineKey: lineKey ?? this.lineKey,
       name: name ?? this.name,
       color: color ?? this.color,
       lineType: lineType ?? this.lineType,
@@ -1053,9 +846,6 @@ class LinesCompanion extends UpdateCompanion<Line> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
-    }
-    if (lineKey.present) {
-      map['line_key'] = Variable<String>(lineKey.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1082,7 +872,6 @@ class LinesCompanion extends UpdateCompanion<Line> {
   String toString() {
     return (StringBuffer('LinesCompanion(')
           ..write('id: $id, ')
-          ..write('lineKey: $lineKey, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
           ..write('lineType: $lineType, ')
@@ -2808,6 +2597,28 @@ class $TransfersTable extends Transfers
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _transferDistanceMMeta = const VerificationMeta(
+    'transferDistanceM',
+  );
+  @override
+  late final GeneratedColumn<int> transferDistanceM = GeneratedColumn<int>(
+    'transfer_distance_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _transferTimeTextMeta = const VerificationMeta(
+    'transferTimeText',
+  );
+  @override
+  late final GeneratedColumn<String> transferTimeText = GeneratedColumn<String>(
+    'transfer_time_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _transferTypeMeta = const VerificationMeta(
     'transferType',
   );
@@ -2869,6 +2680,8 @@ class $TransfersTable extends Transfers
     fromLineStationId,
     toLineStationId,
     walkingSeconds,
+    transferDistanceM,
+    transferTimeText,
     transferType,
     isActive,
     createdAt,
@@ -2921,6 +2734,24 @@ class $TransfersTable extends Transfers
       );
     } else if (isInserting) {
       context.missing(_walkingSecondsMeta);
+    }
+    if (data.containsKey('transfer_distance_m')) {
+      context.handle(
+        _transferDistanceMMeta,
+        transferDistanceM.isAcceptableOrUnknown(
+          data['transfer_distance_m']!,
+          _transferDistanceMMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transfer_time_text')) {
+      context.handle(
+        _transferTimeTextMeta,
+        transferTimeText.isAcceptableOrUnknown(
+          data['transfer_time_text']!,
+          _transferTimeTextMeta,
+        ),
+      );
     }
     if (data.containsKey('transfer_type')) {
       context.handle(
@@ -2978,6 +2809,14 @@ class $TransfersTable extends Transfers
         DriftSqlType.int,
         data['${effectivePrefix}walking_seconds'],
       )!,
+      transferDistanceM: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}transfer_distance_m'],
+      ),
+      transferTimeText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transfer_time_text'],
+      ),
       transferType: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}transfer_type'],
@@ -3008,6 +2847,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
   final int fromLineStationId;
   final int toLineStationId;
   final int walkingSeconds;
+  final int? transferDistanceM;
+  final String? transferTimeText;
   final String? transferType;
   final bool isActive;
   final DateTime createdAt;
@@ -3017,6 +2858,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     required this.fromLineStationId,
     required this.toLineStationId,
     required this.walkingSeconds,
+    this.transferDistanceM,
+    this.transferTimeText,
     this.transferType,
     required this.isActive,
     required this.createdAt,
@@ -3029,6 +2872,12 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     map['from_line_station_id'] = Variable<int>(fromLineStationId);
     map['to_line_station_id'] = Variable<int>(toLineStationId);
     map['walking_seconds'] = Variable<int>(walkingSeconds);
+    if (!nullToAbsent || transferDistanceM != null) {
+      map['transfer_distance_m'] = Variable<int>(transferDistanceM);
+    }
+    if (!nullToAbsent || transferTimeText != null) {
+      map['transfer_time_text'] = Variable<String>(transferTimeText);
+    }
     if (!nullToAbsent || transferType != null) {
       map['transfer_type'] = Variable<String>(transferType);
     }
@@ -3044,6 +2893,12 @@ class Transfer extends DataClass implements Insertable<Transfer> {
       fromLineStationId: Value(fromLineStationId),
       toLineStationId: Value(toLineStationId),
       walkingSeconds: Value(walkingSeconds),
+      transferDistanceM: transferDistanceM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transferDistanceM),
+      transferTimeText: transferTimeText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transferTimeText),
       transferType: transferType == null && nullToAbsent
           ? const Value.absent()
           : Value(transferType),
@@ -3063,6 +2918,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
       fromLineStationId: serializer.fromJson<int>(json['fromLineStationId']),
       toLineStationId: serializer.fromJson<int>(json['toLineStationId']),
       walkingSeconds: serializer.fromJson<int>(json['walkingSeconds']),
+      transferDistanceM: serializer.fromJson<int?>(json['transferDistanceM']),
+      transferTimeText: serializer.fromJson<String?>(json['transferTimeText']),
       transferType: serializer.fromJson<String?>(json['transferType']),
       isActive: serializer.fromJson<bool>(json['isActive']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -3077,6 +2934,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
       'fromLineStationId': serializer.toJson<int>(fromLineStationId),
       'toLineStationId': serializer.toJson<int>(toLineStationId),
       'walkingSeconds': serializer.toJson<int>(walkingSeconds),
+      'transferDistanceM': serializer.toJson<int?>(transferDistanceM),
+      'transferTimeText': serializer.toJson<String?>(transferTimeText),
       'transferType': serializer.toJson<String?>(transferType),
       'isActive': serializer.toJson<bool>(isActive),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -3089,6 +2948,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     int? fromLineStationId,
     int? toLineStationId,
     int? walkingSeconds,
+    Value<int?> transferDistanceM = const Value.absent(),
+    Value<String?> transferTimeText = const Value.absent(),
     Value<String?> transferType = const Value.absent(),
     bool? isActive,
     DateTime? createdAt,
@@ -3098,6 +2959,12 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     fromLineStationId: fromLineStationId ?? this.fromLineStationId,
     toLineStationId: toLineStationId ?? this.toLineStationId,
     walkingSeconds: walkingSeconds ?? this.walkingSeconds,
+    transferDistanceM: transferDistanceM.present
+        ? transferDistanceM.value
+        : this.transferDistanceM,
+    transferTimeText: transferTimeText.present
+        ? transferTimeText.value
+        : this.transferTimeText,
     transferType: transferType.present ? transferType.value : this.transferType,
     isActive: isActive ?? this.isActive,
     createdAt: createdAt ?? this.createdAt,
@@ -3115,6 +2982,12 @@ class Transfer extends DataClass implements Insertable<Transfer> {
       walkingSeconds: data.walkingSeconds.present
           ? data.walkingSeconds.value
           : this.walkingSeconds,
+      transferDistanceM: data.transferDistanceM.present
+          ? data.transferDistanceM.value
+          : this.transferDistanceM,
+      transferTimeText: data.transferTimeText.present
+          ? data.transferTimeText.value
+          : this.transferTimeText,
       transferType: data.transferType.present
           ? data.transferType.value
           : this.transferType,
@@ -3131,6 +3004,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
           ..write('fromLineStationId: $fromLineStationId, ')
           ..write('toLineStationId: $toLineStationId, ')
           ..write('walkingSeconds: $walkingSeconds, ')
+          ..write('transferDistanceM: $transferDistanceM, ')
+          ..write('transferTimeText: $transferTimeText, ')
           ..write('transferType: $transferType, ')
           ..write('isActive: $isActive, ')
           ..write('createdAt: $createdAt, ')
@@ -3145,6 +3020,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     fromLineStationId,
     toLineStationId,
     walkingSeconds,
+    transferDistanceM,
+    transferTimeText,
     transferType,
     isActive,
     createdAt,
@@ -3158,6 +3035,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
           other.fromLineStationId == this.fromLineStationId &&
           other.toLineStationId == this.toLineStationId &&
           other.walkingSeconds == this.walkingSeconds &&
+          other.transferDistanceM == this.transferDistanceM &&
+          other.transferTimeText == this.transferTimeText &&
           other.transferType == this.transferType &&
           other.isActive == this.isActive &&
           other.createdAt == this.createdAt &&
@@ -3169,6 +3048,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
   final Value<int> fromLineStationId;
   final Value<int> toLineStationId;
   final Value<int> walkingSeconds;
+  final Value<int?> transferDistanceM;
+  final Value<String?> transferTimeText;
   final Value<String?> transferType;
   final Value<bool> isActive;
   final Value<DateTime> createdAt;
@@ -3178,6 +3059,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
     this.fromLineStationId = const Value.absent(),
     this.toLineStationId = const Value.absent(),
     this.walkingSeconds = const Value.absent(),
+    this.transferDistanceM = const Value.absent(),
+    this.transferTimeText = const Value.absent(),
     this.transferType = const Value.absent(),
     this.isActive = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -3188,6 +3071,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
     required int fromLineStationId,
     required int toLineStationId,
     required int walkingSeconds,
+    this.transferDistanceM = const Value.absent(),
+    this.transferTimeText = const Value.absent(),
     this.transferType = const Value.absent(),
     this.isActive = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -3200,6 +3085,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
     Expression<int>? fromLineStationId,
     Expression<int>? toLineStationId,
     Expression<int>? walkingSeconds,
+    Expression<int>? transferDistanceM,
+    Expression<String>? transferTimeText,
     Expression<String>? transferType,
     Expression<bool>? isActive,
     Expression<DateTime>? createdAt,
@@ -3210,6 +3097,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
       if (fromLineStationId != null) 'from_line_station_id': fromLineStationId,
       if (toLineStationId != null) 'to_line_station_id': toLineStationId,
       if (walkingSeconds != null) 'walking_seconds': walkingSeconds,
+      if (transferDistanceM != null) 'transfer_distance_m': transferDistanceM,
+      if (transferTimeText != null) 'transfer_time_text': transferTimeText,
       if (transferType != null) 'transfer_type': transferType,
       if (isActive != null) 'is_active': isActive,
       if (createdAt != null) 'created_at': createdAt,
@@ -3222,6 +3111,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
     Value<int>? fromLineStationId,
     Value<int>? toLineStationId,
     Value<int>? walkingSeconds,
+    Value<int?>? transferDistanceM,
+    Value<String?>? transferTimeText,
     Value<String?>? transferType,
     Value<bool>? isActive,
     Value<DateTime>? createdAt,
@@ -3232,6 +3123,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
       fromLineStationId: fromLineStationId ?? this.fromLineStationId,
       toLineStationId: toLineStationId ?? this.toLineStationId,
       walkingSeconds: walkingSeconds ?? this.walkingSeconds,
+      transferDistanceM: transferDistanceM ?? this.transferDistanceM,
+      transferTimeText: transferTimeText ?? this.transferTimeText,
       transferType: transferType ?? this.transferType,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
@@ -3253,6 +3146,12 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
     }
     if (walkingSeconds.present) {
       map['walking_seconds'] = Variable<int>(walkingSeconds.value);
+    }
+    if (transferDistanceM.present) {
+      map['transfer_distance_m'] = Variable<int>(transferDistanceM.value);
+    }
+    if (transferTimeText.present) {
+      map['transfer_time_text'] = Variable<String>(transferTimeText.value);
     }
     if (transferType.present) {
       map['transfer_type'] = Variable<String>(transferType.value);
@@ -3276,6 +3175,8 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
           ..write('fromLineStationId: $fromLineStationId, ')
           ..write('toLineStationId: $toLineStationId, ')
           ..write('walkingSeconds: $walkingSeconds, ')
+          ..write('transferDistanceM: $transferDistanceM, ')
+          ..write('transferTimeText: $transferTimeText, ')
           ..write('transferType: $transferType, ')
           ..write('isActive: $isActive, ')
           ..write('createdAt: $createdAt, ')
@@ -3310,26 +3211,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$StationsTableCreateCompanionBuilder =
     StationsCompanion Function({
       Value<int> id,
-      required String stationKey,
       required String nameKo,
       Value<String?> nameEn,
       Value<String?> nameJp,
       Value<String?> nameCh,
-      Value<double?> latitude,
-      Value<double?> longitude,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
 typedef $$StationsTableUpdateCompanionBuilder =
     StationsCompanion Function({
       Value<int> id,
-      Value<String> stationKey,
       Value<String> nameKo,
       Value<String?> nameEn,
       Value<String?> nameJp,
       Value<String?> nameCh,
-      Value<double?> latitude,
-      Value<double?> longitude,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -3398,11 +3293,6 @@ class $$StationsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get stationKey => $composableBuilder(
-    column: $table.stationKey,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get nameKo => $composableBuilder(
     column: $table.nameKo,
     builder: (column) => ColumnFilters(column),
@@ -3420,16 +3310,6 @@ class $$StationsTableFilterComposer
 
   ColumnFilters<String> get nameCh => $composableBuilder(
     column: $table.nameCh,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get latitude => $composableBuilder(
-    column: $table.latitude,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get longitude => $composableBuilder(
-    column: $table.longitude,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3508,11 +3388,6 @@ class $$StationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get stationKey => $composableBuilder(
-    column: $table.stationKey,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get nameKo => $composableBuilder(
     column: $table.nameKo,
     builder: (column) => ColumnOrderings(column),
@@ -3530,16 +3405,6 @@ class $$StationsTableOrderingComposer
 
   ColumnOrderings<String> get nameCh => $composableBuilder(
     column: $table.nameCh,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get latitude => $composableBuilder(
-    column: $table.latitude,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get longitude => $composableBuilder(
-    column: $table.longitude,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3566,11 +3431,6 @@ class $$StationsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get stationKey => $composableBuilder(
-    column: $table.stationKey,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<String> get nameKo =>
       $composableBuilder(column: $table.nameKo, builder: (column) => column);
 
@@ -3582,12 +3442,6 @@ class $$StationsTableAnnotationComposer
 
   GeneratedColumn<String> get nameCh =>
       $composableBuilder(column: $table.nameCh, builder: (column) => column);
-
-  GeneratedColumn<double> get latitude =>
-      $composableBuilder(column: $table.latitude, builder: (column) => column);
-
-  GeneratedColumn<double> get longitude =>
-      $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3679,48 +3533,36 @@ class $$StationsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> stationKey = const Value.absent(),
                 Value<String> nameKo = const Value.absent(),
                 Value<String?> nameEn = const Value.absent(),
                 Value<String?> nameJp = const Value.absent(),
                 Value<String?> nameCh = const Value.absent(),
-                Value<double?> latitude = const Value.absent(),
-                Value<double?> longitude = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => StationsCompanion(
                 id: id,
-                stationKey: stationKey,
                 nameKo: nameKo,
                 nameEn: nameEn,
                 nameJp: nameJp,
                 nameCh: nameCh,
-                latitude: latitude,
-                longitude: longitude,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String stationKey,
                 required String nameKo,
                 Value<String?> nameEn = const Value.absent(),
                 Value<String?> nameJp = const Value.absent(),
                 Value<String?> nameCh = const Value.absent(),
-                Value<double?> latitude = const Value.absent(),
-                Value<double?> longitude = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => StationsCompanion.insert(
                 id: id,
-                stationKey: stationKey,
                 nameKo: nameKo,
                 nameEn: nameEn,
                 nameJp: nameJp,
                 nameCh: nameCh,
-                latitude: latitude,
-                longitude: longitude,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -3813,10 +3655,9 @@ typedef $$StationsTableProcessedTableManager =
 typedef $$LinesTableCreateCompanionBuilder =
     LinesCompanion Function({
       Value<int> id,
-      required String lineKey,
       required String name,
       Value<String?> color,
-      required String lineType,
+      Value<String?> lineType,
       Value<String?> operator,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -3824,10 +3665,9 @@ typedef $$LinesTableCreateCompanionBuilder =
 typedef $$LinesTableUpdateCompanionBuilder =
     LinesCompanion Function({
       Value<int> id,
-      Value<String> lineKey,
       Value<String> name,
       Value<String?> color,
-      Value<String> lineType,
+      Value<String?> lineType,
       Value<String?> operator,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -3890,11 +3730,6 @@ class $$LinesTableFilterComposer extends Composer<_$AppDatabase, $LinesTable> {
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get lineKey => $composableBuilder(
-    column: $table.lineKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3993,11 +3828,6 @@ class $$LinesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get lineKey => $composableBuilder(
-    column: $table.lineKey,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
@@ -4040,9 +3870,6 @@ class $$LinesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get lineKey =>
-      $composableBuilder(column: $table.lineKey, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -4146,16 +3973,14 @@ class $$LinesTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> lineKey = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> color = const Value.absent(),
-                Value<String> lineType = const Value.absent(),
+                Value<String?> lineType = const Value.absent(),
                 Value<String?> operator = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => LinesCompanion(
                 id: id,
-                lineKey: lineKey,
                 name: name,
                 color: color,
                 lineType: lineType,
@@ -4166,16 +3991,14 @@ class $$LinesTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String lineKey,
                 required String name,
                 Value<String?> color = const Value.absent(),
-                required String lineType,
+                Value<String?> lineType = const Value.absent(),
                 Value<String?> operator = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => LinesCompanion.insert(
                 id: id,
-                lineKey: lineKey,
                 name: name,
                 color: color,
                 lineType: lineType,
@@ -5652,6 +5475,8 @@ typedef $$TransfersTableCreateCompanionBuilder =
       required int fromLineStationId,
       required int toLineStationId,
       required int walkingSeconds,
+      Value<int?> transferDistanceM,
+      Value<String?> transferTimeText,
       Value<String?> transferType,
       Value<bool> isActive,
       Value<DateTime> createdAt,
@@ -5663,6 +5488,8 @@ typedef $$TransfersTableUpdateCompanionBuilder =
       Value<int> fromLineStationId,
       Value<int> toLineStationId,
       Value<int> walkingSeconds,
+      Value<int?> transferDistanceM,
+      Value<String?> transferTimeText,
       Value<String?> transferType,
       Value<bool> isActive,
       Value<DateTime> createdAt,
@@ -5731,6 +5558,16 @@ class $$TransfersTableFilterComposer
 
   ColumnFilters<int> get walkingSeconds => $composableBuilder(
     column: $table.walkingSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get transferDistanceM => $composableBuilder(
+    column: $table.transferDistanceM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transferTimeText => $composableBuilder(
+    column: $table.transferTimeText,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5820,6 +5657,16 @@ class $$TransfersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get transferDistanceM => $composableBuilder(
+    column: $table.transferDistanceM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transferTimeText => $composableBuilder(
+    column: $table.transferTimeText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get transferType => $composableBuilder(
     column: $table.transferType,
     builder: (column) => ColumnOrderings(column),
@@ -5901,6 +5748,16 @@ class $$TransfersTableAnnotationComposer
 
   GeneratedColumn<int> get walkingSeconds => $composableBuilder(
     column: $table.walkingSeconds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get transferDistanceM => $composableBuilder(
+    column: $table.transferDistanceM,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transferTimeText => $composableBuilder(
+    column: $table.transferTimeText,
     builder: (column) => column,
   );
 
@@ -5997,6 +5854,8 @@ class $$TransfersTableTableManager
                 Value<int> fromLineStationId = const Value.absent(),
                 Value<int> toLineStationId = const Value.absent(),
                 Value<int> walkingSeconds = const Value.absent(),
+                Value<int?> transferDistanceM = const Value.absent(),
+                Value<String?> transferTimeText = const Value.absent(),
                 Value<String?> transferType = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -6006,6 +5865,8 @@ class $$TransfersTableTableManager
                 fromLineStationId: fromLineStationId,
                 toLineStationId: toLineStationId,
                 walkingSeconds: walkingSeconds,
+                transferDistanceM: transferDistanceM,
+                transferTimeText: transferTimeText,
                 transferType: transferType,
                 isActive: isActive,
                 createdAt: createdAt,
@@ -6017,6 +5878,8 @@ class $$TransfersTableTableManager
                 required int fromLineStationId,
                 required int toLineStationId,
                 required int walkingSeconds,
+                Value<int?> transferDistanceM = const Value.absent(),
+                Value<String?> transferTimeText = const Value.absent(),
                 Value<String?> transferType = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -6026,6 +5889,8 @@ class $$TransfersTableTableManager
                 fromLineStationId: fromLineStationId,
                 toLineStationId: toLineStationId,
                 walkingSeconds: walkingSeconds,
+                transferDistanceM: transferDistanceM,
+                transferTimeText: transferTimeText,
                 transferType: transferType,
                 isActive: isActive,
                 createdAt: createdAt,

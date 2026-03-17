@@ -25,8 +25,10 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  AppDatabase.forTesting(super.executor);
+
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -34,10 +36,17 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      if (from < 2) {
-        await m.addColumn(stations, stations.nameJp);
-        await m.addColumn(stations, stations.nameCh);
-        await m.createTable(directionPolicies);
+      if (from < 4) {
+        // Current schema is still in active design. Rebuild the local DB
+        // instead of carrying forward partial dev-time schemas.
+        await customStatement('PRAGMA foreign_keys = OFF');
+        await customStatement('DROP TABLE IF EXISTS direction_policies');
+        await customStatement('DROP TABLE IF EXISTS transfers');
+        await customStatement('DROP TABLE IF EXISTS line_stations');
+        await customStatement('DROP TABLE IF EXISTS lines');
+        await customStatement('DROP TABLE IF EXISTS stations');
+        await m.createAll();
+        await customStatement('PRAGMA foreign_keys = ON');
       }
     },
     beforeOpen: (OpeningDetails details) async {
