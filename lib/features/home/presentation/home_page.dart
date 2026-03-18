@@ -5,6 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/database_provider.dart';
 import '../../../core/database/import/subway_line_info_importer.dart';
+import '../../route_parser/data/seoul_route_api_client.dart';
+import '../../route_parser/domain/parsed_route_models.dart';
+import '../../route_parser/domain/route_api_response_dto.dart';
+import '../../route_parser/domain/route_response_parser.dart';
+import '../../route_parser/providers/route_parser_providers.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -14,17 +19,119 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  final RouteResponseParser _routeResponseParser = const RouteResponseParser();
+  late final TextEditingController _departureController;
+  late final TextEditingController _arrivalController;
   bool _isImporting = false;
   String? _errorMessage;
   SubwayLineInfoImportResult? _importResult;
   _DatabaseDebugSnapshot? _snapshot;
+  bool _isFetchingLiveRoute = false;
+  String? _liveRouteErrorMessage;
+  String? _liveParsedRouteJson;
+  String? _liveRouteRequestSummary;
+  String? _liveRouteDiagnostics;
 
   @override
   void initState() {
     super.initState();
+    _departureController = TextEditingController(text: '서울역');
+    _arrivalController = TextEditingController(text: '잠실');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshSnapshot();
     });
+  }
+
+  @override
+  void dispose() {
+    _departureController.dispose();
+    _arrivalController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchLiveParsedRoute() async {
+    final String departureStation = _departureController.text.trim();
+    final String arrivalStation = _arrivalController.text.trim();
+    if (departureStation.isEmpty || arrivalStation.isEmpty) {
+      setState(() {
+        _liveRouteErrorMessage = '출발역과 도착역을 모두 입력해주세요.';
+        _liveParsedRouteJson = null;
+        _liveRouteRequestSummary = null;
+        _liveRouteDiagnostics = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isFetchingLiveRoute = true;
+      _liveRouteErrorMessage = null;
+      _liveParsedRouteJson = null;
+      _liveRouteRequestSummary = null;
+      _liveRouteDiagnostics = null;
+    });
+
+    final DateTime requestDateTime = _buildTodayNoon();
+
+    try {
+      final SeoulRouteApiClient apiClient = ref.read(
+        seoulRouteApiClientProvider,
+      );
+      final RouteApiResponseDto response = await apiClient.fetchShortestPath(
+        departureStation: departureStation,
+        arrivalStation: arrivalStation,
+        requestDateTime: requestDateTime,
+      );
+
+      final String? resultCode = response.header?.resultCode;
+      final String? resultMessage = response.header?.resultMsg;
+      final int? rawPathCount = response.body?.paths?.length;
+      final bool hasBody = response.body != null;
+      _liveRouteDiagnostics = _buildRouteDiagnostics(
+        resultCode: resultCode,
+        resultMessage: resultMessage,
+        hasBody: hasBody,
+        rawPathCount: rawPathCount,
+        requestDateTime: requestDateTime,
+      );
+
+      if (resultCode != null && resultCode != '00') {
+        setState(() {
+          _liveRouteErrorMessage =
+              'API 실패 [$resultCode] ${resultMessage ?? '알 수 없는 오류'}';
+          _liveRouteRequestSummary =
+              '$departureStation → $arrivalStation (${_formatDateTimeForDisplay(requestDateTime)})';
+        });
+        return;
+      }
+
+      final result = _routeResponseParser.parse(response);
+
+      result.when(
+        success: (ParsedRoute route) {
+          _liveParsedRouteJson = const JsonEncoder.withIndent(
+            '  ',
+          ).convert(route.toJson());
+          _liveRouteRequestSummary =
+              '$departureStation → $arrivalStation (${_formatDateTimeForDisplay(requestDateTime)})';
+        },
+        failure: (ParseFailureCode code, String? message) {
+          _liveRouteErrorMessage =
+              '파싱 실패: ${code.name}${message == null ? '' : ' / $message'}';
+          if (code == ParseFailureCode.emptyPaths) {
+            _liveRouteErrorMessage =
+                '파싱 실패: emptyPaths / API는 응답했지만 body.paths가 비어 있습니다.';
+          }
+        },
+      );
+    } catch (error) {
+      _liveRouteErrorMessage = error.toString();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetchingLiveRoute = false;
+        });
+      }
+    }
   }
 
   Future<void> _runLineInfoImport() async {
@@ -82,8 +189,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final stations = await database.select(database.stations).get();
     final lineStations = await database.select(database.lineStations).get();
     final transfers = await database.select(database.transfers).get();
-    final directionPolicies =
-        await database.select(database.directionPolicies).get();
+    final directionPolicies = await database
+        .select(database.directionPolicies)
+        .get();
 
     return _DatabaseDebugSnapshot(
       lineCount: lines.length,
@@ -91,21 +199,24 @@ class _HomePageState extends ConsumerState<HomePage> {
       lineStationCount: lineStations.length,
       transferCount: transfers.length,
       directionPolicyCount: directionPolicies.length,
-      firstLineJson: lines.isEmpty ? null : _toPrettyJson(<String, Object?>{
-        'id': lines.first.id,
-        'name': lines.first.name,
-        'color': lines.first.color,
-        'lineType': lines.first.lineType,
-        'operator': lines.first.operator,
-      }),
-      firstStationJson:
-          stations.isEmpty ? null : _toPrettyJson(<String, Object?>{
-            'id': stations.first.id,
-            'nameKo': stations.first.nameKo,
-            'nameEn': stations.first.nameEn,
-            'nameJp': stations.first.nameJp,
-            'nameCh': stations.first.nameCh,
-          }),
+      firstLineJson: lines.isEmpty
+          ? null
+          : _toPrettyJson(<String, Object?>{
+              'id': lines.first.id,
+              'name': lines.first.name,
+              'color': lines.first.color,
+              'lineType': lines.first.lineType,
+              'operator': lines.first.operator,
+            }),
+      firstStationJson: stations.isEmpty
+          ? null
+          : _toPrettyJson(<String, Object?>{
+              'id': stations.first.id,
+              'nameKo': stations.first.nameKo,
+              'nameEn': stations.first.nameEn,
+              'nameJp': stations.first.nameJp,
+              'nameCh': stations.first.nameCh,
+            }),
     );
   }
 
@@ -113,15 +224,43 @@ class _HomePageState extends ConsumerState<HomePage> {
     return const JsonEncoder.withIndent('  ').convert(json);
   }
 
+  String _formatDateTimeForDisplay(DateTime dateTime) {
+    final String year = dateTime.year.toString().padLeft(4, '0');
+    final String month = dateTime.month.toString().padLeft(2, '0');
+    final String day = dateTime.day.toString().padLeft(2, '0');
+    final String hour = dateTime.hour.toString().padLeft(2, '0');
+    final String minute = dateTime.minute.toString().padLeft(2, '0');
+    final String second = dateTime.second.toString().padLeft(2, '0');
+    return '$year-$month-$day $hour:$minute:$second';
+  }
+
+  DateTime _buildTodayNoon() {
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, 12);
+  }
+
+  String _buildRouteDiagnostics({
+    required String? resultCode,
+    required String? resultMessage,
+    required bool hasBody,
+    required int? rawPathCount,
+    required DateTime requestDateTime,
+  }) {
+    return const JsonEncoder.withIndent('  ').convert(<String, Object?>{
+      'requestDateTime': _formatDateTimeForDisplay(requestDateTime),
+      'resultCode': resultCode,
+      'resultMsg': resultMessage,
+      'hasBody': hasBody,
+      'rawPathCount': rawPathCount,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('서울 지하철 경로 안내'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('서울 지하철 경로 안내'), centerTitle: false),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -156,7 +295,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                   children: [
                     FilledButton(
                       onPressed: _isImporting ? null : _runLineInfoImport,
-                      child: Text(_isImporting ? 'Importing...' : 'Import Line Info'),
+                      child: Text(
+                        _isImporting ? 'Importing...' : 'Import Line Info',
+                      ),
                     ),
                     OutlinedButton(
                       onPressed: _isImporting ? null : _refreshSnapshot,
@@ -189,6 +330,91 @@ class _HomePageState extends ConsumerState<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  'Live API ParsedRoute',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '출발역과 도착역을 입력하면 서울시 API를 실제로 호출하고 ParsedRoute JSON을 그대로 출력합니다. 호출 시각은 항상 당일 12:00:00으로 고정됩니다.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF4B5563),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _departureController,
+                  decoration: const InputDecoration(
+                    labelText: '출발역',
+                    hintText: '예: 서울역',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _arrivalController,
+                  decoration: const InputDecoration(
+                    labelText: '도착역',
+                    hintText: '예: 잠실',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _isFetchingLiveRoute
+                      ? null
+                      : _fetchLiveParsedRoute,
+                  child: Text(
+                    _isFetchingLiveRoute
+                        ? 'Fetching Live Route...'
+                        : 'Fetch Live ParsedRoute',
+                  ),
+                ),
+                if (_liveRouteRequestSummary != null) ...[
+                  const SizedBox(height: 12),
+                  Text(_liveRouteRequestSummary!),
+                ],
+                if (_liveRouteErrorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _liveRouteErrorMessage!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                ],
+                if (_liveRouteDiagnostics != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Response Diagnostics',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _JsonPreview(text: _liveRouteDiagnostics),
+                ],
+                if (_liveParsedRouteJson != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'ParsedRoute',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _JsonPreview(text: _liveParsedRouteJson),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   'Last Import Result',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
@@ -203,8 +429,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                     children: [
                       Text('processedRows: ${_importResult!.processedRows}'),
                       Text('insertedLines: ${_importResult!.insertedLines}'),
-                      Text('insertedStations: ${_importResult!.insertedStations}'),
-                      Text('updatedStations: ${_importResult!.updatedStations}'),
+                      Text(
+                        'insertedStations: ${_importResult!.insertedStations}',
+                      ),
+                      Text(
+                        'updatedStations: ${_importResult!.updatedStations}',
+                      ),
                       Text('skippedRows: ${_importResult!.skippedRows}'),
                     ],
                   ),
@@ -318,9 +548,9 @@ class _JsonPreview extends StatelessWidget {
       ),
       child: SelectableText(
         text!,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontFamily: 'monospace',
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
       ),
     );
   }
