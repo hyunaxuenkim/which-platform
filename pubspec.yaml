@@ -31,5 +31,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/data/branch_keys.csv
+    - assets/data/direction_policies.csv
+    - assets/data/full_route_info.csv
+    - assets/data/station_transition_overrides.csv
     - assets/data/subway_line_info.json
-    - assets/data/subway_info_transfer.csv

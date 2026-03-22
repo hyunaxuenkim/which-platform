@@ -1,0 +1,69 @@
+line_name,line_key,branch_key,direction_kind,api_direction,api_terminal_station_code,display_label_ko,is_active,note,status
+01호선,LINE1,LINE1_MAIN,UP,상행,1919,연천행,true,1호선 공용 구간 대표 상행 terminal,provisional
+01호선,LINE1,LINE1_MAIN,DOWN,,,인천/천안/광명/서동탄행,true,1호선 공용 구간 하행은 branch별 terminal이 갈려 대표 라벨로 묶음,provisional
+01호선,LINE1,LINE1_GYEONGIN,UP,상행,1919,연천행,true,경인 branch 대표 상행 terminal,provisional
+01호선,LINE1,LINE1_GYEONGIN,DOWN,하행,1812,인천행,true,경인 branch 하행 terminal,confirmed
+01호선,LINE1,LINE1_GYEONGBU,UP,상행,1919,연천행,true,경부 branch 대표 상행 terminal,provisional
+01호선,LINE1,LINE1_GYEONGBU,DOWN,,,천안/신창행,true,경부 branch 하행 terminal은 운행 패턴이 갈려 대표 라벨로 묶음,provisional
+01호선,LINE1,LINE1_GWANGMYEONG_SHUTTLE,UP,상행,1703,금천구청행,true,광명 셔틀 상행 junction 회귀,confirmed
+01호선,LINE1,LINE1_GWANGMYEONG_SHUTTLE,DOWN,하행,1750,광명행,true,광명 셔틀 하행 terminal,confirmed
+01호선,LINE1,LINE1_SEODONGTAN_SHUTTLE,UP,상행,1716,병점행,true,서동탄 셔틀 상행 junction 회귀,confirmed
+01호선,LINE1,LINE1_SEODONGTAN_SHUTTLE,DOWN,하행,1749,서동탄행,true,서동탄 셔틀 하행 terminal,confirmed
+02호선,LINE2,LINE2_MAIN,INNER,내선,,내선순환,true,2호선 본선 내선순환,confirmed
+02호선,LINE2,LINE2_MAIN,OUTER,외선,,외선순환,true,2호선 본선 외선순환,confirmed
+02호선,LINE2,LINE2_SEONGSU_BRANCH,UP,,0211,성수행,true,성수지선 본선 복귀 방향,provisional
+02호선,LINE2,LINE2_SEONGSU_BRANCH,DOWN,외선,0246,신설동행,true,성수지선 종점 방향,confirmed
+02호선,LINE2,LINE2_SINJEONG_BRANCH,UP,,0234,신도림행,true,신정지선 본선 복귀 방향,provisional
+02호선,LINE2,LINE2_SINJEONG_BRANCH,DOWN,내선,0200,까치산행,true,신정지선 종점 방향,confirmed
+03호선,LINE3,LINE3_MAIN,UP,상행,1958,대화행,true,3호선 상행 terminal,confirmed
+03호선,LINE3,LINE3_MAIN,DOWN,하행,0342,오금행,true,3호선 하행 terminal,confirmed
+04호선,LINE4,LINE4_MAIN,UP,상행,0405,진접행,true,4호선 상행 terminal,confirmed
+04호선,LINE4,LINE4_MAIN,DOWN,하행,1762,오이도행,true,4호선 하행 terminal,confirmed
+05호선,LINE5,LINE5_MAIN,UP,상행,2511,방화행,true,5호선 공용 구간 대표 상행 terminal,confirmed
+05호선,LINE5,LINE5_MAIN,DOWN,,,하남검단산/마천행,true,5호선 공용 구간 하행은 강동 이후 branch로 갈림,provisional
+05호선,LINE5,LINE5_HANAM_BRANCH,UP,상행,2511,방화행,true,하남 branch 상행은 본선을 통해 방화 방면으로 진행,provisional
+05호선,LINE5,LINE5_HANAM_BRANCH,DOWN,하행,2566,하남검단산행,true,하남 branch 하행 terminal,confirmed
+05호선,LINE5,LINE5_MACHEON_BRANCH,UP,상행,2511,방화행,true,마천 branch 상행은 본선을 통해 방화 방면으로 진행,provisional
+05호선,LINE5,LINE5_MACHEON_BRANCH,DOWN,하행,2561,마천행,true,마천 branch 하행 terminal,confirmed
+06호선,LINE6,LINE6_MAIN,UP,상행,2611,응암행,true,6호선 본선 상행 terminal,confirmed
+06호선,LINE6,LINE6_MAIN,DOWN,하행,2649,신내행,true,6호선 본선 하행 terminal,confirmed
+06호선,LINE6,LINE6_EUNGAM_LOOP,BRANCH,,2611,응암순환,true,응암 loop 특이 구간 대표 라벨,confirmed
+06호선,LINE6,LINE6_EUNGAM_LOOP,UP,상행,2611,응암행,true,응암 loop에서 본선 복귀 후 응암 기준 라벨,provisional
+07호선,LINE7,LINE7_MAIN,UP,상행,2711,장암행,true,7호선 상행 terminal,confirmed
+07호선,LINE7,LINE7_MAIN,DOWN,하행,3763,석남행,true,7호선 하행 terminal,confirmed
+08호선,LINE8,LINE8_MAIN,UP,상행,2805,별내행,true,8호선 상행 terminal,confirmed
+08호선,LINE8,LINE8_MAIN,DOWN,하행,2827,모란행,true,8호선 하행 terminal,confirmed
+09호선,LINE9,LINE9_MAIN,UP,상행,4101,개화행,true,9호선 상행 terminal,confirmed
+09호선,LINE9,LINE9_MAIN,DOWN,하행,4138,중앙보훈병원행,true,9호선 하행 terminal,confirmed
+GTX-A,GTXA,GTXA_MAIN,UP,상행,0008,수서행,true,GTX-A 상행 terminal,confirmed
+GTX-A,GTXA,GTXA_MAIN,DOWN,하행,9000,운정중앙행,true,GTX-A 하행 terminal,confirmed
+경강선,GYEONGGANG,GYEONGGANG_MAIN,UP,상행,1501,판교행,true,경강선 상행 terminal,confirmed
+경강선,GYEONGGANG,GYEONGGANG_MAIN,DOWN,하행,1511,여주행,true,경강선 하행 terminal,confirmed
+경의선,GJ,GJ_MAIN,UP,상행,1284,문산행,true,경의선 북서쪽 대표 terminal,provisional
+경의선,GJ,GJ_MAIN,DOWN,,,서울역/지평행,true,경의선 남동쪽은 서울역 지선과 용문·지평 방면이 공존,provisional
+경의선,GJ,GJ_SEOUL_TERMINAL_BRANCH,UP,상행,1284,문산행,true,서울역 지선에서 북서 방향 복귀,provisional
+경의선,GJ,GJ_SEOUL_TERMINAL_BRANCH,DOWN,,1251,서울역행,true,서울역 지선 후보 branch,provisional
+경춘선,GC,GC_MAIN,UP,상행,1306,청량리행,true,경춘선 상행 대표 terminal,confirmed
+경춘선,GC,GC_MAIN,DOWN,하행,1329,춘천행,true,경춘선 하행 terminal,confirmed
+공항철도,AREX,AREX_MAIN,UP,상행,4201,서울역행,true,공항철도 상행 terminal,confirmed
+공항철도,AREX,AREX_MAIN,DOWN,하행,4215,인천공항2터미널행,true,공항철도 하행 terminal,confirmed
+김포도시철도,GIMPO,GIMPO_MAIN,UP,상행,4920,양촌행,true,김포도시철도 상행 terminal,confirmed
+김포도시철도,GIMPO,GIMPO_MAIN,DOWN,하행,4929,김포공항행,true,김포도시철도 하행 terminal,confirmed
+서해선,SEOHAE,SEOHAE_MAIN,UP,상행,108C,일산행,true,서해선 상행 terminal,confirmed
+서해선,SEOHAE,SEOHAE_MAIN,DOWN,하행,4815,원시행,true,서해선 하행 terminal,confirmed
+수인분당선,SB,SB_MAIN,UP,상행,1845,청량리행,true,수인분당선 상행 대표 terminal,provisional
+수인분당선,SB,SB_MAIN,DOWN,하행,1891,인천행,true,수인분당선 하행 대표 terminal,provisional
+신림선,SILLIM,SILLIM_MAIN,UP,상행,4401,샛강행,true,신림선 상행 terminal,confirmed
+신림선,SILLIM,SILLIM_MAIN,DOWN,하행,4411,관악산행,true,신림선 하행 terminal,confirmed
+신분당선,SINBUNDANG,SINBUNDANG_MAIN,UP,상행,4304,신사행,true,신분당선 상행 terminal,confirmed
+신분당선,SINBUNDANG,SINBUNDANG_MAIN,DOWN,하행,4319,광교행,true,신분당선 하행 terminal,confirmed
+용인경전철,YONGIN,YONGIN_MAIN,UP,상행,4501,기흥행,true,용인경전철 상행 terminal,confirmed
+용인경전철,YONGIN,YONGIN_MAIN,DOWN,하행,4517,전대·에버랜드행,true,용인경전철 하행 terminal,confirmed
+우이신설경전철,UI_SINSEOL,UI_SINSEOL_MAIN,UP,상행,4701,북한산우이행,true,우이신설선 상행 terminal,confirmed
+우이신설경전철,UI_SINSEOL,UI_SINSEOL_MAIN,DOWN,하행,4713,신설동행,true,우이신설선 하행 terminal,confirmed
+의정부경전철,UJEONGBU,UJEONGBU_MAIN,UP,상행,4601,발곡행,true,의정부경전철 상행 terminal,confirmed
+의정부경전철,UJEONGBU,UJEONGBU_MAIN,DOWN,하행,4615,탑석행,true,의정부경전철 하행 terminal,confirmed
+인천2호선,INCHEON2,INCHEON2_MAIN,UP,상행,3201,검단오류행,true,인천2호선 상행 terminal,confirmed
+인천2호선,INCHEON2,INCHEON2_MAIN,DOWN,하행,3227,운연행,true,인천2호선 하행 terminal,confirmed
+인천선,INCHEON1,INCHEON1_MAIN,UP,상행,3110,계양행,true,인천1호선 상행 terminal,confirmed
+인천선,INCHEON1,INCHEON1_MAIN,DOWN,하행,3139,송도달빛축제공원행,true,인천1호선 하행 terminal,confirmed

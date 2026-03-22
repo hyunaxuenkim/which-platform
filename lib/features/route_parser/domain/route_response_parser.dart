@@ -1,3 +1,5 @@
+import '../../../core/database/app_database.dart';
+import '../../../core/database/line_metadata_catalog.dart';
 import 'route_api_response_dto.dart';
 import 'parsed_route_models.dart';
 
@@ -9,7 +11,24 @@ class RouteResponseParser {
 
   final DirectionLabelResolver _directionLabelResolver;
 
+  Future<ParsedRouteParseResult> parseWithDatabase(
+    RouteApiResponseDto response, {
+    required AppDatabase database,
+  }) async {
+    final _DatabasePolicyContext context = await _DatabasePolicyContext.load(
+      database,
+    );
+    return _parseInternal(response, policyContext: context);
+  }
+
   ParsedRouteParseResult parse(RouteApiResponseDto response) {
+    return _parseInternal(response);
+  }
+
+  ParsedRouteParseResult _parseInternal(
+    RouteApiResponseDto response, {
+    _DatabasePolicyContext? policyContext,
+  }) {
     final RouteApiBodyDto? body = response.body;
     if (body == null) {
       return const ParsedRouteParseResult.failure(
@@ -34,15 +53,24 @@ class RouteResponseParser {
     }
 
     final List<RawPathSegment> rawSegments = <RawPathSegment>[];
+    RawPathSegment? previousRideSegment;
     for (int pathIndex = 0; pathIndex < paths.length; pathIndex++) {
       final _NormalizedPathResult normalizedPath = _normalizePath(
         path: paths[pathIndex],
         pathIndex: pathIndex,
+        previousRideSegment: previousRideSegment,
+        policyContext: policyContext,
       );
       if (normalizedPath.failure != null) {
         return normalizedPath.failure!;
       }
-      rawSegments.add(normalizedPath.segment!);
+      final RawPathSegment segment = normalizedPath.segment!;
+      rawSegments.add(segment);
+      if (segment.isTransfer) {
+        previousRideSegment = null;
+      } else {
+        previousRideSegment = segment;
+      }
     }
 
     final ParsedRouteParseFailure? shapeFailure = _validateRawSegments(
@@ -68,7 +96,11 @@ class RouteResponseParser {
       );
     }
 
-    final List<RouteLeg> legs = _buildLegs(rideSegments, rawSegments);
+    final List<RouteLeg> legs = _buildLegs(
+      rideSegments,
+      rawSegments,
+      policyContext: policyContext,
+    );
     final List<String> stationTrail = _buildStationTrail(rideSegments);
 
     return ParsedRouteParseResult.success(
@@ -87,6 +119,8 @@ class RouteResponseParser {
   _NormalizedPathResult _normalizePath({
     required RouteApiPathDto path,
     required int pathIndex,
+    required RawPathSegment? previousRideSegment,
+    required _DatabasePolicyContext? policyContext,
   }) {
     final RouteApiStationDto? departureStation = path.departureStation;
     final RouteApiStationDto? arrivalStation = path.arrivalStation;
@@ -161,6 +195,14 @@ class RouteResponseParser {
     final bool isTransfer = transferYn == 'Y';
 
     final String branchKey =
+        policyContext?.resolveBranchKey(
+          lineName: departureLineName!,
+          currentStationCode: departureStationCode!,
+          nextStationCode: arrivalStationCode!,
+          terminalStationCode: _normalizeNullableText(path.terminalStationCode),
+          apiDirection: _normalizeNullableText(path.apiDirection),
+          previousRideSegment: previousRideSegment,
+        ) ??
         _normalizeNullableText(departureStation.branchLineName) ??
         _normalizeNullableText(arrivalStation.branchLineName) ??
         'MAIN';
@@ -287,7 +329,9 @@ class RouteResponseParser {
   List<RouteLeg> _buildLegs(
     List<RideSegment> rideSegments,
     List<RawPathSegment> rawSegments,
-  ) {
+    {
+    _DatabasePolicyContext? policyContext,
+  }) {
     final List<List<RideSegment>> groups = <List<RideSegment>>[];
     int rideIndex = 0;
     RideSegment? previousRideSegment;
@@ -315,7 +359,11 @@ class RouteResponseParser {
       rideIndex += 1;
     }
 
-    return groups.map(_buildLeg).toList(growable: false);
+    return groups
+        .map(
+          (group) => _buildLeg(group, policyContext: policyContext),
+        )
+        .toList(growable: false);
   }
 
   bool _canMergeIntoSameLeg(RideSegment previous, RideSegment current) {
@@ -327,7 +375,10 @@ class RouteResponseParser {
         previous.terminalStationName == current.terminalStationName;
   }
 
-  RouteLeg _buildLeg(List<RideSegment> segments) {
+  RouteLeg _buildLeg(
+    List<RideSegment> segments, {
+    _DatabasePolicyContext? policyContext,
+  }) {
     final RideSegment first = segments.first;
     final RideSegment last = segments.last;
     final List<String> stationNames = <String>[
@@ -341,14 +392,21 @@ class RouteResponseParser {
       toStationName: last.toStationName,
       stationNames: stationNames,
       stationCount: stationNames.length,
-      directionLabel: _directionLabelResolver.resolve(
-        lineName: first.lineName,
-        apiDirection: first.apiDirection,
-        terminalStationName: first.terminalStationName,
-        terminalStationCode: first.terminalStationCode,
-        branchKey: first.branchKey,
-        servicePatternKey: first.servicePatternKey,
-      ),
+      directionLabel:
+          policyContext?.resolveDirectionLabel(
+            lineName: first.lineName,
+            branchKey: first.branchKey,
+            apiDirection: first.apiDirection,
+            terminalStationCode: first.terminalStationCode,
+          ) ??
+          _directionLabelResolver.resolve(
+            lineName: first.lineName,
+            apiDirection: first.apiDirection,
+            terminalStationName: first.terminalStationName,
+            terminalStationCode: first.terminalStationCode,
+            branchKey: first.branchKey,
+            servicePatternKey: first.servicePatternKey,
+          ),
       apiDirection: first.apiDirection,
       terminalStationName: first.terminalStationName,
       servicePatternKey: first.servicePatternKey,
@@ -399,7 +457,9 @@ class DirectionLabelResolver {
     required String branchKey,
     required String servicePatternKey,
   }) {
-    final bool isMainLineTwo = lineName == '2호선' && branchKey == 'MAIN';
+    final bool isMainLineTwo =
+        lineName == '2호선' &&
+        (branchKey == 'MAIN' || branchKey == 'LINE2_MAIN');
     if (lineName == '1호선' && terminalStationName != null) {
       return '$terminalStationName행';
     }
@@ -411,6 +471,7 @@ class DirectionLabelResolver {
     }
     if (lineName == '2호선' &&
         branchKey != 'MAIN' &&
+        branchKey != 'LINE2_MAIN' &&
         terminalStationName != null) {
       return '$terminalStationName행';
     }
@@ -418,5 +479,297 @@ class DirectionLabelResolver {
       return '$terminalStationName행';
     }
     return apiDirection ?? '방향 미정';
+  }
+}
+
+class _DatabasePolicyContext {
+  const _DatabasePolicyContext({
+    required this.lineIdByCanonicalName,
+    required this.defaultMainBranchKeyByLineId,
+    required this.branchStationCodesByLineId,
+    required this.directionPoliciesByLineId,
+    required this.stationTransitionOverridesByLineId,
+  });
+
+  static Future<_DatabasePolicyContext> load(AppDatabase database) async {
+    final List<Line> lines = await database.select(database.lines).get();
+    final List<LineStation> lineStations = await database
+        .select(database.lineStations)
+        .get();
+    final List<DirectionPolicy> directionPolicies = await database
+        .select(database.directionPolicies)
+        .get();
+    final List<StationTransitionOverride> stationTransitionOverrides =
+        await database.select(database.stationTransitionOverrides).get();
+
+    final Map<String, int> lineIdByCanonicalName = <String, int>{};
+    final Map<int, String> defaultMainBranchKeyByLineId = <int, String>{};
+    for (final Line line in lines) {
+      final String canonicalLineName = canonicalizeLineName(line.name);
+      lineIdByCanonicalName[canonicalLineName] = line.id;
+      defaultMainBranchKeyByLineId[line.id] = _fallbackMainBranchKey(
+        canonicalLineName,
+      );
+    }
+
+    final Map<int, Map<String, Set<String>>> branchStationCodesByLineId =
+        <int, Map<String, Set<String>>>{};
+    for (final LineStation row in lineStations) {
+      final Map<String, Set<String>> byBranch = branchStationCodesByLineId
+          .putIfAbsent(row.lineId, () => <String, Set<String>>{});
+      final Set<String> stationCodes = byBranch.putIfAbsent(
+        row.branchKey,
+        () => <String>{},
+      );
+      stationCodes.add(row.stationCode);
+      if (row.branchKey.endsWith('_MAIN')) {
+        defaultMainBranchKeyByLineId[row.lineId] = row.branchKey;
+      }
+    }
+
+    final Map<int, List<DirectionPolicy>> directionPoliciesByLineId =
+        <int, List<DirectionPolicy>>{};
+    for (final DirectionPolicy row in directionPolicies) {
+      directionPoliciesByLineId
+          .putIfAbsent(row.lineId, () => <DirectionPolicy>[])
+          .add(row);
+    }
+
+    final Map<int, List<StationTransitionOverride>>
+    stationTransitionOverridesByLineId =
+        <int, List<StationTransitionOverride>>{};
+    for (final StationTransitionOverride row in stationTransitionOverrides) {
+      stationTransitionOverridesByLineId
+          .putIfAbsent(row.lineId, () => <StationTransitionOverride>[])
+          .add(row);
+    }
+
+    return _DatabasePolicyContext(
+      lineIdByCanonicalName: lineIdByCanonicalName,
+      defaultMainBranchKeyByLineId: defaultMainBranchKeyByLineId,
+      branchStationCodesByLineId: branchStationCodesByLineId,
+      directionPoliciesByLineId: directionPoliciesByLineId,
+      stationTransitionOverridesByLineId: stationTransitionOverridesByLineId,
+    );
+  }
+
+  final Map<String, int> lineIdByCanonicalName;
+  final Map<int, String> defaultMainBranchKeyByLineId;
+  final Map<int, Map<String, Set<String>>> branchStationCodesByLineId;
+  final Map<int, List<DirectionPolicy>> directionPoliciesByLineId;
+  final Map<int, List<StationTransitionOverride>>
+  stationTransitionOverridesByLineId;
+
+  String resolveBranchKey({
+    required String lineName,
+    required String currentStationCode,
+    required String nextStationCode,
+    required String? terminalStationCode,
+    required String? apiDirection,
+    required RawPathSegment? previousRideSegment,
+  }) {
+    final String canonicalLineName = canonicalizeLineName(lineName);
+    final int? lineId = lineIdByCanonicalName[canonicalLineName];
+    if (lineId == null) {
+      return _fallbackMainBranchKey(canonicalLineName);
+    }
+
+    final List<String> candidateBranchKeys = _resolveCandidateBranchKeys(
+      lineId: lineId,
+      currentStationCode: currentStationCode,
+      nextStationCode: nextStationCode,
+    );
+
+    final StationTransitionOverride? override = _resolveOverride(
+      lineId: lineId,
+      currentStationCode: currentStationCode,
+      nextStationCode: nextStationCode,
+      terminalStationCode: terminalStationCode,
+      apiDirection: apiDirection,
+    );
+    if (override != null) {
+      return override.resolvedBranchKey;
+    }
+
+    if (candidateBranchKeys.length == 1) {
+      return candidateBranchKeys.single;
+    }
+
+    if (previousRideSegment != null &&
+        previousRideSegment.departureLineName == lineName &&
+        previousRideSegment.branchKey.isNotEmpty &&
+        candidateBranchKeys.contains(previousRideSegment.branchKey)) {
+      return previousRideSegment.branchKey;
+    }
+
+    return defaultMainBranchKeyByLineId[lineId] ??
+        _fallbackMainBranchKey(canonicalLineName);
+  }
+
+  String? resolveDirectionLabel({
+    required String lineName,
+    required String branchKey,
+    required String? apiDirection,
+    required String? terminalStationCode,
+  }) {
+    final String canonicalLineName = canonicalizeLineName(lineName);
+    final int? lineId = lineIdByCanonicalName[canonicalLineName];
+    if (lineId == null) {
+      return null;
+    }
+
+    final Iterable<DirectionPolicy> candidates =
+        (directionPoliciesByLineId[lineId] ?? const <DirectionPolicy>[])
+            .where((row) => row.isActive && row.branchKey == branchKey)
+            .where(
+              (row) =>
+                  row.apiDirection == null || row.apiDirection == apiDirection,
+            )
+            .where(
+              (row) =>
+                  row.apiTerminalStationCode == null ||
+                  row.apiTerminalStationCode == terminalStationCode,
+            );
+
+    final List<DirectionPolicy> sorted = candidates.toList()
+      ..sort((a, b) => _directionPolicyScore(b).compareTo(
+            _directionPolicyScore(a),
+          ));
+    if (sorted.isEmpty) {
+      return null;
+    }
+    return sorted.first.displayLabelKo;
+  }
+
+  List<String> _resolveCandidateBranchKeys({
+    required int lineId,
+    required String currentStationCode,
+    required String nextStationCode,
+  }) {
+    final Map<String, Set<String>> byBranch =
+        branchStationCodesByLineId[lineId] ?? const <String, Set<String>>{};
+    final List<String> result = <String>[];
+    for (final MapEntry<String, Set<String>> entry in byBranch.entries) {
+      if (entry.value.contains(currentStationCode) &&
+          entry.value.contains(nextStationCode)) {
+        result.add(entry.key);
+      }
+    }
+    result.sort();
+    return result;
+  }
+
+  StationTransitionOverride? _resolveOverride({
+    required int lineId,
+    required String currentStationCode,
+    required String nextStationCode,
+    required String? terminalStationCode,
+    required String? apiDirection,
+  }) {
+    final List<StationTransitionOverride> candidates =
+        (stationTransitionOverridesByLineId[lineId] ??
+                const <StationTransitionOverride>[])
+            .where((row) => row.isActive)
+            .where((row) => row.currentStationCode == currentStationCode)
+            .where((row) => row.nextStationCode == nextStationCode)
+            .where(
+              (row) =>
+                  row.apiTerminalStationCode == null ||
+                  row.apiTerminalStationCode == terminalStationCode,
+            )
+            .where(
+              (row) =>
+                  row.apiDirection == null || row.apiDirection == apiDirection,
+            )
+            .toList();
+    if (candidates.isEmpty) {
+      return null;
+    }
+    candidates.sort(
+      (a, b) => _stationTransitionOverrideScore(b).compareTo(
+        _stationTransitionOverrideScore(a),
+      ),
+    );
+    return candidates.first;
+  }
+
+  int _directionPolicyScore(DirectionPolicy row) {
+    int score = 0;
+    if (row.apiDirection != null) {
+      score += 1;
+    }
+    if (row.apiTerminalStationCode != null) {
+      score += 2;
+    }
+    return score;
+  }
+
+  int _stationTransitionOverrideScore(StationTransitionOverride row) {
+    int score = row.priority;
+    if (row.apiDirection != null) {
+      score += 1;
+    }
+    if (row.apiTerminalStationCode != null) {
+      score += 2;
+    }
+    if (row.prevStationCode != null) {
+      score += 4;
+    }
+    return score;
+  }
+}
+
+String _fallbackMainBranchKey(String canonicalLineName) {
+  switch (canonicalLineName) {
+    case '01호선':
+      return 'LINE1_MAIN';
+    case '02호선':
+      return 'LINE2_MAIN';
+    case '03호선':
+      return 'LINE3_MAIN';
+    case '04호선':
+      return 'LINE4_MAIN';
+    case '05호선':
+      return 'LINE5_MAIN';
+    case '06호선':
+      return 'LINE6_MAIN';
+    case '07호선':
+      return 'LINE7_MAIN';
+    case '08호선':
+      return 'LINE8_MAIN';
+    case '09호선':
+      return 'LINE9_MAIN';
+    case '경의선':
+      return 'GJ_MAIN';
+    case '경춘선':
+      return 'GC_MAIN';
+    case '수인분당선':
+      return 'SB_MAIN';
+    case '공항철도':
+      return 'AREX_MAIN';
+    case '경강선':
+      return 'GYEONGGANG_MAIN';
+    case '서해선':
+      return 'SEOHAE_MAIN';
+    case '인천선':
+      return 'INCHEON1_MAIN';
+    case '인천2호선':
+      return 'INCHEON2_MAIN';
+    case '우이신설경전철':
+      return 'UI_SINSEOL_MAIN';
+    case '신림선':
+      return 'SILLIM_MAIN';
+    case '의정부경전철':
+      return 'UJEONGBU_MAIN';
+    case '용인경전철':
+      return 'YONGIN_MAIN';
+    case '김포도시철도':
+      return 'GIMPO_MAIN';
+    case '신분당선':
+      return 'SINBUNDANG_MAIN';
+    case 'GTX-A':
+      return 'GTXA_MAIN';
+    default:
+      return '${canonicalLineName.toUpperCase()}_MAIN';
   }
 }

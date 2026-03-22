@@ -11,8 +11,6 @@ class Lines extends Table {
       .nullable()
       .check(lineType.isIn(const <String>['LINEAR', 'LOOP', 'BRANCH']))();
 
-  TextColumn get operator => text().nullable()();
-
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

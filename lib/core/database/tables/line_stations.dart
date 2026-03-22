@@ -26,8 +26,6 @@ class LineStations extends Table {
 
   @override
   List<Set<Column<Object>>> get uniqueKeys => <Set<Column<Object>>>[
-    <Column<Object>>{lineId, stationCode},
     <Column<Object>>{lineId, stationId, branchKey},
-    <Column<Object>>{lineId, orderIndex, branchKey},
   ];
 }

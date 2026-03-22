@@ -1,6 +1,9 @@
 import 'dart:convert';
 
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:which_platform/core/database/app_database.dart';
+import 'package:which_platform/core/database/import/subway_line_info_importer.dart';
 import 'package:which_platform/features/route_parser/data/sample_route_response.dart';
 import 'package:which_platform/features/route_parser/domain/parsed_route_models.dart';
 import 'package:which_platform/features/route_parser/domain/route_api_response_dto.dart';
@@ -10,7 +13,12 @@ import 'package:which_platform/features/route_parser/domain/route_view_data_mapp
 
 void main() {
   const RouteResponseParser parser = RouteResponseParser();
-  const RouteViewDataMapper mapper = RouteViewDataMapper();
+  const RouteViewDataMapper mapper = RouteViewDataMapper(
+    lineColorHexByName: <String, String>{
+      '04호선': '#32A1C8',
+      '02호선': '#33A23D',
+    },
+  );
 
   group('RouteResponseParser', () {
     test('parses sample response into legs and transfers', () {
@@ -210,6 +218,93 @@ void main() {
               .route;
 
       expect(route.legs.single.directionLabel, '인천행');
+    });
+
+    test('applies database direction policies and station transition overrides', () async {
+      final AppDatabase database = AppDatabase.forTesting(
+        NativeDatabase.memory(),
+      );
+      final SubwayLineInfoImporter importer = SubwayLineInfoImporter(database);
+
+      const String rawRouteCsv = '''
+권역,권역명,철도운영기관명,노선명,순번,역명
+01,수도권,코레일,1호선,45,구로
+01,수도권,코레일,1호선,46,구일
+''';
+
+      const String rawBranchKeysCsv = '''
+line_name,line_key,branch_key,is_default,branch_kind,status,note
+01호선,LINE1,LINE1_MAIN,true,main,confirmed,
+01호선,LINE1,LINE1_GYEONGIN,false,branch,confirmed,
+''';
+
+      const String rawDirectionPoliciesCsv = '''
+line_name,line_key,branch_key,direction_kind,api_direction,api_terminal_station_code,display_label_ko,is_active,note,status
+01호선,LINE1,LINE1_GYEONGIN,DOWN,하행,1812,인천행,true,,confirmed
+''';
+
+      const String rawOverridesCsv = '''
+line_name,line_key,current_station_code,next_station_code,api_terminal_station_code,api_terminal_station_name,api_direction,resolved_branch_key,prev_station_code,priority,is_active,note,status
+01호선,LINE1,1701,1813,1812,인천,하행,LINE1_GYEONGIN,,100,true,,confirmed
+''';
+
+      final String rawJson = jsonEncode(<String, Object?>{
+        'DESCRIPTION': <String, Object?>{},
+        'DATA': <Map<String, Object?>>[
+          <String, Object?>{
+            'line_num': '01호선',
+            'station_nm': '구로',
+            'station_nm_eng': 'Guro',
+            'station_nm_jpn': 'クロ',
+            'station_nm_chn': '九老',
+            'station_cd': '1701',
+            'fr_code': '141',
+          },
+          <String, Object?>{
+            'line_num': '01호선',
+            'station_nm': '구일',
+            'station_nm_eng': 'Guil',
+            'station_nm_jpn': 'クイル',
+            'station_nm_chn': '九一',
+            'station_cd': '1813',
+            'fr_code': '142',
+          },
+        ],
+      });
+
+      await importer.importFromJsonString(
+        rawJson,
+        rawRouteCsv: rawRouteCsv,
+        rawBranchKeysCsv: rawBranchKeysCsv,
+        rawDirectionPoliciesCsv: rawDirectionPoliciesCsv,
+        rawStationTransitionOverridesCsv: rawOverridesCsv,
+      );
+
+      final RouteApiResponseDto response = _responseWithPaths(<Map<String, Object?>>[
+        _ridePath(
+          departureCode: '1701',
+          departureName: '구로',
+          departureLine: '1호선',
+          arrivalCode: '1813',
+          arrivalName: '구일',
+          arrivalLine: '1호선',
+          terminalName: '인천',
+          terminalCode: '1812',
+          direction: '하행',
+          duration: 80,
+          distance: 600,
+        ),
+      ]);
+
+      final ParsedRoute route =
+          (await parser.parseWithDatabase(response, database: database)
+                  as ParsedRouteParseSuccess)
+              .route;
+
+      expect(route.legs.single.branchKey, 'LINE1_GYEONGIN');
+      expect(route.legs.single.directionLabel, '인천행');
+
+      await database.close();
     });
 
     test('supports one-path short movement', () {

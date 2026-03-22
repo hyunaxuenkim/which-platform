@@ -1,0 +1,19 @@
+line_name,line_key,current_station_code,next_station_code,api_terminal_station_code,api_terminal_station_name,api_direction,resolved_branch_key,prev_station_code,priority,is_active,note,status
+01호선,LINE1,1701,1813,1812,인천,하행,LINE1_GYEONGIN,,100,true,구로에서 경인선 branch 진입,confirmed
+01호선,LINE1,1701,1702,1728,천안,하행,LINE1_GYEONGBU,,100,true,구로에서 경부선 branch 진입,confirmed
+01호선,LINE1,1703,1750,1750,광명,하행,LINE1_GWANGMYEONG_SHUTTLE,,100,true,금천구청에서 광명 셔틀 진입,confirmed
+01호선,LINE1,1703,1704,1728,천안,하행,LINE1_GYEONGBU,,100,true,금천구청에서 경부선 본선 진행,confirmed
+01호선,LINE1,1716,1749,1749,서동탄,하행,LINE1_SEODONGTAN_SHUTTLE,,100,true,병점에서 서동탄 셔틀 진입,confirmed
+01호선,LINE1,1716,1717,1728,천안,하행,LINE1_GYEONGBU,,100,true,병점에서 경부선 본선 진행,confirmed
+02호선,LINE2,0211,0210,0211,성수,외선,LINE2_MAIN,,100,true,성수에서 본선 외선 진행,confirmed
+02호선,LINE2,0211,0244,0246,신설동,외선,LINE2_SEONGSU_BRANCH,,100,true,성수지선 진입,confirmed
+02호선,LINE2,0234,0233,0211,성수,외선,LINE2_MAIN,,100,true,신도림에서 본선 진행,confirmed
+02호선,LINE2,0234,0247,0200,까치산,내선,LINE2_SINJEONG_BRANCH,,100,true,신정지선 진입,confirmed
+05호선,LINE5,2549,2555,2561,마천,하행,LINE5_MACHEON_BRANCH,,100,true,강동에서 마천 branch 진입,confirmed
+05호선,LINE5,2549,2550,2566,하남검단산,하행,LINE5_HANAM_BRANCH,,100,true,강동에서 하남 branch 진입,confirmed
+06호선,LINE6,2611,2612,2649,신내,하행,LINE6_EUNGAM_LOOP,,100,true,응암 loop 진입,confirmed
+06호선,LINE6,2614,2615,2649,신내,하행,LINE6_EUNGAM_LOOP,,100,true,응암 loop 내부 전이,confirmed
+06호선,LINE6,2615,2616,2649,신내,하행,LINE6_EUNGAM_LOOP,,100,true,응암 loop 내부 전이,confirmed
+06호선,LINE6,2616,2611,2649,신내,하행,LINE6_EUNGAM_LOOP,,100,true,응암 loop에서 응암으로 재합류,confirmed
+06호선,LINE6,2611,2617,2649,신내,하행,LINE6_MAIN,,100,true,응암에서 본선으로 이탈,confirmed
+06호선,LINE6,2617,2611,2611,응암,상행,LINE6_MAIN,,100,true,본선에서 응암으로 진입,confirmed

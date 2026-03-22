@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 
 import 'lines.dart';
-import 'stations.dart';
 
 class DirectionPolicies extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -9,8 +8,6 @@ class DirectionPolicies extends Table {
   IntColumn get lineId => integer().references(Lines, #id)();
 
   TextColumn get branchKey => text().withDefault(const Constant('MAIN'))();
-
-  TextColumn get servicePatternKey => text()();
 
   TextColumn get directionKind => text().check(
     directionKind.isIn(
@@ -24,20 +21,7 @@ class DirectionPolicies extends Table {
 
   TextColumn get apiTerminalStationCode => text().nullable()();
 
-  TextColumn get apiTerminalStationName => text().nullable()();
-
-  IntColumn get destinationStationId =>
-      integer().nullable().references(Stations, #id)();
-
   TextColumn get displayLabelKo => text()();
-
-  TextColumn get displayLabelEn => text().nullable()();
-
-  TextColumn get displayLabelJp => text().nullable()();
-
-  TextColumn get displayLabelCh => text().nullable()();
-
-  IntColumn get priority => integer().withDefault(const Constant(0))();
 
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 
@@ -50,7 +34,6 @@ class DirectionPolicies extends Table {
     <Column<Object>>{
       lineId,
       branchKey,
-      servicePatternKey,
       directionKind,
       apiDirection,
       apiTerminalStationCode,

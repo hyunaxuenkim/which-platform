@@ -9,6 +9,7 @@ import '../../route_parser/data/seoul_route_api_client.dart';
 import '../../route_parser/domain/parsed_route_models.dart';
 import '../../route_parser/domain/route_api_response_dto.dart';
 import '../../route_parser/domain/route_response_parser.dart';
+import '../../route_parser/domain/route_view_data.dart';
 import '../../route_parser/domain/route_view_data_mapper.dart';
 import '../../route_parser/providers/route_parser_providers.dart';
 
@@ -21,7 +22,6 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   final RouteResponseParser _routeResponseParser = const RouteResponseParser();
-  final RouteViewDataMapper _routeViewDataMapper = const RouteViewDataMapper();
   late final TextEditingController _departureController;
   late final TextEditingController _arrivalController;
   bool _isImporting = false;
@@ -30,7 +30,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   _DatabaseDebugSnapshot? _snapshot;
   bool _isFetchingLiveRoute = false;
   String? _liveRouteErrorMessage;
-  String? _liveParsedRouteJson;
+  RouteViewData? _liveRouteViewData;
+  String? _liveRouteViewDataJson;
   String? _liveRouteRequestSummary;
   String? _liveRouteDiagnostics;
 
@@ -51,14 +52,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
-  Future<void> _fetchLiveParsedRoute() async {
+  Future<void> _fetchLiveRouteViewData() async {
     final String departureStation = _departureController.text.trim();
     final String arrivalStation = _arrivalController.text.trim();
     if (departureStation.isEmpty || arrivalStation.isEmpty) {
       setState(() {
         _liveRouteErrorMessage =
             'Please enter both departure and arrival stations.';
-        _liveParsedRouteJson = null;
+        _liveRouteViewData = null;
+        _liveRouteViewDataJson = null;
         _liveRouteRequestSummary = null;
         _liveRouteDiagnostics = null;
       });
@@ -68,7 +70,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     setState(() {
       _isFetchingLiveRoute = true;
       _liveRouteErrorMessage = null;
-      _liveParsedRouteJson = null;
+      _liveRouteViewData = null;
+      _liveRouteViewDataJson = null;
       _liveRouteRequestSummary = null;
       _liveRouteDiagnostics = null;
     });
@@ -107,12 +110,25 @@ class _HomePageState extends ConsumerState<HomePage> {
         return;
       }
 
-      final result = _routeResponseParser.parse(response);
+      final database = ref.read(appDatabaseProvider);
+      final result = await _routeResponseParser.parseWithDatabase(
+        response,
+        database: database,
+      );
+      final Map<String, String> lineColorHexByName = await database
+          .getLineColorHexByName();
+      final RouteViewDataMapper routeViewDataMapper = RouteViewDataMapper(
+        lineColorHexByName: lineColorHexByName,
+      );
 
-      result.when(
-        success: (ParsedRoute route) {
-          final routeViewData = _routeViewDataMapper.map(route);
-          _liveParsedRouteJson = const JsonEncoder.withIndent(
+      await result.when(
+        success: (ParsedRoute route) async {
+          final routeViewData = await routeViewDataMapper.mapWithDatabase(
+            route,
+            database: database,
+          );
+          _liveRouteViewData = routeViewData;
+          _liveRouteViewDataJson = const JsonEncoder.withIndent(
             '  ',
           ).convert(routeViewData.toJson());
           _liveRouteRequestSummary =
@@ -192,17 +208,19 @@ class _HomePageState extends ConsumerState<HomePage> {
     final lines = await database.select(database.lines).get();
     final stations = await database.select(database.stations).get();
     final lineStations = await database.select(database.lineStations).get();
-    final transfers = await database.select(database.transfers).get();
     final directionPolicies = await database
         .select(database.directionPolicies)
+        .get();
+    final stationTransitionOverrides = await database
+        .select(database.stationTransitionOverrides)
         .get();
 
     return _DatabaseDebugSnapshot(
       lineCount: lines.length,
       stationCount: stations.length,
       lineStationCount: lineStations.length,
-      transferCount: transfers.length,
       directionPolicyCount: directionPolicies.length,
+      stationTransitionOverrideCount: stationTransitionOverrides.length,
       firstLineJson: lines.isEmpty
           ? null
           : _toPrettyJson(<String, Object?>{
@@ -210,7 +228,6 @@ class _HomePageState extends ConsumerState<HomePage> {
               'name': lines.first.name,
               'color': lines.first.color,
               'lineType': lines.first.lineType,
-              'operator': lines.first.operator,
             }),
       firstStationJson: stations.isEmpty
           ? null
@@ -311,7 +328,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Assets: assets/data/subway_line_info.json, assets/data/subway_info_transfer.csv',
+                  'Assets: assets/data/subway_line_info.json, assets/data/full_route_info.csv',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: const Color(0xFF6B7280),
                   ),
@@ -334,14 +351,14 @@ class _HomePageState extends ConsumerState<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Live API ParsedRoute',
+                  'Live API RouteViewData',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '출발역과 도착역을 입력하면 서울시 API를 실제로 호출하고 ParsedRoute JSON을 그대로 출력합니다. 호출 시각은 항상 당일 12:00:00으로 고정됩니다.',
+                  '출발역과 도착역을 입력하면 서울시 API를 실제로 호출하고 RouteViewData JSON 전체를 출력합니다. 호출 시각은 항상 당일 12:00:00으로 고정됩니다.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: const Color(0xFF4B5563),
                   ),
@@ -368,11 +385,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                 FilledButton(
                   onPressed: _isFetchingLiveRoute
                       ? null
-                      : _fetchLiveParsedRoute,
+                      : _fetchLiveRouteViewData,
                   child: Text(
                     _isFetchingLiveRoute
                         ? 'Fetching Live Route...'
-                        : 'Fetch Live ParsedRoute',
+                        : 'Fetch Live RouteViewData',
                   ),
                 ),
                 if (_liveRouteRequestSummary != null) ...[
@@ -399,16 +416,27 @@ class _HomePageState extends ConsumerState<HomePage> {
                   const SizedBox(height: 8),
                   _JsonPreview(text: _liveRouteDiagnostics),
                 ],
-                if (_liveParsedRouteJson != null) ...[
+                if (_liveRouteViewData != null) ...[
                   const SizedBox(height: 16),
                   Text(
-                    'ParsedRoute',
+                    'RouteViewData Preview',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _JsonPreview(text: _liveParsedRouteJson),
+                  _RouteViewDataPreview(data: _liveRouteViewData!),
+                ],
+                if (_liveRouteViewDataJson != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'RouteViewData',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _JsonPreview(text: _liveRouteViewDataJson),
                 ],
               ],
             ),
@@ -437,6 +465,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                         'insertedStations: ${_importResult!.insertedStations}',
                       ),
                       Text(
+                        'insertedLineStations: ${_importResult!.insertedLineStations}',
+                      ),
+                      Text(
                         'updatedStations: ${_importResult!.updatedStations}',
                       ),
                       Text('skippedRows: ${_importResult!.skippedRows}'),
@@ -463,8 +494,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                   Text('lines: ${_snapshot!.lineCount}'),
                   Text('stations: ${_snapshot!.stationCount}'),
                   Text('lineStations: ${_snapshot!.lineStationCount}'),
-                  Text('transfers: ${_snapshot!.transferCount}'),
                   Text('directionPolicies: ${_snapshot!.directionPolicyCount}'),
+                  Text(
+                    'stationTransitionOverrides: ${_snapshot!.stationTransitionOverrideCount}',
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'lines[0]',
@@ -498,8 +531,8 @@ class _DatabaseDebugSnapshot {
     required this.lineCount,
     required this.stationCount,
     required this.lineStationCount,
-    required this.transferCount,
     required this.directionPolicyCount,
+    required this.stationTransitionOverrideCount,
     required this.firstLineJson,
     required this.firstStationJson,
   });
@@ -507,8 +540,8 @@ class _DatabaseDebugSnapshot {
   final int lineCount;
   final int stationCount;
   final int lineStationCount;
-  final int transferCount;
   final int directionPolicyCount;
+  final int stationTransitionOverrideCount;
   final String? firstLineJson;
   final String? firstStationJson;
 }
@@ -558,4 +591,175 @@ class _JsonPreview extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RouteViewDataPreview extends StatelessWidget {
+  const _RouteViewDataPreview({required this.data});
+
+  final RouteViewData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${data.summary.departureStationName} → ${data.summary.arrivalStationName}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${data.summary.totalDurationText} · ${data.summary.totalFareText} · ${data.summary.transferCountText}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF4B5563),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...data.legItems.map((leg) => _RouteLegCard(item: leg)),
+        if (data.transferItems.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          ...data.transferItems.map((transfer) => _RouteTransferCard(item: transfer)),
+        ],
+      ],
+    );
+  }
+}
+
+class _RouteLegCard extends StatelessWidget {
+  const _RouteLegCard({required this.item});
+
+  final RouteLegItemViewData item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final Color backgroundColor = _parseHexColor(item.lineColorHex);
+    final Brightness brightness =
+        ThemeData.estimateBrightnessForColor(backgroundColor);
+    final Color foregroundColor =
+        brightness == Brightness.dark ? Colors.white : const Color(0xFF111827);
+    final Color secondaryColor =
+        brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.84)
+            : const Color(0xFF374151);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            item.lineName,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${item.fromStationName} → ${item.toStationName}',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            item.directionLabel,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: foregroundColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '다음 역: ${item.nextStationName}',
+            style: theme.textTheme.bodyMedium?.copyWith(color: secondaryColor),
+          ),
+          Text(
+            '반대편 역: ${item.nextNegativeStationName}',
+            style: theme.textTheme.bodyMedium?.copyWith(color: secondaryColor),
+          ),
+          Text(
+            '반대 예시: ${item.directionNegativeExamplesText}',
+            style: theme.textTheme.bodyMedium?.copyWith(color: secondaryColor),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${item.stationCountText} · ${item.durationText}',
+            style: theme.textTheme.bodyMedium?.copyWith(color: secondaryColor),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            item.stationTrailText,
+            style: theme.textTheme.bodySmall?.copyWith(color: secondaryColor),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RouteTransferCard extends StatelessWidget {
+  const _RouteTransferCard({required this.item});
+
+  final RouteTransferItemViewData item;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        '${item.stationName} 환승 · ${item.fromLineName} → ${item.toLineName} · ${item.walkingTimeText}',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: const Color(0xFF374151),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+Color _parseHexColor(String rawHex) {
+  final String normalized = rawHex.trim().replaceFirst('#', '');
+  if (normalized.length != 6) {
+    return const Color(0xFF9E9E9E);
+  }
+  final int? value = int.tryParse('FF$normalized', radix: 16);
+  if (value == null) {
+    return const Color(0xFF9E9E9E);
+  }
+  return Color(value);
 }

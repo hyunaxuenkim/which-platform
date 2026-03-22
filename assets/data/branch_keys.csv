@@ -1,0 +1,35 @@
+line_name,line_key,branch_key,is_default,branch_kind,status,note
+01호선,LINE1,LINE1_MAIN,true,main,confirmed,default main branch
+01호선,LINE1,LINE1_GYEONGIN,false,branch,confirmed,구로 이후 구일 방면
+01호선,LINE1,LINE1_GYEONGBU,false,branch,confirmed,구로 이후 가산디지털단지 방면
+01호선,LINE1,LINE1_GWANGMYEONG_SHUTTLE,false,shuttle,confirmed,금천구청 이후 광명 셔틀
+01호선,LINE1,LINE1_SEODONGTAN_SHUTTLE,false,shuttle,confirmed,병점 이후 서동탄 셔틀
+02호선,LINE2,LINE2_MAIN,true,main,confirmed,default main branch
+02호선,LINE2,LINE2_SEONGSU_BRANCH,false,branch,confirmed,성수지선
+02호선,LINE2,LINE2_SINJEONG_BRANCH,false,branch,confirmed,신정지선
+03호선,LINE3,LINE3_MAIN,true,main,confirmed,default main branch
+04호선,LINE4,LINE4_MAIN,true,main,confirmed,default main branch
+05호선,LINE5,LINE5_MAIN,true,main,confirmed,default main branch
+05호선,LINE5,LINE5_HANAM_BRANCH,false,branch,confirmed,강동 이후 길동 방면 하남 branch
+05호선,LINE5,LINE5_MACHEON_BRANCH,false,branch,confirmed,강동 이후 둔촌동 방면 마천 branch
+06호선,LINE6,LINE6_MAIN,true,main,confirmed,응암 loop 바깥 기본 축
+06호선,LINE6,LINE6_EUNGAM_LOOP,false,loop,confirmed,응암 순환 특이 구간
+07호선,LINE7,LINE7_MAIN,true,main,confirmed,default main branch
+08호선,LINE8,LINE8_MAIN,true,main,confirmed,default main branch
+09호선,LINE9,LINE9_MAIN,true,main,confirmed,default main branch
+GTX-A,GTXA,GTXA_MAIN,true,main,confirmed,default main branch
+경강선,GYEONGGANG,GYEONGGANG_MAIN,true,main,confirmed,default main branch
+경의선,GJ,GJ_MAIN,true,main,confirmed,default main branch
+경의선,GJ,GJ_SEOUL_TERMINAL_BRANCH,false,terminal_branch,provisional,서울역행 지선 후보
+경춘선,GC,GC_MAIN,true,main,confirmed,default main branch
+공항철도,AREX,AREX_MAIN,true,main,confirmed,default main branch
+김포도시철도,GIMPO,GIMPO_MAIN,true,main,confirmed,default main branch
+서해선,SEOHAE,SEOHAE_MAIN,true,main,confirmed,default main branch
+수인분당선,SB,SB_MAIN,true,main,confirmed,default main branch
+신림선,SILLIM,SILLIM_MAIN,true,main,confirmed,default main branch
+신분당선,SINBUNDANG,SINBUNDANG_MAIN,true,main,confirmed,default main branch
+용인경전철,YONGIN,YONGIN_MAIN,true,main,confirmed,default main branch
+우이신설경전철,UI_SINSEOL,UI_SINSEOL_MAIN,true,main,confirmed,default main branch
+의정부경전철,UJEONGBU,UJEONGBU_MAIN,true,main,confirmed,default main branch
+인천2호선,INCHEON2,INCHEON2_MAIN,true,main,confirmed,default main branch
+인천선,INCHEON1,INCHEON1_MAIN,true,main,confirmed,default main branch
