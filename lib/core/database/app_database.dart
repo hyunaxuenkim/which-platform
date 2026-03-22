@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import 'tables/line_stations.dart';
 import 'tables/lines.dart';
@@ -57,12 +56,27 @@ class AppDatabase extends _$AppDatabase {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final Directory documentsDirectory =
-        await getApplicationDocumentsDirectory();
-    final File file = File(
-      p.join(documentsDirectory.path, 'which_platform.sqlite'),
-    );
+    final Directory databaseDirectory = await _resolveDatabaseDirectory();
+    await databaseDirectory.create(recursive: true);
+    final File file = File(p.join(databaseDirectory.path, 'which_platform.sqlite'));
 
     return NativeDatabase.createInBackground(file);
   });
+}
+
+Future<Directory> _resolveDatabaseDirectory() async {
+  final String? homePath = Platform.environment['HOME'];
+  if (homePath == null || homePath.isEmpty) {
+    return Directory.systemTemp;
+  }
+
+  if (Platform.isIOS) {
+    return Directory(p.join(homePath, 'Documents'));
+  }
+
+  if (Platform.isAndroid) {
+    return Directory(p.join(homePath, 'files'));
+  }
+
+  return Directory(homePath);
 }

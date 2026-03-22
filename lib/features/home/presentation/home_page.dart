@@ -9,6 +9,7 @@ import '../../route_parser/data/seoul_route_api_client.dart';
 import '../../route_parser/domain/parsed_route_models.dart';
 import '../../route_parser/domain/route_api_response_dto.dart';
 import '../../route_parser/domain/route_response_parser.dart';
+import '../../route_parser/domain/route_view_data_mapper.dart';
 import '../../route_parser/providers/route_parser_providers.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -20,6 +21,7 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   final RouteResponseParser _routeResponseParser = const RouteResponseParser();
+  final RouteViewDataMapper _routeViewDataMapper = const RouteViewDataMapper();
   late final TextEditingController _departureController;
   late final TextEditingController _arrivalController;
   bool _isImporting = false;
@@ -54,7 +56,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     final String arrivalStation = _arrivalController.text.trim();
     if (departureStation.isEmpty || arrivalStation.isEmpty) {
       setState(() {
-        _liveRouteErrorMessage = '출발역과 도착역을 모두 입력해주세요.';
+        _liveRouteErrorMessage =
+            'Please enter both departure and arrival stations.';
         _liveParsedRouteJson = null;
         _liveRouteRequestSummary = null;
         _liveRouteDiagnostics = null;
@@ -97,7 +100,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       if (resultCode != null && resultCode != '00') {
         setState(() {
           _liveRouteErrorMessage =
-              'API 실패 [$resultCode] ${resultMessage ?? '알 수 없는 오류'}';
+              'API error [$resultCode] ${resultMessage ?? 'Unknown error'}';
           _liveRouteRequestSummary =
               '$departureStation → $arrivalStation (${_formatDateTimeForDisplay(requestDateTime)})';
         });
@@ -108,18 +111,19 @@ class _HomePageState extends ConsumerState<HomePage> {
 
       result.when(
         success: (ParsedRoute route) {
+          final routeViewData = _routeViewDataMapper.map(route);
           _liveParsedRouteJson = const JsonEncoder.withIndent(
             '  ',
-          ).convert(route.toJson());
+          ).convert(routeViewData.toJson());
           _liveRouteRequestSummary =
               '$departureStation → $arrivalStation (${_formatDateTimeForDisplay(requestDateTime)})';
         },
         failure: (ParseFailureCode code, String? message) {
           _liveRouteErrorMessage =
-              '파싱 실패: ${code.name}${message == null ? '' : ' / $message'}';
+              'Parse failed: ${code.name}${message == null ? '' : ' / $message'}';
           if (code == ParseFailureCode.emptyPaths) {
             _liveRouteErrorMessage =
-                '파싱 실패: emptyPaths / API는 응답했지만 body.paths가 비어 있습니다.';
+                'Parse failed: emptyPaths / API returned successfully, but body.paths is empty.';
           }
         },
       );

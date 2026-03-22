@@ -589,7 +589,7 @@ as String,
 /// @nodoc
 mixin _$RouteLegItemViewData {
 
- String get lineName; String get directionLabel; String get fromStationName; String get toStationName; String get nextStationName; String get stationTrailText; String get stationCountText; String get durationText;
+ String get lineName; String get lineColorHex; String get directionLabel; String get directionPositiveExamplesText; String get directionNegativeExamplesText; String get fromStationName; String get toStationName; String get nextStationName; String get nextNegativeStationName; String get stationTrailText; String get stationCountText; String get durationText; String get instructionText;
 /// Create a copy of RouteLegItemViewData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -602,16 +602,16 @@ $RouteLegItemViewDataCopyWith<RouteLegItemViewData> get copyWith => _$RouteLegIt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RouteLegItemViewData&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.stationTrailText, stationTrailText) || other.stationTrailText == stationTrailText)&&(identical(other.stationCountText, stationCountText) || other.stationCountText == stationCountText)&&(identical(other.durationText, durationText) || other.durationText == durationText));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RouteLegItemViewData&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.lineColorHex, lineColorHex) || other.lineColorHex == lineColorHex)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.directionPositiveExamplesText, directionPositiveExamplesText) || other.directionPositiveExamplesText == directionPositiveExamplesText)&&(identical(other.directionNegativeExamplesText, directionNegativeExamplesText) || other.directionNegativeExamplesText == directionNegativeExamplesText)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.nextNegativeStationName, nextNegativeStationName) || other.nextNegativeStationName == nextNegativeStationName)&&(identical(other.stationTrailText, stationTrailText) || other.stationTrailText == stationTrailText)&&(identical(other.stationCountText, stationCountText) || other.stationCountText == stationCountText)&&(identical(other.durationText, durationText) || other.durationText == durationText)&&(identical(other.instructionText, instructionText) || other.instructionText == instructionText));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lineName,directionLabel,fromStationName,toStationName,nextStationName,stationTrailText,stationCountText,durationText);
+int get hashCode => Object.hash(runtimeType,lineName,lineColorHex,directionLabel,directionPositiveExamplesText,directionNegativeExamplesText,fromStationName,toStationName,nextStationName,nextNegativeStationName,stationTrailText,stationCountText,durationText,instructionText);
 
 @override
 String toString() {
-  return 'RouteLegItemViewData(lineName: $lineName, directionLabel: $directionLabel, fromStationName: $fromStationName, toStationName: $toStationName, nextStationName: $nextStationName, stationTrailText: $stationTrailText, stationCountText: $stationCountText, durationText: $durationText)';
+  return 'RouteLegItemViewData(lineName: $lineName, lineColorHex: $lineColorHex, directionLabel: $directionLabel, directionPositiveExamplesText: $directionPositiveExamplesText, directionNegativeExamplesText: $directionNegativeExamplesText, fromStationName: $fromStationName, toStationName: $toStationName, nextStationName: $nextStationName, nextNegativeStationName: $nextNegativeStationName, stationTrailText: $stationTrailText, stationCountText: $stationCountText, durationText: $durationText, instructionText: $instructionText)';
 }
 
 
@@ -622,7 +622,7 @@ abstract mixin class $RouteLegItemViewDataCopyWith<$Res>  {
   factory $RouteLegItemViewDataCopyWith(RouteLegItemViewData value, $Res Function(RouteLegItemViewData) _then) = _$RouteLegItemViewDataCopyWithImpl;
 @useResult
 $Res call({
- String lineName, String directionLabel, String fromStationName, String toStationName, String nextStationName, String stationTrailText, String stationCountText, String durationText
+ String lineName, String lineColorHex, String directionLabel, String directionPositiveExamplesText, String directionNegativeExamplesText, String fromStationName, String toStationName, String nextStationName, String nextNegativeStationName, String stationTrailText, String stationCountText, String durationText, String instructionText
 });
 
 
@@ -639,16 +639,21 @@ class _$RouteLegItemViewDataCopyWithImpl<$Res>
 
 /// Create a copy of RouteLegItemViewData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? lineName = null,Object? directionLabel = null,Object? fromStationName = null,Object? toStationName = null,Object? nextStationName = null,Object? stationTrailText = null,Object? stationCountText = null,Object? durationText = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? lineName = null,Object? lineColorHex = null,Object? directionLabel = null,Object? directionPositiveExamplesText = null,Object? directionNegativeExamplesText = null,Object? fromStationName = null,Object? toStationName = null,Object? nextStationName = null,Object? nextNegativeStationName = null,Object? stationTrailText = null,Object? stationCountText = null,Object? durationText = null,Object? instructionText = null,}) {
   return _then(_self.copyWith(
 lineName: null == lineName ? _self.lineName : lineName // ignore: cast_nullable_to_non_nullable
+as String,lineColorHex: null == lineColorHex ? _self.lineColorHex : lineColorHex // ignore: cast_nullable_to_non_nullable
 as String,directionLabel: null == directionLabel ? _self.directionLabel : directionLabel // ignore: cast_nullable_to_non_nullable
+as String,directionPositiveExamplesText: null == directionPositiveExamplesText ? _self.directionPositiveExamplesText : directionPositiveExamplesText // ignore: cast_nullable_to_non_nullable
+as String,directionNegativeExamplesText: null == directionNegativeExamplesText ? _self.directionNegativeExamplesText : directionNegativeExamplesText // ignore: cast_nullable_to_non_nullable
 as String,fromStationName: null == fromStationName ? _self.fromStationName : fromStationName // ignore: cast_nullable_to_non_nullable
 as String,toStationName: null == toStationName ? _self.toStationName : toStationName // ignore: cast_nullable_to_non_nullable
 as String,nextStationName: null == nextStationName ? _self.nextStationName : nextStationName // ignore: cast_nullable_to_non_nullable
+as String,nextNegativeStationName: null == nextNegativeStationName ? _self.nextNegativeStationName : nextNegativeStationName // ignore: cast_nullable_to_non_nullable
 as String,stationTrailText: null == stationTrailText ? _self.stationTrailText : stationTrailText // ignore: cast_nullable_to_non_nullable
 as String,stationCountText: null == stationCountText ? _self.stationCountText : stationCountText // ignore: cast_nullable_to_non_nullable
 as String,durationText: null == durationText ? _self.durationText : durationText // ignore: cast_nullable_to_non_nullable
+as String,instructionText: null == instructionText ? _self.instructionText : instructionText // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -734,10 +739,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String lineName,  String directionLabel,  String fromStationName,  String toStationName,  String nextStationName,  String stationTrailText,  String stationCountText,  String durationText)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String lineName,  String lineColorHex,  String directionLabel,  String directionPositiveExamplesText,  String directionNegativeExamplesText,  String fromStationName,  String toStationName,  String nextStationName,  String nextNegativeStationName,  String stationTrailText,  String stationCountText,  String durationText,  String instructionText)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RouteLegItemViewData() when $default != null:
-return $default(_that.lineName,_that.directionLabel,_that.fromStationName,_that.toStationName,_that.nextStationName,_that.stationTrailText,_that.stationCountText,_that.durationText);case _:
+return $default(_that.lineName,_that.lineColorHex,_that.directionLabel,_that.directionPositiveExamplesText,_that.directionNegativeExamplesText,_that.fromStationName,_that.toStationName,_that.nextStationName,_that.nextNegativeStationName,_that.stationTrailText,_that.stationCountText,_that.durationText,_that.instructionText);case _:
   return orElse();
 
 }
@@ -755,10 +760,10 @@ return $default(_that.lineName,_that.directionLabel,_that.fromStationName,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String lineName,  String directionLabel,  String fromStationName,  String toStationName,  String nextStationName,  String stationTrailText,  String stationCountText,  String durationText)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String lineName,  String lineColorHex,  String directionLabel,  String directionPositiveExamplesText,  String directionNegativeExamplesText,  String fromStationName,  String toStationName,  String nextStationName,  String nextNegativeStationName,  String stationTrailText,  String stationCountText,  String durationText,  String instructionText)  $default,) {final _that = this;
 switch (_that) {
 case _RouteLegItemViewData():
-return $default(_that.lineName,_that.directionLabel,_that.fromStationName,_that.toStationName,_that.nextStationName,_that.stationTrailText,_that.stationCountText,_that.durationText);case _:
+return $default(_that.lineName,_that.lineColorHex,_that.directionLabel,_that.directionPositiveExamplesText,_that.directionNegativeExamplesText,_that.fromStationName,_that.toStationName,_that.nextStationName,_that.nextNegativeStationName,_that.stationTrailText,_that.stationCountText,_that.durationText,_that.instructionText);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -775,10 +780,10 @@ return $default(_that.lineName,_that.directionLabel,_that.fromStationName,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String lineName,  String directionLabel,  String fromStationName,  String toStationName,  String nextStationName,  String stationTrailText,  String stationCountText,  String durationText)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String lineName,  String lineColorHex,  String directionLabel,  String directionPositiveExamplesText,  String directionNegativeExamplesText,  String fromStationName,  String toStationName,  String nextStationName,  String nextNegativeStationName,  String stationTrailText,  String stationCountText,  String durationText,  String instructionText)?  $default,) {final _that = this;
 switch (_that) {
 case _RouteLegItemViewData() when $default != null:
-return $default(_that.lineName,_that.directionLabel,_that.fromStationName,_that.toStationName,_that.nextStationName,_that.stationTrailText,_that.stationCountText,_that.durationText);case _:
+return $default(_that.lineName,_that.lineColorHex,_that.directionLabel,_that.directionPositiveExamplesText,_that.directionNegativeExamplesText,_that.fromStationName,_that.toStationName,_that.nextStationName,_that.nextNegativeStationName,_that.stationTrailText,_that.stationCountText,_that.durationText,_that.instructionText);case _:
   return null;
 
 }
@@ -790,17 +795,22 @@ return $default(_that.lineName,_that.directionLabel,_that.fromStationName,_that.
 @JsonSerializable()
 
 class _RouteLegItemViewData implements RouteLegItemViewData {
-  const _RouteLegItemViewData({required this.lineName, required this.directionLabel, required this.fromStationName, required this.toStationName, required this.nextStationName, required this.stationTrailText, required this.stationCountText, required this.durationText});
+  const _RouteLegItemViewData({required this.lineName, required this.lineColorHex, required this.directionLabel, required this.directionPositiveExamplesText, required this.directionNegativeExamplesText, required this.fromStationName, required this.toStationName, required this.nextStationName, required this.nextNegativeStationName, required this.stationTrailText, required this.stationCountText, required this.durationText, required this.instructionText});
   factory _RouteLegItemViewData.fromJson(Map<String, dynamic> json) => _$RouteLegItemViewDataFromJson(json);
 
 @override final  String lineName;
+@override final  String lineColorHex;
 @override final  String directionLabel;
+@override final  String directionPositiveExamplesText;
+@override final  String directionNegativeExamplesText;
 @override final  String fromStationName;
 @override final  String toStationName;
 @override final  String nextStationName;
+@override final  String nextNegativeStationName;
 @override final  String stationTrailText;
 @override final  String stationCountText;
 @override final  String durationText;
+@override final  String instructionText;
 
 /// Create a copy of RouteLegItemViewData
 /// with the given fields replaced by the non-null parameter values.
@@ -815,16 +825,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RouteLegItemViewData&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.stationTrailText, stationTrailText) || other.stationTrailText == stationTrailText)&&(identical(other.stationCountText, stationCountText) || other.stationCountText == stationCountText)&&(identical(other.durationText, durationText) || other.durationText == durationText));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RouteLegItemViewData&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.lineColorHex, lineColorHex) || other.lineColorHex == lineColorHex)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.directionPositiveExamplesText, directionPositiveExamplesText) || other.directionPositiveExamplesText == directionPositiveExamplesText)&&(identical(other.directionNegativeExamplesText, directionNegativeExamplesText) || other.directionNegativeExamplesText == directionNegativeExamplesText)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.nextNegativeStationName, nextNegativeStationName) || other.nextNegativeStationName == nextNegativeStationName)&&(identical(other.stationTrailText, stationTrailText) || other.stationTrailText == stationTrailText)&&(identical(other.stationCountText, stationCountText) || other.stationCountText == stationCountText)&&(identical(other.durationText, durationText) || other.durationText == durationText)&&(identical(other.instructionText, instructionText) || other.instructionText == instructionText));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lineName,directionLabel,fromStationName,toStationName,nextStationName,stationTrailText,stationCountText,durationText);
+int get hashCode => Object.hash(runtimeType,lineName,lineColorHex,directionLabel,directionPositiveExamplesText,directionNegativeExamplesText,fromStationName,toStationName,nextStationName,nextNegativeStationName,stationTrailText,stationCountText,durationText,instructionText);
 
 @override
 String toString() {
-  return 'RouteLegItemViewData(lineName: $lineName, directionLabel: $directionLabel, fromStationName: $fromStationName, toStationName: $toStationName, nextStationName: $nextStationName, stationTrailText: $stationTrailText, stationCountText: $stationCountText, durationText: $durationText)';
+  return 'RouteLegItemViewData(lineName: $lineName, lineColorHex: $lineColorHex, directionLabel: $directionLabel, directionPositiveExamplesText: $directionPositiveExamplesText, directionNegativeExamplesText: $directionNegativeExamplesText, fromStationName: $fromStationName, toStationName: $toStationName, nextStationName: $nextStationName, nextNegativeStationName: $nextNegativeStationName, stationTrailText: $stationTrailText, stationCountText: $stationCountText, durationText: $durationText, instructionText: $instructionText)';
 }
 
 
@@ -835,7 +845,7 @@ abstract mixin class _$RouteLegItemViewDataCopyWith<$Res> implements $RouteLegIt
   factory _$RouteLegItemViewDataCopyWith(_RouteLegItemViewData value, $Res Function(_RouteLegItemViewData) _then) = __$RouteLegItemViewDataCopyWithImpl;
 @override @useResult
 $Res call({
- String lineName, String directionLabel, String fromStationName, String toStationName, String nextStationName, String stationTrailText, String stationCountText, String durationText
+ String lineName, String lineColorHex, String directionLabel, String directionPositiveExamplesText, String directionNegativeExamplesText, String fromStationName, String toStationName, String nextStationName, String nextNegativeStationName, String stationTrailText, String stationCountText, String durationText, String instructionText
 });
 
 
@@ -852,16 +862,21 @@ class __$RouteLegItemViewDataCopyWithImpl<$Res>
 
 /// Create a copy of RouteLegItemViewData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? lineName = null,Object? directionLabel = null,Object? fromStationName = null,Object? toStationName = null,Object? nextStationName = null,Object? stationTrailText = null,Object? stationCountText = null,Object? durationText = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? lineName = null,Object? lineColorHex = null,Object? directionLabel = null,Object? directionPositiveExamplesText = null,Object? directionNegativeExamplesText = null,Object? fromStationName = null,Object? toStationName = null,Object? nextStationName = null,Object? nextNegativeStationName = null,Object? stationTrailText = null,Object? stationCountText = null,Object? durationText = null,Object? instructionText = null,}) {
   return _then(_RouteLegItemViewData(
 lineName: null == lineName ? _self.lineName : lineName // ignore: cast_nullable_to_non_nullable
+as String,lineColorHex: null == lineColorHex ? _self.lineColorHex : lineColorHex // ignore: cast_nullable_to_non_nullable
 as String,directionLabel: null == directionLabel ? _self.directionLabel : directionLabel // ignore: cast_nullable_to_non_nullable
+as String,directionPositiveExamplesText: null == directionPositiveExamplesText ? _self.directionPositiveExamplesText : directionPositiveExamplesText // ignore: cast_nullable_to_non_nullable
+as String,directionNegativeExamplesText: null == directionNegativeExamplesText ? _self.directionNegativeExamplesText : directionNegativeExamplesText // ignore: cast_nullable_to_non_nullable
 as String,fromStationName: null == fromStationName ? _self.fromStationName : fromStationName // ignore: cast_nullable_to_non_nullable
 as String,toStationName: null == toStationName ? _self.toStationName : toStationName // ignore: cast_nullable_to_non_nullable
 as String,nextStationName: null == nextStationName ? _self.nextStationName : nextStationName // ignore: cast_nullable_to_non_nullable
+as String,nextNegativeStationName: null == nextNegativeStationName ? _self.nextNegativeStationName : nextNegativeStationName // ignore: cast_nullable_to_non_nullable
 as String,stationTrailText: null == stationTrailText ? _self.stationTrailText : stationTrailText // ignore: cast_nullable_to_non_nullable
 as String,stationCountText: null == stationCountText ? _self.stationCountText : stationCountText // ignore: cast_nullable_to_non_nullable
 as String,durationText: null == durationText ? _self.durationText : durationText // ignore: cast_nullable_to_non_nullable
+as String,instructionText: null == instructionText ? _self.instructionText : instructionText // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -873,7 +888,7 @@ as String,
 /// @nodoc
 mixin _$RouteTransferItemViewData {
 
- String get stationName; String get fromLineName; String get toLineName; String get walkingTimeText;
+ String get stationName; String get fromLineName; String get toLineName; String get toLineColorHex; String get walkingTimeText;
 /// Create a copy of RouteTransferItemViewData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -886,16 +901,16 @@ $RouteTransferItemViewDataCopyWith<RouteTransferItemViewData> get copyWith => _$
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RouteTransferItemViewData&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.walkingTimeText, walkingTimeText) || other.walkingTimeText == walkingTimeText));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RouteTransferItemViewData&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.toLineColorHex, toLineColorHex) || other.toLineColorHex == toLineColorHex)&&(identical(other.walkingTimeText, walkingTimeText) || other.walkingTimeText == walkingTimeText));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,stationName,fromLineName,toLineName,walkingTimeText);
+int get hashCode => Object.hash(runtimeType,stationName,fromLineName,toLineName,toLineColorHex,walkingTimeText);
 
 @override
 String toString() {
-  return 'RouteTransferItemViewData(stationName: $stationName, fromLineName: $fromLineName, toLineName: $toLineName, walkingTimeText: $walkingTimeText)';
+  return 'RouteTransferItemViewData(stationName: $stationName, fromLineName: $fromLineName, toLineName: $toLineName, toLineColorHex: $toLineColorHex, walkingTimeText: $walkingTimeText)';
 }
 
 
@@ -906,7 +921,7 @@ abstract mixin class $RouteTransferItemViewDataCopyWith<$Res>  {
   factory $RouteTransferItemViewDataCopyWith(RouteTransferItemViewData value, $Res Function(RouteTransferItemViewData) _then) = _$RouteTransferItemViewDataCopyWithImpl;
 @useResult
 $Res call({
- String stationName, String fromLineName, String toLineName, String walkingTimeText
+ String stationName, String fromLineName, String toLineName, String toLineColorHex, String walkingTimeText
 });
 
 
@@ -923,11 +938,12 @@ class _$RouteTransferItemViewDataCopyWithImpl<$Res>
 
 /// Create a copy of RouteTransferItemViewData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stationName = null,Object? fromLineName = null,Object? toLineName = null,Object? walkingTimeText = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stationName = null,Object? fromLineName = null,Object? toLineName = null,Object? toLineColorHex = null,Object? walkingTimeText = null,}) {
   return _then(_self.copyWith(
 stationName: null == stationName ? _self.stationName : stationName // ignore: cast_nullable_to_non_nullable
 as String,fromLineName: null == fromLineName ? _self.fromLineName : fromLineName // ignore: cast_nullable_to_non_nullable
 as String,toLineName: null == toLineName ? _self.toLineName : toLineName // ignore: cast_nullable_to_non_nullable
+as String,toLineColorHex: null == toLineColorHex ? _self.toLineColorHex : toLineColorHex // ignore: cast_nullable_to_non_nullable
 as String,walkingTimeText: null == walkingTimeText ? _self.walkingTimeText : walkingTimeText // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -1014,10 +1030,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String stationName,  String fromLineName,  String toLineName,  String walkingTimeText)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String stationName,  String fromLineName,  String toLineName,  String toLineColorHex,  String walkingTimeText)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RouteTransferItemViewData() when $default != null:
-return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.walkingTimeText);case _:
+return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.toLineColorHex,_that.walkingTimeText);case _:
   return orElse();
 
 }
@@ -1035,10 +1051,10 @@ return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.walk
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String stationName,  String fromLineName,  String toLineName,  String walkingTimeText)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String stationName,  String fromLineName,  String toLineName,  String toLineColorHex,  String walkingTimeText)  $default,) {final _that = this;
 switch (_that) {
 case _RouteTransferItemViewData():
-return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.walkingTimeText);case _:
+return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.toLineColorHex,_that.walkingTimeText);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1055,10 +1071,10 @@ return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.walk
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String stationName,  String fromLineName,  String toLineName,  String walkingTimeText)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String stationName,  String fromLineName,  String toLineName,  String toLineColorHex,  String walkingTimeText)?  $default,) {final _that = this;
 switch (_that) {
 case _RouteTransferItemViewData() when $default != null:
-return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.walkingTimeText);case _:
+return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.toLineColorHex,_that.walkingTimeText);case _:
   return null;
 
 }
@@ -1070,12 +1086,13 @@ return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.walk
 @JsonSerializable()
 
 class _RouteTransferItemViewData implements RouteTransferItemViewData {
-  const _RouteTransferItemViewData({required this.stationName, required this.fromLineName, required this.toLineName, required this.walkingTimeText});
+  const _RouteTransferItemViewData({required this.stationName, required this.fromLineName, required this.toLineName, required this.toLineColorHex, required this.walkingTimeText});
   factory _RouteTransferItemViewData.fromJson(Map<String, dynamic> json) => _$RouteTransferItemViewDataFromJson(json);
 
 @override final  String stationName;
 @override final  String fromLineName;
 @override final  String toLineName;
+@override final  String toLineColorHex;
 @override final  String walkingTimeText;
 
 /// Create a copy of RouteTransferItemViewData
@@ -1091,16 +1108,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RouteTransferItemViewData&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.walkingTimeText, walkingTimeText) || other.walkingTimeText == walkingTimeText));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RouteTransferItemViewData&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.toLineColorHex, toLineColorHex) || other.toLineColorHex == toLineColorHex)&&(identical(other.walkingTimeText, walkingTimeText) || other.walkingTimeText == walkingTimeText));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,stationName,fromLineName,toLineName,walkingTimeText);
+int get hashCode => Object.hash(runtimeType,stationName,fromLineName,toLineName,toLineColorHex,walkingTimeText);
 
 @override
 String toString() {
-  return 'RouteTransferItemViewData(stationName: $stationName, fromLineName: $fromLineName, toLineName: $toLineName, walkingTimeText: $walkingTimeText)';
+  return 'RouteTransferItemViewData(stationName: $stationName, fromLineName: $fromLineName, toLineName: $toLineName, toLineColorHex: $toLineColorHex, walkingTimeText: $walkingTimeText)';
 }
 
 
@@ -1111,7 +1128,7 @@ abstract mixin class _$RouteTransferItemViewDataCopyWith<$Res> implements $Route
   factory _$RouteTransferItemViewDataCopyWith(_RouteTransferItemViewData value, $Res Function(_RouteTransferItemViewData) _then) = __$RouteTransferItemViewDataCopyWithImpl;
 @override @useResult
 $Res call({
- String stationName, String fromLineName, String toLineName, String walkingTimeText
+ String stationName, String fromLineName, String toLineName, String toLineColorHex, String walkingTimeText
 });
 
 
@@ -1128,11 +1145,12 @@ class __$RouteTransferItemViewDataCopyWithImpl<$Res>
 
 /// Create a copy of RouteTransferItemViewData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stationName = null,Object? fromLineName = null,Object? toLineName = null,Object? walkingTimeText = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stationName = null,Object? fromLineName = null,Object? toLineName = null,Object? toLineColorHex = null,Object? walkingTimeText = null,}) {
   return _then(_RouteTransferItemViewData(
 stationName: null == stationName ? _self.stationName : stationName // ignore: cast_nullable_to_non_nullable
 as String,fromLineName: null == fromLineName ? _self.fromLineName : fromLineName // ignore: cast_nullable_to_non_nullable
 as String,toLineName: null == toLineName ? _self.toLineName : toLineName // ignore: cast_nullable_to_non_nullable
+as String,toLineColorHex: null == toLineColorHex ? _self.toLineColorHex : toLineColorHex // ignore: cast_nullable_to_non_nullable
 as String,walkingTimeText: null == walkingTimeText ? _self.walkingTimeText : walkingTimeText // ignore: cast_nullable_to_non_nullable
 as String,
   ));

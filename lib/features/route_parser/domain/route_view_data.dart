@@ -33,13 +33,18 @@ abstract class RouteSummaryViewData with _$RouteSummaryViewData {
 abstract class RouteLegItemViewData with _$RouteLegItemViewData {
   const factory RouteLegItemViewData({
     required String lineName,
+    required String lineColorHex,
     required String directionLabel,
+    required String directionPositiveExamplesText,
+    required String directionNegativeExamplesText,
     required String fromStationName,
     required String toStationName,
     required String nextStationName,
+    required String nextNegativeStationName,
     required String stationTrailText,
     required String stationCountText,
     required String durationText,
+    required String instructionText,
   }) = _RouteLegItemViewData;
 
   factory RouteLegItemViewData.fromJson(Map<String, Object?> json) =>
@@ -52,6 +57,7 @@ abstract class RouteTransferItemViewData with _$RouteTransferItemViewData {
     required String stationName,
     required String fromLineName,
     required String toLineName,
+    required String toLineColorHex,
     required String walkingTimeText,
   }) = _RouteTransferItemViewData;
 

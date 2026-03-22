@@ -53,26 +53,38 @@ _RouteLegItemViewData _$RouteLegItemViewDataFromJson(
   Map<String, dynamic> json,
 ) => _RouteLegItemViewData(
   lineName: json['lineName'] as String,
+  lineColorHex: json['lineColorHex'] as String,
   directionLabel: json['directionLabel'] as String,
+  directionPositiveExamplesText:
+      json['directionPositiveExamplesText'] as String,
+  directionNegativeExamplesText:
+      json['directionNegativeExamplesText'] as String,
   fromStationName: json['fromStationName'] as String,
   toStationName: json['toStationName'] as String,
   nextStationName: json['nextStationName'] as String,
+  nextNegativeStationName: json['nextNegativeStationName'] as String,
   stationTrailText: json['stationTrailText'] as String,
   stationCountText: json['stationCountText'] as String,
   durationText: json['durationText'] as String,
+  instructionText: json['instructionText'] as String,
 );
 
 Map<String, dynamic> _$RouteLegItemViewDataToJson(
   _RouteLegItemViewData instance,
 ) => <String, dynamic>{
   'lineName': instance.lineName,
+  'lineColorHex': instance.lineColorHex,
   'directionLabel': instance.directionLabel,
+  'directionPositiveExamplesText': instance.directionPositiveExamplesText,
+  'directionNegativeExamplesText': instance.directionNegativeExamplesText,
   'fromStationName': instance.fromStationName,
   'toStationName': instance.toStationName,
   'nextStationName': instance.nextStationName,
+  'nextNegativeStationName': instance.nextNegativeStationName,
   'stationTrailText': instance.stationTrailText,
   'stationCountText': instance.stationCountText,
   'durationText': instance.durationText,
+  'instructionText': instance.instructionText,
 };
 
 _RouteTransferItemViewData _$RouteTransferItemViewDataFromJson(
@@ -81,6 +93,7 @@ _RouteTransferItemViewData _$RouteTransferItemViewDataFromJson(
   stationName: json['stationName'] as String,
   fromLineName: json['fromLineName'] as String,
   toLineName: json['toLineName'] as String,
+  toLineColorHex: json['toLineColorHex'] as String,
   walkingTimeText: json['walkingTimeText'] as String,
 );
 
@@ -90,5 +103,6 @@ Map<String, dynamic> _$RouteTransferItemViewDataToJson(
   'stationName': instance.stationName,
   'fromLineName': instance.fromLineName,
   'toLineName': instance.toLineName,
+  'toLineColorHex': instance.toLineColorHex,
   'walkingTimeText': instance.walkingTimeText,
 };

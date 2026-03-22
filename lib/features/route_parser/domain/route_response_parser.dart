@@ -14,6 +14,7 @@ class RouteResponseParser {
     if (body == null) {
       return const ParsedRouteParseResult.failure(
         code: ParseFailureCode.missingBody,
+        message: 'response.body is missing.',
       );
     }
 
@@ -21,24 +22,34 @@ class RouteResponseParser {
     if (paths == null) {
       return const ParsedRouteParseResult.failure(
         code: ParseFailureCode.missingPaths,
+        message: 'response.body.paths is missing.',
       );
     }
 
     if (paths.isEmpty) {
       return const ParsedRouteParseResult.failure(
         code: ParseFailureCode.emptyPaths,
+        message: 'response.body.paths is empty.',
       );
     }
 
     final List<RawPathSegment> rawSegments = <RawPathSegment>[];
-    for (final RouteApiPathDto path in paths) {
-      final RawPathSegment? segment = _normalizePath(path);
-      if (segment == null) {
-        return const ParsedRouteParseResult.failure(
-          code: ParseFailureCode.invalidPathShape,
-        );
+    for (int pathIndex = 0; pathIndex < paths.length; pathIndex++) {
+      final _NormalizedPathResult normalizedPath = _normalizePath(
+        path: paths[pathIndex],
+        pathIndex: pathIndex,
+      );
+      if (normalizedPath.failure != null) {
+        return normalizedPath.failure!;
       }
-      rawSegments.add(segment);
+      rawSegments.add(normalizedPath.segment!);
+    }
+
+    final ParsedRouteParseFailure? shapeFailure = _validateRawSegments(
+      rawSegments,
+    );
+    if (shapeFailure != null) {
+      return shapeFailure;
     }
 
     final List<RideSegment> rideSegments = rawSegments
@@ -53,7 +64,7 @@ class RouteResponseParser {
     if (rideSegments.isEmpty) {
       return const ParsedRouteParseResult.failure(
         code: ParseFailureCode.invalidPathShape,
-        message: 'Ride segment가 없는 응답입니다.',
+        message: 'No ride segments found in response.',
       );
     }
 
@@ -73,11 +84,27 @@ class RouteResponseParser {
     );
   }
 
-  RawPathSegment? _normalizePath(RouteApiPathDto path) {
+  _NormalizedPathResult _normalizePath({
+    required RouteApiPathDto path,
+    required int pathIndex,
+  }) {
     final RouteApiStationDto? departureStation = path.departureStation;
     final RouteApiStationDto? arrivalStation = path.arrivalStation;
-    if (departureStation == null || arrivalStation == null) {
-      return null;
+    if (departureStation == null) {
+      return _NormalizedPathResult.failure(
+        _invalidPathFailure(
+          pathIndex: pathIndex,
+          message: 'paths[$pathIndex].departureStation is missing.',
+        ),
+      );
+    }
+    if (arrivalStation == null) {
+      return _NormalizedPathResult.failure(
+        _invalidPathFailure(
+          pathIndex: pathIndex,
+          message: 'paths[$pathIndex].arrivalStation is missing.',
+        ),
+      );
     }
 
     final String? departureStationCode = _normalizeNullableText(
@@ -99,19 +126,39 @@ class RouteResponseParser {
       arrivalStation.lineName,
     );
     final String? transferYn = _normalizeNullableText(path.transferYn);
+    final List<String> missingFields = <String>[
+      if (departureStationCode == null) 'departureStation.stationCode',
+      if (departureStationName == null) 'departureStation.stationName',
+      if (departureLineName == null) 'departureStation.lineName',
+      if (arrivalStationCode == null) 'arrivalStation.stationCode',
+      if (arrivalStationName == null) 'arrivalStation.stationName',
+      if (arrivalLineName == null) 'arrivalStation.lineName',
+      if (path.sectionDistanceMeters == null) 'sectionDistanceMeters',
+      if (path.sectionDurationSeconds == null) 'sectionDurationSeconds',
+      if (path.waitingSeconds == null) 'waitingSeconds',
+      if (transferYn == null) 'transferYn',
+    ];
 
-    if (departureStationCode == null ||
-        departureStationName == null ||
-        departureLineName == null ||
-        arrivalStationCode == null ||
-        arrivalStationName == null ||
-        arrivalLineName == null ||
-        path.sectionDistanceMeters == null ||
-        path.sectionDurationSeconds == null ||
-        path.waitingSeconds == null ||
-        transferYn == null) {
-      return null;
+    if (missingFields.isNotEmpty) {
+      return _NormalizedPathResult.failure(
+        _invalidPathFailure(
+          pathIndex: pathIndex,
+          message:
+              'paths[$pathIndex] is missing required fields: ${missingFields.join(', ')}.',
+        ),
+      );
     }
+
+    if (transferYn != 'Y' && transferYn != 'N') {
+      return _NormalizedPathResult.failure(
+        _invalidPathFailure(
+          pathIndex: pathIndex,
+          message:
+              'paths[$pathIndex].transferYn must be "Y" or "N", got "$transferYn".',
+        ),
+      );
+    }
+    final bool isTransfer = transferYn == 'Y';
 
     final String branchKey =
         _normalizeNullableText(departureStation.branchLineName) ??
@@ -120,32 +167,92 @@ class RouteResponseParser {
     final String servicePatternKey =
         _normalizeNullableText(path.nonstopYn) == 'Y' ? 'NONSTOP' : 'LOCAL';
 
-    return RawPathSegment(
-      departureStationCode: departureStationCode,
-      departureStationName: departureStationName,
-      departureLineName: departureLineName,
-      departureBranchLineName: _normalizeNullableText(
-        departureStation.branchLineName,
+    return _NormalizedPathResult.success(
+      RawPathSegment(
+        departureStationCode: departureStationCode!,
+        departureStationName: departureStationName!,
+        departureLineName: departureLineName!,
+        departureBranchLineName: _normalizeNullableText(
+          departureStation.branchLineName,
+        ),
+        arrivalStationCode: arrivalStationCode!,
+        arrivalStationName: arrivalStationName!,
+        arrivalLineName: arrivalLineName!,
+        arrivalBranchLineName: _normalizeNullableText(
+          arrivalStation.branchLineName,
+        ),
+        terminalStationCode: _normalizeNullableText(path.terminalStationCode),
+        terminalStationName: _normalizeNullableText(path.terminalStationName),
+        apiDirection: _normalizeNullableText(path.apiDirection),
+        distanceMeters: path.sectionDistanceMeters!,
+        durationSeconds: path.sectionDurationSeconds!,
+        waitingSeconds: path.waitingSeconds!,
+        isTransfer: isTransfer,
+        trainNo: _normalizeNullableText(path.trainNo),
+        trainDepartureTime: _normalizeNullableText(path.trainDepartureTime),
+        trainArrivalTime: _normalizeNullableText(path.trainArrivalTime),
+        servicePatternKey: servicePatternKey,
+        branchKey: branchKey,
       ),
-      arrivalStationCode: arrivalStationCode,
-      arrivalStationName: arrivalStationName,
-      arrivalLineName: arrivalLineName,
-      arrivalBranchLineName: _normalizeNullableText(
-        arrivalStation.branchLineName,
-      ),
-      terminalStationCode: _normalizeNullableText(path.terminalStationCode),
-      terminalStationName: _normalizeNullableText(path.terminalStationName),
-      apiDirection: _normalizeNullableText(path.apiDirection),
-      distanceMeters: path.sectionDistanceMeters!,
-      durationSeconds: path.sectionDurationSeconds!,
-      waitingSeconds: path.waitingSeconds!,
-      isTransfer: transferYn == 'Y',
-      trainNo: _normalizeNullableText(path.trainNo),
-      trainDepartureTime: _normalizeNullableText(path.trainDepartureTime),
-      trainArrivalTime: _normalizeNullableText(path.trainArrivalTime),
-      servicePatternKey: servicePatternKey,
-      branchKey: branchKey,
     );
+  }
+
+  ParsedRouteParseFailure _invalidPathFailure({
+    required int pathIndex,
+    required String message,
+  }) {
+    return ParsedRouteParseFailure(
+      code: ParseFailureCode.invalidPathShape,
+      message: 'Invalid path at index $pathIndex. $message',
+    );
+  }
+
+  ParsedRouteParseFailure? _validateRawSegments(List<RawPathSegment> segments) {
+    if (segments.isEmpty) {
+      return const ParsedRouteParseFailure(
+        code: ParseFailureCode.emptyPaths,
+        message: 'Normalized paths are empty.',
+      );
+    }
+
+    if (segments.first.isTransfer) {
+      return const ParsedRouteParseFailure(
+        code: ParseFailureCode.invalidPathShape,
+        message: 'First path cannot be a transfer segment.',
+      );
+    }
+
+    if (segments.last.isTransfer) {
+      return const ParsedRouteParseFailure(
+        code: ParseFailureCode.invalidPathShape,
+        message: 'Last path cannot be a transfer segment.',
+      );
+    }
+
+    for (int i = 1; i < segments.length; i++) {
+      if (segments[i - 1].isTransfer && segments[i].isTransfer) {
+        return ParsedRouteParseFailure(
+          code: ParseFailureCode.invalidPathShape,
+          message:
+              'Consecutive transfer segments are not allowed at paths[${i - 1}] and [$i].',
+        );
+      }
+
+      if (!_segmentsConnect(segments[i - 1], segments[i])) {
+        return ParsedRouteParseFailure(
+          code: ParseFailureCode.invalidPathShape,
+          message:
+              'Path connectivity breaks between paths[${i - 1}] and [$i].',
+        );
+      }
+    }
+
+    return null;
+  }
+
+  bool _segmentsConnect(RawPathSegment previous, RawPathSegment current) {
+    return previous.arrivalStationCode == current.departureStationCode &&
+        previous.arrivalStationName == current.departureStationName;
   }
 
   RideSegment _toRideSegment(RawPathSegment segment) {
@@ -183,6 +290,7 @@ class RouteResponseParser {
   ) {
     final List<List<RideSegment>> groups = <List<RideSegment>>[];
     int rideIndex = 0;
+    RideSegment? previousRideSegment;
 
     for (int i = 0; i < rawSegments.length; i++) {
       final RawPathSegment rawSegment = rawSegments[i];
@@ -194,7 +302,8 @@ class RouteResponseParser {
       final bool shouldStartNewGroup =
           groups.isEmpty ||
           (i > 0 && rawSegments[i - 1].isTransfer) ||
-          groups.last.last.lineName != rideSegment.lineName;
+          previousRideSegment == null ||
+          !_canMergeIntoSameLeg(previousRideSegment, rideSegment);
 
       if (shouldStartNewGroup) {
         groups.add(<RideSegment>[rideSegment]);
@@ -202,10 +311,20 @@ class RouteResponseParser {
         groups.last.add(rideSegment);
       }
 
+      previousRideSegment = rideSegment;
       rideIndex += 1;
     }
 
     return groups.map(_buildLeg).toList(growable: false);
+  }
+
+  bool _canMergeIntoSameLeg(RideSegment previous, RideSegment current) {
+    return previous.lineName == current.lineName &&
+        previous.branchKey == current.branchKey &&
+        previous.servicePatternKey == current.servicePatternKey &&
+        previous.apiDirection == current.apiDirection &&
+        previous.terminalStationCode == current.terminalStationCode &&
+        previous.terminalStationName == current.terminalStationName;
   }
 
   RouteLeg _buildLeg(List<RideSegment> segments) {
@@ -258,6 +377,15 @@ class RouteResponseParser {
     final String trimmed = value?.trim() ?? '';
     return trimmed.isEmpty ? null : trimmed;
   }
+}
+
+class _NormalizedPathResult {
+  const _NormalizedPathResult.success(this.segment) : failure = null;
+
+  const _NormalizedPathResult.failure(this.failure) : segment = null;
+
+  final RawPathSegment? segment;
+  final ParsedRouteParseFailure? failure;
 }
 
 class DirectionLabelResolver {
