@@ -55,7 +55,7 @@ class SeoulRouteApiClient {
     if (_apiKey.trim().isEmpty) {
       throw StateError(
         'SEOUL_ROUTE_API_KEY is not configured. Run Flutter with '
-        '--dart-define-from-file=.env or provide --dart-define manually.',
+        '--dart-define-from-file=.env.local or provide --dart-define manually.',
       );
     }
 
