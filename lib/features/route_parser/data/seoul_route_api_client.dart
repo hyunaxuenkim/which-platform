@@ -1,19 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../../../core/config/app_env.dart';
 import '../domain/route_api_response_dto.dart';
 
 class SeoulRouteApiClient {
   SeoulRouteApiClient({
     HttpClient? httpClient,
-    String baseUrl = defaultBaseUrl,
-    String apiKey = defaultApiKey,
+    String baseUrl = AppEnv.seoulRouteApiBaseUrl,
+    String apiKey = AppEnv.seoulRouteApiKey,
   }) : _httpClient = httpClient ?? HttpClient(),
        _baseUrl = baseUrl,
        _apiKey = apiKey;
-
-  static const String defaultBaseUrl = 'http://openapi.seoul.go.kr:8088';
-  static const String defaultApiKey = '754c7969576b696936377745636f64';
 
   final HttpClient _httpClient;
   final String _baseUrl;
@@ -54,6 +52,13 @@ class SeoulRouteApiClient {
     required String arrivalStation,
     required DateTime requestDateTime,
   }) {
+    if (_apiKey.trim().isEmpty) {
+      throw StateError(
+        'SEOUL_ROUTE_API_KEY is not configured. Run Flutter with '
+        '--dart-define-from-file=.env or provide --dart-define manually.',
+      );
+    }
+
     final List<String> encodedSegments = <String>[
       _apiKey,
       'json',
