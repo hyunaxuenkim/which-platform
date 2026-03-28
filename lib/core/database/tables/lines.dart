@@ -7,9 +7,9 @@ class Lines extends Table {
 
   TextColumn get color => text().nullable()();
 
-  TextColumn get lineType => text()
-      .nullable()
-      .check(lineType.isIn(const <String>['LINEAR', 'LOOP', 'BRANCH']))();
+  TextColumn get lineType => text().nullable().customConstraint(
+    "CHECK (line_type IS NULL OR line_type IN ('LINEAR', 'LOOP', 'BRANCH'))",
+  )();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 

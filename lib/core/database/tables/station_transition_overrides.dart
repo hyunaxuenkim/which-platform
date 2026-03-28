@@ -15,8 +15,8 @@ class StationTransitionOverrides extends Table {
 
   TextColumn get apiTerminalStationName => text().nullable()();
 
-  TextColumn get apiDirection => text().nullable().check(
-    apiDirection.isIn(const <String>['상행', '하행', '내선', '외선']),
+  TextColumn get apiDirection => text().nullable().customConstraint(
+    "CHECK (api_direction IS NULL OR api_direction IN ('상행', '하행', '내선', '외선'))",
   )();
 
   TextColumn get resolvedBranchKey => text()();

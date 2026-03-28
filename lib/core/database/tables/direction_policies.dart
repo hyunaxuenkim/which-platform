@@ -9,14 +9,12 @@ class DirectionPolicies extends Table {
 
   TextColumn get branchKey => text().withDefault(const Constant('MAIN'))();
 
-  TextColumn get directionKind => text().check(
-    directionKind.isIn(
-      const <String>['UP', 'DOWN', 'INNER', 'OUTER', 'TERMINAL', 'BRANCH'],
-    ),
+  TextColumn get directionKind => text().customConstraint(
+    "CHECK (direction_kind IN ('UP', 'DOWN', 'INNER', 'OUTER', 'TERMINAL', 'BRANCH'))",
   )();
 
-  TextColumn get apiDirection => text().nullable().check(
-    apiDirection.isIn(const <String>['상행', '하행', '내선', '외선']),
+  TextColumn get apiDirection => text().nullable().customConstraint(
+    "CHECK (api_direction IS NULL OR api_direction IN ('상행', '하행', '내선', '외선'))",
   )();
 
   TextColumn get apiTerminalStationCode => text().nullable()();
