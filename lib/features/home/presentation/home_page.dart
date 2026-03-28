@@ -41,7 +41,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     _departureController = TextEditingController(text: '서울역');
     _arrivalController = TextEditingController(text: '잠실');
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshSnapshot();
+      _initializeDatabaseSnapshot();
     });
   }
 
@@ -79,6 +79,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     final DateTime requestDateTime = _buildTodayNoon();
 
     try {
+      await _ensureDatabaseSeeded();
+
       final SeoulRouteApiClient apiClient = ref.read(
         seoulRouteApiClientProvider,
       );
@@ -151,6 +153,49 @@ class _HomePageState extends ConsumerState<HomePage> {
           _isFetchingLiveRoute = false;
         });
       }
+    }
+  }
+
+  Future<void> _initializeDatabaseSnapshot() async {
+    try {
+      await _ensureDatabaseSeeded();
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = error.toString();
+        });
+      }
+    }
+
+    await _refreshSnapshot();
+  }
+
+  Future<void> _ensureDatabaseSeeded() async {
+    final database = ref.read(appDatabaseProvider);
+    final bool hasLines =
+        (await database.select(database.lines).get()).isNotEmpty;
+    final bool hasLineStations =
+        (await database.select(database.lineStations).get()).isNotEmpty;
+    final bool hasDirectionPolicies =
+        (await database.select(database.directionPolicies).get()).isNotEmpty;
+    final bool hasStationTransitionOverrides =
+        (await database.select(database.stationTransitionOverrides).get())
+            .isNotEmpty;
+
+    if (hasLines &&
+        hasLineStations &&
+        hasDirectionPolicies &&
+        hasStationTransitionOverrides) {
+      return;
+    }
+
+    final importer = ref.read(subwayLineInfoImporterProvider);
+    final result = await importer.importFromAsset();
+
+    if (mounted) {
+      setState(() {
+        _importResult = result;
+      });
     }
   }
 
@@ -636,7 +681,9 @@ class _RouteViewDataPreview extends StatelessWidget {
         ...data.legItems.map((leg) => _RouteLegCard(item: leg)),
         if (data.transferItems.isNotEmpty) ...[
           const SizedBox(height: 12),
-          ...data.transferItems.map((transfer) => _RouteTransferCard(item: transfer)),
+          ...data.transferItems.map(
+            (transfer) => _RouteTransferCard(item: transfer),
+          ),
         ],
       ],
     );
@@ -652,14 +699,15 @@ class _RouteLegCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final Color backgroundColor = _parseHexColor(item.lineColorHex);
-    final Brightness brightness =
-        ThemeData.estimateBrightnessForColor(backgroundColor);
-    final Color foregroundColor =
-        brightness == Brightness.dark ? Colors.white : const Color(0xFF111827);
-    final Color secondaryColor =
-        brightness == Brightness.dark
-            ? Colors.white.withValues(alpha: 0.84)
-            : const Color(0xFF374151);
+    final Brightness brightness = ThemeData.estimateBrightnessForColor(
+      backgroundColor,
+    );
+    final Color foregroundColor = brightness == Brightness.dark
+        ? Colors.white
+        : const Color(0xFF111827);
+    final Color secondaryColor = brightness == Brightness.dark
+        ? Colors.white.withValues(alpha: 0.84)
+        : const Color(0xFF374151);
 
     return Container(
       width: double.infinity,
