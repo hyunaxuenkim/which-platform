@@ -33,6 +33,21 @@ The default expectation is that the agent drives the flow after the user approve
 19. After all milestones are merged into the topic branch, open a final PR from `topic/<topic-name>` to `main`.
 20. After the topic is fully complete, move the finalized `plan.md` from `docs/topics/<topic-name>/plan.md` to `docs/archive/<topic-name>/plan.md`.
 
+## Branch Preconditions
+
+- Before implementing a milestone, confirm the current branch matches the target milestone branch.
+- If the current branch does not match the milestone being implemented, switch to the correct base branch and create the proper milestone branch before making code changes.
+- Do not continue milestone work on a previous milestone branch just because the code happens to be compatible.
+
+## Stacked Milestones
+
+- The default rule is still: create each milestone branch from the latest `topic/<topic-name>`.
+- If the next milestone depends on code that exists only on an earlier milestone branch that has not been merged yet, use a stacked branch.
+- In that case, create the new milestone branch from the dependent milestone branch instead of from `topic/<topic-name>`.
+- Open the dependent milestone PR against the previous milestone branch first.
+- After the previous milestone is merged, retarget the dependent milestone PR to `topic/<topic-name>` if needed.
+- State clearly in the PR body when a milestone PR is stacked on another unmerged milestone.
+
 ## Ownership Expectations
 
 - The agent and user design the plan together.

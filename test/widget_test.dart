@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,6 +57,15 @@ void main() {
     expect(find.text('Seoul Station'), findsOneWidget);
     expect(find.text('Origin station'), findsOneWidget);
     expect(find.text('Destination or place'), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(
+            find.byKey(const ValueKey<String>('journey-field-Seoul Station')),
+          )
+          .controller!
+          .text,
+      isEmpty,
+    );
 
     await database.close();
   });
@@ -111,6 +121,64 @@ void main() {
     expect(find.text('到达站或目的地'), findsOneWidget);
     expect(find.text('导航'), findsOneWidget);
     expect(find.text('WAYFINDER'), findsNothing);
+
+    await database.close();
+  });
+
+  testWidgets('shows autocomplete suggestions and applies the selection', (
+    WidgetTester tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    await database
+        .into(database.stations)
+        .insert(
+          StationsCompanion.insert(
+            nameKo: '서울역',
+            nameEn: const Value('Seoul Station'),
+            nameJp: const Value('ソウル駅'),
+            nameCh: const Value('首尔站'),
+          ),
+        );
+    await database
+        .into(database.stations)
+        .insert(
+          StationsCompanion.insert(
+            nameKo: '시청',
+            nameEn: const Value('City Hall'),
+            nameJp: const Value('シチョン'),
+            nameCh: const Value('市厅'),
+          ),
+        );
+
+    await tester.pumpWidget(_buildTestApp(database: database));
+    await tester.pumpAndSettle();
+
+    final Finder originField = find.byKey(
+      const ValueKey<String>('journey-field-Seoul Station'),
+    );
+
+    await tester.tap(originField);
+    await tester.pump();
+    await tester.enterText(originField, 'S');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('station-suggestion-list')),
+      findsOneWidget,
+    );
+    expect(find.text('Seoul Station'), findsWidgets);
+
+    await tester.tap(find.text('Seoul Station').last);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<TextField>(originField).controller!.text,
+      'Seoul Station',
+    );
+    expect(
+      find.byKey(const ValueKey<String>('station-suggestion-list')),
+      findsNothing,
+    );
 
     await database.close();
   });
