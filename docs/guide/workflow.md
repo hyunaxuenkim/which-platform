@@ -8,7 +8,7 @@ The default expectation is that the agent drives the flow after the user approve
 1. Start by creating a `plan.md` for the topic.
 2. Use `docs/template/plan_template.md` as the starting point.
 3. The agent drafts the initial plan.
-4. Store the topic plan at `docs/archive/<topic-name>/plan.md`.
+4. Store the active topic plan at `docs/topics/<topic-name>/plan.md`.
 5. The user reviews and approves the plan before implementation starts.
 6. After approval, create `topic/<topic-name>` from the latest `main`.
 7. Commit the approved `plan.md` to the topic branch.
@@ -31,11 +31,13 @@ The default expectation is that the agent drives the flow after the user approve
 17. Notify the user only after the PR is open and CI is passing.
 18. Request user review and approval for the milestone PR.
 19. After all milestones are merged into the topic branch, open a final PR from `topic/<topic-name>` to `main`.
+20. After the topic is fully complete, move the finalized `plan.md` from `docs/topics/<topic-name>/plan.md` to `docs/archive/<topic-name>/plan.md`.
 
 ## Ownership Expectations
 
 - The agent and user design the plan together.
-- The canonical plan location for a topic is `docs/archive/<topic-name>/plan.md`.
+- The canonical plan location for an active topic is `docs/topics/<topic-name>/plan.md`.
+- Move the plan to `docs/archive/<topic-name>/plan.md` only after all milestones for that topic are complete.
 - The user is the approval point for the plan and each milestone PR.
 - After plan approval, the agent is expected to drive milestone execution with minimal extra prompting.
 - The agent should create branches, run validation, prepare commits, and prepare PR content unless blocked by tooling or permissions.

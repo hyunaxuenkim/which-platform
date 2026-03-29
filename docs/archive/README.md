@@ -1,12 +1,13 @@
 # Archive
 
-This directory stores topic plans and other completed topic records.
+This directory stores completed topic records.
 
-## Topic Plan Location
+## When To Archive A Plan
 
-- The canonical path for a topic plan is `docs/archive/<topic-name>/plan.md`.
+- Active topic plans must stay at `docs/topics/<topic-name>/plan.md`.
+- Move a topic plan into `docs/archive/<topic-name>/plan.md` only after all milestones for that topic are complete.
 - Each topic should have its own directory under `docs/archive/`.
-- The approved `plan.md` should be committed on the corresponding `topic/<topic-name>` branch before milestone work begins.
+- Archived records in this directory should represent completed topics only.
 
 ## Example
 
