@@ -20,8 +20,10 @@ Agents must strictly follow the rules defined in this document.
 ---
 
 # Local Repository Structure
-- docs/archive → source of truth for scope and milestones that already finished
-- docs/archive/<topic-name>/plan.md → canonical location for each topic plan
+- docs/topics → source of truth for active topic plans that are still in progress
+- docs/topics/<topic-name>/plan.md → canonical location for each active topic plan
+- docs/archive → source of truth for completed topic records
+- docs/archive/<topic-name>/plan.md → archive location for a topic plan only after all milestones are finished
 - docs/domain → source of domain informations
 
 ---
@@ -30,6 +32,8 @@ Agents must strictly follow the rules defined in this document.
 
 Agents MUST:
 
+- keep active topic plans under `docs/topics/<topic-name>/plan.md`
+- move a topic plan to `docs/archive/<topic-name>/plan.md` only after all milestones for that topic are complete
 - run local validation before commit
 - create a focused commit for the completed milestone work
 - push the milestone branch
