@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/database/database_provider.dart';
 import '../domain/station_search_lookup.dart';
 import '../providers/station_search_lookup_provider.dart';
 import '../../settings/domain/app_language.dart';
@@ -23,6 +24,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   late final TextEditingController _destinationController;
   late final FocusNode _originFocusNode;
   late final FocusNode _destinationFocusNode;
+  late final Future<void> _seedFuture;
   _SearchField? _activeField;
 
   Future<void> _openSettings() async {
@@ -39,6 +41,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     _destinationController = TextEditingController();
     _originFocusNode = FocusNode();
     _destinationFocusNode = FocusNode();
+    _seedFuture = _ensureDatabaseSeeded();
     _originController.addListener(_handleFieldStateChanged);
     _destinationController.addListener(_handleFieldStateChanged);
     _originFocusNode.addListener(_handleFocusChanged);
@@ -142,12 +145,24 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     );
   }
 
+  Future<void> _ensureDatabaseSeeded() async {
+    final database = ref.read(appDatabaseProvider);
+    final bool hasStations =
+        (await database.select(database.stations).get()).isNotEmpty;
+    if (hasStations) {
+      return;
+    }
+
+    final importer = ref.read(subwayLineInfoImporterProvider);
+    await importer.importFromAsset();
+    ref.invalidate(stationSearchLookupProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = ref.watch(appStringsProvider);
     final language = ref.watch(appLanguageProvider);
     final lookupAsync = ref.watch(stationSearchLookupProvider);
-    final suggestions = _buildSuggestions(lookupAsync, language);
     final theme = Theme.of(context);
     final double keyboardInset = MediaQuery.of(context).viewInsets.bottom;
     final bool isKeyboardVisible = keyboardInset > 0;
@@ -196,16 +211,26 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                           ),
                         ),
                         const SizedBox(height: 36),
-                        _SearchInputStack(
-                          strings: strings,
-                          originPlaceholder: strings.searchDefaultOrigin,
-                          originController: _originController,
-                          destinationController: _destinationController,
-                          originFocusNode: _originFocusNode,
-                          destinationFocusNode: _destinationFocusNode,
-                          suggestions: suggestions,
-                          activeField: _activeField,
-                          onSuggestionSelected: _applySuggestion,
+                        FutureBuilder<void>(
+                          future: _seedFuture,
+                          builder: (context, snapshot) {
+                            final suggestions =
+                                snapshot.connectionState == ConnectionState.done
+                                ? _buildSuggestions(lookupAsync, language)
+                                : const <StationSearchSuggestion>[];
+
+                            return _SearchInputStack(
+                              strings: strings,
+                              originPlaceholder: strings.searchDefaultOrigin,
+                              originController: _originController,
+                              destinationController: _destinationController,
+                              originFocusNode: _originFocusNode,
+                              destinationFocusNode: _destinationFocusNode,
+                              suggestions: suggestions,
+                              activeField: _activeField,
+                              onSuggestionSelected: _applySuggestion,
+                            );
+                          },
                         ),
                       ],
                     ),
