@@ -102,6 +102,9 @@ class RouteResponseParser {
       policyContext: policyContext,
     );
     final List<String> stationTrail = _buildStationTrail(rideSegments);
+    final List<String> stationTrailCodes = _buildStationTrailCodes(
+      rideSegments,
+    );
 
     return ParsedRouteParseResult.success(
       route: ParsedRoute(
@@ -111,6 +114,7 @@ class RouteResponseParser {
         legs: legs,
         transfers: transferSegments,
         stationTrail: stationTrail,
+        stationTrailCodes: stationTrailCodes,
         rawPathCount: rawSegments.length,
       ),
     );
@@ -283,8 +287,7 @@ class RouteResponseParser {
       if (!_segmentsConnect(segments[i - 1], segments[i])) {
         return ParsedRouteParseFailure(
           code: ParseFailureCode.invalidPathShape,
-          message:
-              'Path connectivity breaks between paths[${i - 1}] and [$i].',
+          message: 'Path connectivity breaks between paths[${i - 1}] and [$i].',
         );
       }
     }
@@ -318,6 +321,7 @@ class RouteResponseParser {
   TransferSegment _toTransferSegment(RawPathSegment segment) {
     return TransferSegment(
       stationName: segment.departureStationName,
+      stationCode: segment.departureStationCode,
       fromLineName: segment.departureLineName,
       toLineName: segment.arrivalLineName,
       durationSeconds: segment.durationSeconds,
@@ -328,8 +332,7 @@ class RouteResponseParser {
 
   List<RouteLeg> _buildLegs(
     List<RideSegment> rideSegments,
-    List<RawPathSegment> rawSegments,
-    {
+    List<RawPathSegment> rawSegments, {
     _DatabasePolicyContext? policyContext,
   }) {
     final List<List<RideSegment>> groups = <List<RideSegment>>[];
@@ -360,9 +363,7 @@ class RouteResponseParser {
     }
 
     return groups
-        .map(
-          (group) => _buildLeg(group, policyContext: policyContext),
-        )
+        .map((group) => _buildLeg(group, policyContext: policyContext))
         .toList(growable: false);
   }
 
@@ -385,12 +386,19 @@ class RouteResponseParser {
       first.fromStationName,
       ...segments.map((RideSegment segment) => segment.toStationName),
     ];
+    final List<String> stationCodes = <String>[
+      first.fromStationCode,
+      ...segments.map((RideSegment segment) => segment.toStationCode),
+    ];
 
     return RouteLeg(
       lineName: first.lineName,
       fromStationName: first.fromStationName,
+      fromStationCode: first.fromStationCode,
       toStationName: last.toStationName,
+      toStationCode: last.toStationCode,
       stationNames: stationNames,
+      stationCodes: stationCodes,
       stationCount: stationNames.length,
       directionLabel:
           policyContext?.resolveDirectionLabel(
@@ -409,9 +417,11 @@ class RouteResponseParser {
           ),
       apiDirection: first.apiDirection,
       terminalStationName: first.terminalStationName,
+      terminalStationCode: first.terminalStationCode,
       servicePatternKey: first.servicePatternKey,
       branchKey: first.branchKey,
       nextStationName: first.toStationName,
+      nextStationCode: first.toStationCode,
       durationSeconds: segments.fold<int>(
         0,
         (int total, RideSegment segment) => total + segment.durationSeconds,
@@ -428,6 +438,13 @@ class RouteResponseParser {
     return <String>[
       rideSegments.first.fromStationName,
       ...rideSegments.map((RideSegment segment) => segment.toStationName),
+    ];
+  }
+
+  List<String> _buildStationTrailCodes(List<RideSegment> rideSegments) {
+    return <String>[
+      rideSegments.first.fromStationCode,
+      ...rideSegments.map((RideSegment segment) => segment.toStationCode),
     ];
   }
 
@@ -458,8 +475,7 @@ class DirectionLabelResolver {
     required String servicePatternKey,
   }) {
     final bool isMainLineTwo =
-        lineName == '2호선' &&
-        (branchKey == 'MAIN' || branchKey == 'LINE2_MAIN');
+        lineName == '2호선' && (branchKey == 'MAIN' || branchKey == 'LINE2_MAIN');
     if (lineName == '1호선' && terminalStationName != null) {
       return '$terminalStationName행';
     }
@@ -632,9 +648,9 @@ class _DatabasePolicyContext {
             );
 
     final List<DirectionPolicy> sorted = candidates.toList()
-      ..sort((a, b) => _directionPolicyScore(b).compareTo(
-            _directionPolicyScore(a),
-          ));
+      ..sort(
+        (a, b) => _directionPolicyScore(b).compareTo(_directionPolicyScore(a)),
+      );
     if (sorted.isEmpty) {
       return null;
     }
@@ -686,9 +702,9 @@ class _DatabasePolicyContext {
       return null;
     }
     candidates.sort(
-      (a, b) => _stationTransitionOverrideScore(b).compareTo(
-        _stationTransitionOverrideScore(a),
-      ),
+      (a, b) => _stationTransitionOverrideScore(
+        b,
+      ).compareTo(_stationTransitionOverrideScore(a)),
     );
     return candidates.first;
   }

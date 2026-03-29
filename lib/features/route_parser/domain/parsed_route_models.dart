@@ -30,6 +30,7 @@ abstract class ParsedRoute with _$ParsedRoute {
     required List<RouteLeg> legs,
     required List<TransferSegment> transfers,
     required List<String> stationTrail,
+    @Default(<String>[]) List<String> stationTrailCodes,
     required int rawPathCount,
   }) = _ParsedRoute;
 
@@ -92,6 +93,7 @@ abstract class RideSegment with _$RideSegment {
 abstract class TransferSegment with _$TransferSegment {
   const factory TransferSegment({
     required String stationName,
+    String? stationCode,
     required String fromLineName,
     required String toLineName,
     required int durationSeconds,
@@ -108,15 +110,20 @@ abstract class RouteLeg with _$RouteLeg {
   const factory RouteLeg({
     required String lineName,
     required String fromStationName,
+    String? fromStationCode,
     required String toStationName,
+    String? toStationCode,
     required List<String> stationNames,
+    @Default(<String>[]) List<String> stationCodes,
     required int stationCount,
     required String directionLabel,
     required String? apiDirection,
     required String? terminalStationName,
+    String? terminalStationCode,
     required String servicePatternKey,
     required String branchKey,
     required String nextStationName,
+    String? nextStationCode,
     required int durationSeconds,
     required int distanceMeters,
     required int segmentCount,

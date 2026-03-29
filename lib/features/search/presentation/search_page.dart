@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class SearchPage extends StatefulWidget {
+import '../../settings/domain/app_language.dart';
+import '../../settings/domain/app_language_extensions.dart';
+import '../../settings/domain/app_strings.dart';
+import '../../settings/providers/app_language_providers.dart';
+import '../../settings/presentation/app_settings_sheet.dart';
+import 'search_route_params.dart';
+
+class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPageState extends ConsumerState<SearchPage> {
   late final TextEditingController _originController;
   late final TextEditingController _destinationController;
+  late String _defaultOriginText;
+
+  Future<void> _openSettings() async {
+    await showAppSettingsSheet(
+      context,
+      initialLanguage: ref.read(appLanguageProvider),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    _originController = TextEditingController(text: '서울역');
+    _defaultOriginText = AppStrings.forLanguage(
+      ref.read(appLanguageProvider),
+    ).searchDefaultOrigin;
+    _originController = TextEditingController(text: _defaultOriginText);
     _destinationController = TextEditingController();
   }
 
@@ -41,6 +60,12 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AppLanguage>(appLanguageProvider, (previous, next) {
+      _syncDefaultOriginText(previous: previous, next: next);
+    });
+
+    final strings = ref.watch(appStringsProvider);
+    final language = ref.watch(appLanguageProvider);
     final theme = Theme.of(context);
     final double keyboardInset = MediaQuery.of(context).viewInsets.bottom;
     final bool isKeyboardVisible = keyboardInset > 0;
@@ -67,11 +92,12 @@ class _SearchPageState extends State<SearchPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _SearchTopBar(
-                          onSettingsPressed: () => context.push('/debug'),
+                          brand: strings.brand,
+                          onSettingsPressed: _openSettings,
                         ),
                         const SizedBox(height: 36),
                         Text(
-                          'Where to?',
+                          strings.searchHeading,
                           style: theme.textTheme.displayMedium?.copyWith(
                             fontWeight: FontWeight.w900,
                             letterSpacing: -2.4,
@@ -80,15 +106,16 @@ class _SearchPageState extends State<SearchPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'PLAN YOUR NEXT CONNECTION',
+                          strings.searchSubheading,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: const Color(0xFF5C5B5B),
                             fontWeight: FontWeight.w700,
-                            letterSpacing: 1.8,
+                            letterSpacing: language.isCjk ? 0 : 1.8,
                           ),
                         ),
                         const SizedBox(height: 36),
                         _SearchInputStack(
+                          strings: strings,
                           originController: _originController,
                           destinationController: _destinationController,
                         ),
@@ -106,7 +133,10 @@ class _SearchPageState extends State<SearchPage> {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 520),
-                    child: _GoButton(onPressed: _openNextScreen),
+                    child: _GoButton(
+                      label: strings.searchGoCta,
+                      onPressed: _openNextScreen,
+                    ),
                   ),
                 ),
               ),
@@ -132,11 +162,38 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
   }
+
+  void _syncDefaultOriginText({
+    required AppLanguage? previous,
+    required AppLanguage next,
+  }) {
+    final String nextDefault = AppStrings.forLanguage(next).searchDefaultOrigin;
+    final String previousDefault = previous == null
+        ? _defaultOriginText
+        : AppStrings.forLanguage(previous).searchDefaultOrigin;
+    final String currentOrigin = _originController.text.trim();
+    final bool shouldReplace =
+        currentOrigin.isEmpty ||
+        currentOrigin == _defaultOriginText ||
+        currentOrigin == previousDefault;
+
+    _defaultOriginText = nextDefault;
+    if (!shouldReplace) {
+      return;
+    }
+
+    _originController.value = _originController.value.copyWith(
+      text: nextDefault,
+      selection: TextSelection.collapsed(offset: nextDefault.length),
+      composing: TextRange.empty,
+    );
+  }
 }
 
 class _SearchTopBar extends StatelessWidget {
-  const _SearchTopBar({required this.onSettingsPressed});
+  const _SearchTopBar({required this.brand, required this.onSettingsPressed});
 
+  final String brand;
   final VoidCallback onSettingsPressed;
 
   @override
@@ -146,7 +203,7 @@ class _SearchTopBar extends StatelessWidget {
         const Icon(Icons.directions_subway_rounded, color: Color(0xFF0049E6)),
         const SizedBox(width: 8),
         Text(
-          'Wayfinder',
+          brand,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w900,
             letterSpacing: -1.2,
@@ -168,10 +225,12 @@ class _SearchTopBar extends StatelessWidget {
 
 class _SearchInputStack extends StatelessWidget {
   const _SearchInputStack({
+    required this.strings,
     required this.originController,
     required this.destinationController,
   });
 
+  final AppStrings strings;
   final TextEditingController originController;
   final TextEditingController destinationController;
 
@@ -193,14 +252,14 @@ class _SearchInputStack extends StatelessWidget {
           children: [
             _JourneyTextField(
               controller: originController,
-              hintText: '출발역',
+              hintText: strings.searchOriginHint,
               icon: Icons.my_location_rounded,
               iconColor: const Color(0xFF0049E6),
             ),
             const SizedBox(height: 16),
             _JourneyTextField(
               controller: destinationController,
-              hintText: '도착역 또는 목적지',
+              hintText: strings.searchDestinationHint,
               icon: Icons.location_on_rounded,
               iconColor: const Color(0xFFB31B25),
             ),
@@ -264,8 +323,9 @@ class _JourneyTextField extends StatelessWidget {
 }
 
 class _GoButton extends StatelessWidget {
-  const _GoButton({required this.onPressed});
+  const _GoButton({required this.label, required this.onPressed});
 
+  final String label;
   final VoidCallback onPressed;
 
   @override
@@ -302,7 +362,7 @@ class _GoButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'GO',
+                label,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: const Color(0xFFF2F1FF),
                   fontWeight: FontWeight.w900,
@@ -319,11 +379,13 @@ class _GoButton extends StatelessWidget {
   }
 }
 
-class _BottomNavigationBar extends StatelessWidget {
+class _BottomNavigationBar extends ConsumerWidget {
   const _BottomNavigationBar();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
       decoration: const BoxDecoration(
@@ -341,14 +403,17 @@ class _BottomNavigationBar extends StatelessWidget {
         top: false,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
+          children: [
             _NavItem(
               icon: Icons.explore_rounded,
-              label: 'Navigate',
+              label: strings.navNavigate,
               selected: true,
             ),
-            _NavItem(icon: Icons.bookmark_border_rounded, label: 'Saved'),
-            _NavItem(icon: Icons.history_rounded, label: 'History'),
+            _NavItem(
+              icon: Icons.bookmark_border_rounded,
+              label: strings.navSaved,
+            ),
+            _NavItem(icon: Icons.history_rounded, label: strings.navHistory),
           ],
         ),
       ),
@@ -399,68 +464,4 @@ class _NavItem extends StatelessWidget {
       ),
     );
   }
-}
-
-class RoutePlaceholderPage extends StatelessWidget {
-  const RoutePlaceholderPage({super.key, this.params});
-
-  final SearchRouteParams? params;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final String summary = switch (params) {
-      SearchRouteParams(:final origin, :final destination) =>
-        '${origin.isEmpty ? '출발역 미입력' : origin} → '
-            '${destination.isEmpty ? '도착역 미입력' : destination}',
-      null => '입력 정보 없음',
-    };
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('방향 결과 준비중')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Screen 2는 다음 단계에서 이어서 구현할 예정입니다.',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              summary,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: const Color(0xFF2C2F30),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              params?.voiceGuidanceEnabled == true
-                  ? '음성 안내가 켜진 상태로 전달되었습니다.'
-                  : '음성 안내가 꺼진 상태로 전달되었습니다.',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: const Color(0xFF595C5D),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SearchRouteParams {
-  const SearchRouteParams({
-    required this.origin,
-    required this.destination,
-    required this.voiceGuidanceEnabled,
-  });
-
-  final String origin;
-  final String destination;
-  final bool voiceGuidanceEnabled;
 }

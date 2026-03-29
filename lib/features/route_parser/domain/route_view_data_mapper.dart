@@ -1,6 +1,10 @@
 import '../../../core/database/app_database.dart';
 import '../../../core/database/line_metadata_catalog.dart';
+import '../../settings/domain/app_language.dart';
 import 'parsed_route_models.dart';
+import 'resolved_station_display_name.dart';
+import 'station_display_name_formatter.dart';
+import 'station_display_name_resolver.dart';
 import 'route_view_data.dart';
 
 class RouteViewDataMapper {
@@ -9,74 +13,161 @@ class RouteViewDataMapper {
 
   const RouteViewDataMapper({
     this.lineColorHexByName = const <String, String>{},
+    this.stationDisplayNameResolver = const StationDisplayNameResolver(),
+    this.stationDisplayNameFormatter = const StationDisplayNameFormatter(),
   });
 
   final Map<String, String> lineColorHexByName;
+  final StationDisplayNameResolver stationDisplayNameResolver;
+  final StationDisplayNameFormatter stationDisplayNameFormatter;
 
   Future<RouteViewData> mapWithDatabase(
     ParsedRoute route, {
     required AppDatabase database,
+    AppLanguage language = AppLanguage.en,
   }) async {
-    final _RouteViewDatabaseContext databaseContext =
-        await _RouteViewDatabaseContext.load(database);
-    return _map(route, databaseContext: databaseContext);
+    final RouteViewDataMapperContext databaseContext =
+        await RouteViewDataMapperContext.load(database);
+    return _map(route, language: language, databaseContext: databaseContext);
   }
 
-  RouteViewData map(ParsedRoute route) {
-    return _map(route);
+  RouteViewData map(
+    ParsedRoute route, {
+    AppLanguage language = AppLanguage.en,
+    RouteViewDataMapperContext? databaseContext,
+  }) {
+    return _map(route, language: language, databaseContext: databaseContext);
   }
 
   RouteViewData _map(
     ParsedRoute route, {
-    _RouteViewDatabaseContext? databaseContext,
+    required AppLanguage language,
+    RouteViewDataMapperContext? databaseContext,
   }) {
-    final String departureStationName = route.stationTrail.isEmpty
-        ? missingInformationText
-        : _fallbackText(route.stationTrail.first);
-    final String arrivalStationName = route.stationTrail.isEmpty
-        ? missingInformationText
-        : _fallbackText(route.stationTrail.last);
+    final StationDisplayNameViewData departureStation =
+        route.stationTrail.isEmpty
+        ? _missingStationDisplay()
+        : _resolveStationViewData(
+            language: language,
+            rawStationName: route.stationTrail.first,
+            stationCode: route.stationTrailCodes.isEmpty
+                ? null
+                : route.stationTrailCodes.first,
+            databaseContext: databaseContext,
+          );
+    final StationDisplayNameViewData arrivalStation = route.stationTrail.isEmpty
+        ? _missingStationDisplay()
+        : _resolveStationViewData(
+            language: language,
+            rawStationName: route.stationTrail.last,
+            stationCode: route.stationTrailCodes.isEmpty
+                ? null
+                : route.stationTrailCodes.last,
+            databaseContext: databaseContext,
+          );
 
     return RouteViewData(
       summary: RouteSummaryViewData(
-        departureStationName: departureStationName,
-        arrivalStationName: arrivalStationName,
+        departureStation: departureStation,
+        arrivalStation: arrivalStation,
+        totalDurationSeconds: route.totalDurationSeconds,
+        totalFare: route.totalFare,
+        transferCount: route.transferCount,
         totalDurationText: _formatDuration(route.totalDurationSeconds),
         totalFareText: _formatFare(route.totalFare),
         transferCountText: _formatTransferCount(route.transferCount),
       ),
       legItems: route.legs
-          .map(
-            (RouteLeg leg) => RouteLegItemViewData(
+          .map((RouteLeg leg) {
+            final List<StationDisplayNameViewData> stations =
+                _resolveStationSequence(
+                  language: language,
+                  rawStationNames: leg.stationNames,
+                  stationCodes: leg.stationCodes,
+                  databaseContext: databaseContext,
+                );
+            final StationDisplayNameViewData fromStation = stations.isEmpty
+                ? _resolveStationViewData(
+                    language: language,
+                    rawStationName: leg.fromStationName,
+                    stationCode: leg.fromStationCode,
+                    databaseContext: databaseContext,
+                  )
+                : stations.first;
+            final StationDisplayNameViewData toStation = stations.isEmpty
+                ? _resolveStationViewData(
+                    language: language,
+                    rawStationName: leg.toStationName,
+                    stationCode: leg.toStationCode,
+                    databaseContext: databaseContext,
+                  )
+                : stations.last;
+            final StationDisplayNameViewData nextStation =
+                _resolveStationViewData(
+                  language: language,
+                  rawStationName: leg.nextStationName,
+                  stationCode: leg.nextStationCode,
+                  databaseContext: databaseContext,
+                );
+            final _StationReference? nextNegativeStationReference =
+                databaseContext?._resolveNextNegativeStation(leg);
+            final StationDisplayNameViewData nextNegativeStation =
+                nextNegativeStationReference == null
+                ? _missingStationDisplay()
+                : _resolveStationViewData(
+                    language: language,
+                    rawStationName: nextNegativeStationReference.stationName,
+                    stationCode: nextNegativeStationReference.stationCode,
+                    databaseContext: databaseContext,
+                  );
+            final StationDisplayNameViewData? terminalStation =
+                _hasText(leg.terminalStationName) ||
+                    _hasText(leg.terminalStationCode)
+                ? _resolveStationViewData(
+                    language: language,
+                    rawStationName: leg.terminalStationName,
+                    stationCode: leg.terminalStationCode,
+                    databaseContext: databaseContext,
+                  )
+                : null;
+
+            return RouteLegItemViewData(
               lineName: _fallbackText(leg.lineName),
               lineColorHex: _resolveLineColorHex(leg.lineName),
+              stationCount: leg.stationCount,
+              durationSeconds: leg.durationSeconds,
               directionLabel: _fallbackText(leg.directionLabel),
               directionPositiveExamplesText: _buildDirectionPositiveExamples(
-                leg,
+                terminalStation: terminalStation,
+                toStation: toStation,
               ),
               directionNegativeExamplesText:
                   databaseContext?.resolveDirectionNegativeExamplesText(leg) ??
                   missingInformationText,
-              fromStationName: _fallbackText(leg.fromStationName),
-              toStationName: _fallbackText(leg.toStationName),
-              nextStationName: _fallbackText(leg.nextStationName),
-              nextNegativeStationName:
-                  databaseContext?.resolveNextNegativeStationName(leg) ??
-                  missingInformationText,
-              stationTrailText: _formatStationTrail(leg.stationNames),
+              fromStation: fromStation,
+              toStation: toStation,
+              stations: stations,
+              nextStation: nextStation,
+              nextNegativeStation: nextNegativeStation,
+              stationTrailText: _formatStationTrail(stations),
               stationCountText: _formatStationCount(leg.stationCount),
               durationText: _formatDuration(leg.durationSeconds),
-              instructionText: _buildInstructionText(leg),
-            ),
-          )
+            );
+          })
           .toList(growable: false),
       transferItems: route.transfers
           .map(
             (TransferSegment transfer) => RouteTransferItemViewData(
-              stationName: _fallbackText(transfer.stationName),
+              station: _resolveStationViewData(
+                language: language,
+                rawStationName: transfer.stationName,
+                stationCode: transfer.stationCode,
+                databaseContext: databaseContext,
+              ),
               fromLineName: _fallbackText(transfer.fromLineName),
               toLineName: _fallbackText(transfer.toLineName),
               toLineColorHex: _resolveLineColorHex(transfer.toLineName),
+              walkingTimeSeconds: transfer.durationSeconds,
               walkingTimeText: _formatDuration(transfer.durationSeconds),
             ),
           )
@@ -108,9 +199,61 @@ class RouteViewDataMapper {
     return '$stationCount station${stationCount == 1 ? '' : 's'}';
   }
 
-  String _formatStationTrail(List<String> stationNames) {
-    final List<String> normalizedStationNames = stationNames
-        .map(_fallbackText)
+  List<StationDisplayNameViewData> _resolveStationSequence({
+    required AppLanguage language,
+    required List<String> rawStationNames,
+    required List<String> stationCodes,
+    required RouteViewDataMapperContext? databaseContext,
+  }) {
+    return List<StationDisplayNameViewData>.generate(rawStationNames.length, (
+      int index,
+    ) {
+      final String? stationCode = index < stationCodes.length
+          ? stationCodes[index]
+          : null;
+      return _resolveStationViewData(
+        language: language,
+        rawStationName: rawStationNames[index],
+        stationCode: stationCode,
+        databaseContext: databaseContext,
+      );
+    }, growable: false);
+  }
+
+  StationDisplayNameViewData _resolveStationViewData({
+    required AppLanguage language,
+    required String? rawStationName,
+    required String? stationCode,
+    required RouteViewDataMapperContext? databaseContext,
+  }) {
+    final ResolvedStationDisplayName resolved = databaseContext == null
+        ? stationDisplayNameFormatter.resolve(
+            language: language,
+            rawStationName: rawStationName,
+          )
+        : stationDisplayNameResolver.resolve(
+            lookup: databaseContext.stationDisplayNameLookup,
+            language: language,
+            stationCode: stationCode,
+            rawStationName: rawStationName,
+          );
+    return StationDisplayNameViewData(
+      primary: resolved.primary,
+      secondary: resolved.secondary,
+      fullText: resolved.fullText,
+    );
+  }
+
+  StationDisplayNameViewData _missingStationDisplay() {
+    return const StationDisplayNameViewData(
+      primary: missingInformationText,
+      fullText: missingInformationText,
+    );
+  }
+
+  String _formatStationTrail(List<StationDisplayNameViewData> stations) {
+    final List<String> normalizedStationNames = stations
+        .map((StationDisplayNameViewData station) => station.fullText)
         .toList(growable: false);
     if (normalizedStationNames.isEmpty) {
       return missingInformationText;
@@ -118,21 +261,15 @@ class RouteViewDataMapper {
     return normalizedStationNames.join(' -> ');
   }
 
-  String _buildDirectionPositiveExamples(RouteLeg leg) {
+  String _buildDirectionPositiveExamples({
+    required StationDisplayNameViewData? terminalStation,
+    required StationDisplayNameViewData toStation,
+  }) {
     final List<String> candidates = <String>[
-      if (_hasText(leg.terminalStationName)) leg.terminalStationName!,
-      _fallbackText(leg.toStationName),
+      if (terminalStation != null) terminalStation.fullText,
+      toStation.fullText,
     ];
     return _joinUniqueCandidates(candidates);
-  }
-
-  String _buildInstructionText(RouteLeg leg) {
-    final String directionTarget = _firstAvailable(<String?>[
-      leg.terminalStationName,
-      leg.directionLabel,
-      leg.nextStationName,
-    ]);
-    return 'Follow signs to $directionTarget';
   }
 
   String _joinUniqueCandidates(List<String> values) {
@@ -149,15 +286,6 @@ class RouteViewDataMapper {
       return missingInformationText;
     }
     return unique.join(', ');
-  }
-
-  String _firstAvailable(List<String?> values) {
-    for (final String? value in values) {
-      if (_hasText(value)) {
-        return value!.trim();
-      }
-    }
-    return missingInformationText;
   }
 
   bool _hasText(String? value) {
@@ -180,23 +308,31 @@ class RouteViewDataMapper {
   }
 }
 
-class _RouteViewDatabaseContext {
-  const _RouteViewDatabaseContext({
+class RouteViewDataMapperContext {
+  const RouteViewDataMapperContext._({
     required this.lineIdByCanonicalName,
-    required this.orderedLineStationsByBranchKey,
-    required this.orderedMainLineStationsByLineId,
+    required this.stationDisplayNameLookup,
+    required Map<String, List<_OrderedLineStation>>
+    orderedLineStationsByBranchKey,
+    required Map<int, List<_OrderedLineStation>>
+    orderedMainLineStationsByLineId,
     required this.directionPolicyLabelsByBranchKey,
-  });
+  }) : _orderedLineStationsByBranchKey = orderedLineStationsByBranchKey,
+       _orderedMainLineStationsByLineId = orderedMainLineStationsByLineId;
 
-  static Future<_RouteViewDatabaseContext> load(AppDatabase database) async {
+  static Future<RouteViewDataMapperContext> load(AppDatabase database) async {
     final List<Line> lines = await database.select(database.lines).get();
-    final List<Station> stations = await database.select(database.stations).get();
+    final List<Station> stations = await database
+        .select(database.stations)
+        .get();
     final List<LineStation> lineStations = await database
         .select(database.lineStations)
         .get();
     final List<DirectionPolicy> directionPolicies = await database
         .select(database.directionPolicies)
         .get();
+    final StationDisplayNameLookup stationDisplayNameLookup =
+        await StationDisplayNameLookup.load(database);
 
     final Map<String, int> lineIdByCanonicalName = <String, int>{};
     for (final Line line in lines) {
@@ -208,8 +344,8 @@ class _RouteViewDatabaseContext {
       stationNameById[station.id] = station.nameKo;
     }
 
-    final Map<String, List<_OrderedLineStation>> orderedLineStationsByBranchKey =
-        <String, List<_OrderedLineStation>>{};
+    final Map<String, List<_OrderedLineStation>>
+    orderedLineStationsByBranchKey = <String, List<_OrderedLineStation>>{};
     final Map<int, List<_OrderedLineStation>> orderedMainLineStationsByLineId =
         <int, List<_OrderedLineStation>>{};
     for (final LineStation row in lineStations) {
@@ -223,6 +359,7 @@ class _RouteViewDatabaseContext {
           .add(
             _OrderedLineStation(
               stationName: stationName,
+              stationCode: row.stationCode,
               orderIndex: row.orderIndex,
             ),
           );
@@ -232,6 +369,7 @@ class _RouteViewDatabaseContext {
             .add(
               _OrderedLineStation(
                 stationName: stationName,
+                stationCode: row.stationCode,
                 orderIndex: row.orderIndex,
               ),
             );
@@ -261,8 +399,9 @@ class _RouteViewDatabaseContext {
       }
     }
 
-    return _RouteViewDatabaseContext(
+    return RouteViewDataMapperContext._(
       lineIdByCanonicalName: lineIdByCanonicalName,
+      stationDisplayNameLookup: stationDisplayNameLookup,
       orderedLineStationsByBranchKey: orderedLineStationsByBranchKey,
       orderedMainLineStationsByLineId: orderedMainLineStationsByLineId,
       directionPolicyLabelsByBranchKey: directionPolicyLabelsByBranchKey,
@@ -270,19 +409,23 @@ class _RouteViewDatabaseContext {
   }
 
   final Map<String, int> lineIdByCanonicalName;
-  final Map<String, List<_OrderedLineStation>> orderedLineStationsByBranchKey;
-  final Map<int, List<_OrderedLineStation>> orderedMainLineStationsByLineId;
+  final StationDisplayNameLookup stationDisplayNameLookup;
+  final Map<String, List<_OrderedLineStation>> _orderedLineStationsByBranchKey;
+  final Map<int, List<_OrderedLineStation>> _orderedMainLineStationsByLineId;
   final Map<String, List<String>> directionPolicyLabelsByBranchKey;
 
-  String? resolveNextNegativeStationName(RouteLeg leg) {
-    final int? lineId = lineIdByCanonicalName[canonicalizeLineName(leg.lineName)];
+  _StationReference? _resolveNextNegativeStation(RouteLeg leg) {
+    final int? lineId =
+        lineIdByCanonicalName[canonicalizeLineName(leg.lineName)];
     if (lineId == null) {
       return null;
     }
 
     final String branchLookupKey = '$lineId::${leg.branchKey}';
-    final String? branchResult = _resolveAdjacentOppositeStationName(
-      rows: orderedLineStationsByBranchKey[branchLookupKey] ?? const <_OrderedLineStation>[],
+    final _StationReference? branchResult = _resolveAdjacentOppositeStation(
+      rows:
+          _orderedLineStationsByBranchKey[branchLookupKey] ??
+          const <_OrderedLineStation>[],
       currentStationName: leg.fromStationName,
       nextStationName: leg.nextStationName,
     );
@@ -290,8 +433,10 @@ class _RouteViewDatabaseContext {
       return branchResult;
     }
 
-    return _resolveAdjacentOppositeStationName(
-      rows: orderedMainLineStationsByLineId[lineId] ?? const <_OrderedLineStation>[],
+    return _resolveAdjacentOppositeStation(
+      rows:
+          _orderedMainLineStationsByLineId[lineId] ??
+          const <_OrderedLineStation>[],
       currentStationName: leg.fromStationName,
       nextStationName: leg.nextStationName,
     );
@@ -315,14 +460,15 @@ class _RouteViewDatabaseContext {
   }
 
   String? _buildBranchLookupKey(RouteLeg leg) {
-    final int? lineId = lineIdByCanonicalName[canonicalizeLineName(leg.lineName)];
+    final int? lineId =
+        lineIdByCanonicalName[canonicalizeLineName(leg.lineName)];
     if (lineId == null) {
       return null;
     }
     return '$lineId::${leg.branchKey}';
   }
 
-  String? _resolveAdjacentOppositeStationName({
+  _StationReference? _resolveAdjacentOppositeStation({
     required List<_OrderedLineStation> rows,
     required String currentStationName,
     required String? nextStationName,
@@ -338,17 +484,20 @@ class _RouteViewDatabaseContext {
       return null;
     }
 
-    final List<String> adjacentNames = <String>[];
+    final List<_OrderedLineStation> adjacentRows = <_OrderedLineStation>[];
     if (currentIndex > 0) {
-      adjacentNames.add(rows[currentIndex - 1].stationName);
+      adjacentRows.add(rows[currentIndex - 1]);
     }
     if (currentIndex + 1 < rows.length) {
-      adjacentNames.add(rows[currentIndex + 1].stationName);
+      adjacentRows.add(rows[currentIndex + 1]);
     }
 
-    for (final String stationName in adjacentNames) {
-      if (stationName != nextStationName) {
-        return stationName;
+    for (final _OrderedLineStation station in adjacentRows) {
+      if (station.stationName != nextStationName) {
+        return _StationReference(
+          stationName: station.stationName,
+          stationCode: station.stationCode,
+        );
       }
     }
     return null;
@@ -358,9 +507,21 @@ class _RouteViewDatabaseContext {
 class _OrderedLineStation {
   const _OrderedLineStation({
     required this.stationName,
+    required this.stationCode,
     required this.orderIndex,
   });
 
   final String stationName;
+  final String stationCode;
   final int orderIndex;
+}
+
+class _StationReference {
+  const _StationReference({
+    required this.stationName,
+    required this.stationCode,
+  });
+
+  final String stationName;
+  final String stationCode;
 }

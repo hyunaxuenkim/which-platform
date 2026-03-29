@@ -324,7 +324,7 @@ as String?,
 /// @nodoc
 mixin _$ParsedRoute {
 
- int get totalDurationSeconds; int get totalFare; int get transferCount; List<RouteLeg> get legs; List<TransferSegment> get transfers; List<String> get stationTrail; int get rawPathCount;
+ int get totalDurationSeconds; int get totalFare; int get transferCount; List<RouteLeg> get legs; List<TransferSegment> get transfers; List<String> get stationTrail; List<String> get stationTrailCodes; int get rawPathCount;
 /// Create a copy of ParsedRoute
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -337,16 +337,16 @@ $ParsedRouteCopyWith<ParsedRoute> get copyWith => _$ParsedRouteCopyWithImpl<Pars
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ParsedRoute&&(identical(other.totalDurationSeconds, totalDurationSeconds) || other.totalDurationSeconds == totalDurationSeconds)&&(identical(other.totalFare, totalFare) || other.totalFare == totalFare)&&(identical(other.transferCount, transferCount) || other.transferCount == transferCount)&&const DeepCollectionEquality().equals(other.legs, legs)&&const DeepCollectionEquality().equals(other.transfers, transfers)&&const DeepCollectionEquality().equals(other.stationTrail, stationTrail)&&(identical(other.rawPathCount, rawPathCount) || other.rawPathCount == rawPathCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ParsedRoute&&(identical(other.totalDurationSeconds, totalDurationSeconds) || other.totalDurationSeconds == totalDurationSeconds)&&(identical(other.totalFare, totalFare) || other.totalFare == totalFare)&&(identical(other.transferCount, transferCount) || other.transferCount == transferCount)&&const DeepCollectionEquality().equals(other.legs, legs)&&const DeepCollectionEquality().equals(other.transfers, transfers)&&const DeepCollectionEquality().equals(other.stationTrail, stationTrail)&&const DeepCollectionEquality().equals(other.stationTrailCodes, stationTrailCodes)&&(identical(other.rawPathCount, rawPathCount) || other.rawPathCount == rawPathCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,totalDurationSeconds,totalFare,transferCount,const DeepCollectionEquality().hash(legs),const DeepCollectionEquality().hash(transfers),const DeepCollectionEquality().hash(stationTrail),rawPathCount);
+int get hashCode => Object.hash(runtimeType,totalDurationSeconds,totalFare,transferCount,const DeepCollectionEquality().hash(legs),const DeepCollectionEquality().hash(transfers),const DeepCollectionEquality().hash(stationTrail),const DeepCollectionEquality().hash(stationTrailCodes),rawPathCount);
 
 @override
 String toString() {
-  return 'ParsedRoute(totalDurationSeconds: $totalDurationSeconds, totalFare: $totalFare, transferCount: $transferCount, legs: $legs, transfers: $transfers, stationTrail: $stationTrail, rawPathCount: $rawPathCount)';
+  return 'ParsedRoute(totalDurationSeconds: $totalDurationSeconds, totalFare: $totalFare, transferCount: $transferCount, legs: $legs, transfers: $transfers, stationTrail: $stationTrail, stationTrailCodes: $stationTrailCodes, rawPathCount: $rawPathCount)';
 }
 
 
@@ -357,7 +357,7 @@ abstract mixin class $ParsedRouteCopyWith<$Res>  {
   factory $ParsedRouteCopyWith(ParsedRoute value, $Res Function(ParsedRoute) _then) = _$ParsedRouteCopyWithImpl;
 @useResult
 $Res call({
- int totalDurationSeconds, int totalFare, int transferCount, List<RouteLeg> legs, List<TransferSegment> transfers, List<String> stationTrail, int rawPathCount
+ int totalDurationSeconds, int totalFare, int transferCount, List<RouteLeg> legs, List<TransferSegment> transfers, List<String> stationTrail, List<String> stationTrailCodes, int rawPathCount
 });
 
 
@@ -374,7 +374,7 @@ class _$ParsedRouteCopyWithImpl<$Res>
 
 /// Create a copy of ParsedRoute
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? totalDurationSeconds = null,Object? totalFare = null,Object? transferCount = null,Object? legs = null,Object? transfers = null,Object? stationTrail = null,Object? rawPathCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? totalDurationSeconds = null,Object? totalFare = null,Object? transferCount = null,Object? legs = null,Object? transfers = null,Object? stationTrail = null,Object? stationTrailCodes = null,Object? rawPathCount = null,}) {
   return _then(_self.copyWith(
 totalDurationSeconds: null == totalDurationSeconds ? _self.totalDurationSeconds : totalDurationSeconds // ignore: cast_nullable_to_non_nullable
 as int,totalFare: null == totalFare ? _self.totalFare : totalFare // ignore: cast_nullable_to_non_nullable
@@ -382,6 +382,7 @@ as int,transferCount: null == transferCount ? _self.transferCount : transferCoun
 as int,legs: null == legs ? _self.legs : legs // ignore: cast_nullable_to_non_nullable
 as List<RouteLeg>,transfers: null == transfers ? _self.transfers : transfers // ignore: cast_nullable_to_non_nullable
 as List<TransferSegment>,stationTrail: null == stationTrail ? _self.stationTrail : stationTrail // ignore: cast_nullable_to_non_nullable
+as List<String>,stationTrailCodes: null == stationTrailCodes ? _self.stationTrailCodes : stationTrailCodes // ignore: cast_nullable_to_non_nullable
 as List<String>,rawPathCount: null == rawPathCount ? _self.rawPathCount : rawPathCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -468,10 +469,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int totalDurationSeconds,  int totalFare,  int transferCount,  List<RouteLeg> legs,  List<TransferSegment> transfers,  List<String> stationTrail,  int rawPathCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int totalDurationSeconds,  int totalFare,  int transferCount,  List<RouteLeg> legs,  List<TransferSegment> transfers,  List<String> stationTrail,  List<String> stationTrailCodes,  int rawPathCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ParsedRoute() when $default != null:
-return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_that.legs,_that.transfers,_that.stationTrail,_that.rawPathCount);case _:
+return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_that.legs,_that.transfers,_that.stationTrail,_that.stationTrailCodes,_that.rawPathCount);case _:
   return orElse();
 
 }
@@ -489,10 +490,10 @@ return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int totalDurationSeconds,  int totalFare,  int transferCount,  List<RouteLeg> legs,  List<TransferSegment> transfers,  List<String> stationTrail,  int rawPathCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int totalDurationSeconds,  int totalFare,  int transferCount,  List<RouteLeg> legs,  List<TransferSegment> transfers,  List<String> stationTrail,  List<String> stationTrailCodes,  int rawPathCount)  $default,) {final _that = this;
 switch (_that) {
 case _ParsedRoute():
-return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_that.legs,_that.transfers,_that.stationTrail,_that.rawPathCount);case _:
+return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_that.legs,_that.transfers,_that.stationTrail,_that.stationTrailCodes,_that.rawPathCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -509,10 +510,10 @@ return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int totalDurationSeconds,  int totalFare,  int transferCount,  List<RouteLeg> legs,  List<TransferSegment> transfers,  List<String> stationTrail,  int rawPathCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int totalDurationSeconds,  int totalFare,  int transferCount,  List<RouteLeg> legs,  List<TransferSegment> transfers,  List<String> stationTrail,  List<String> stationTrailCodes,  int rawPathCount)?  $default,) {final _that = this;
 switch (_that) {
 case _ParsedRoute() when $default != null:
-return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_that.legs,_that.transfers,_that.stationTrail,_that.rawPathCount);case _:
+return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_that.legs,_that.transfers,_that.stationTrail,_that.stationTrailCodes,_that.rawPathCount);case _:
   return null;
 
 }
@@ -524,7 +525,7 @@ return $default(_that.totalDurationSeconds,_that.totalFare,_that.transferCount,_
 @JsonSerializable()
 
 class _ParsedRoute implements ParsedRoute {
-  const _ParsedRoute({required this.totalDurationSeconds, required this.totalFare, required this.transferCount, required final  List<RouteLeg> legs, required final  List<TransferSegment> transfers, required final  List<String> stationTrail, required this.rawPathCount}): _legs = legs,_transfers = transfers,_stationTrail = stationTrail;
+  const _ParsedRoute({required this.totalDurationSeconds, required this.totalFare, required this.transferCount, required final  List<RouteLeg> legs, required final  List<TransferSegment> transfers, required final  List<String> stationTrail, final  List<String> stationTrailCodes = const <String>[], required this.rawPathCount}): _legs = legs,_transfers = transfers,_stationTrail = stationTrail,_stationTrailCodes = stationTrailCodes;
   factory _ParsedRoute.fromJson(Map<String, dynamic> json) => _$ParsedRouteFromJson(json);
 
 @override final  int totalDurationSeconds;
@@ -551,6 +552,13 @@ class _ParsedRoute implements ParsedRoute {
   return EqualUnmodifiableListView(_stationTrail);
 }
 
+ final  List<String> _stationTrailCodes;
+@override@JsonKey() List<String> get stationTrailCodes {
+  if (_stationTrailCodes is EqualUnmodifiableListView) return _stationTrailCodes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_stationTrailCodes);
+}
+
 @override final  int rawPathCount;
 
 /// Create a copy of ParsedRoute
@@ -566,16 +574,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ParsedRoute&&(identical(other.totalDurationSeconds, totalDurationSeconds) || other.totalDurationSeconds == totalDurationSeconds)&&(identical(other.totalFare, totalFare) || other.totalFare == totalFare)&&(identical(other.transferCount, transferCount) || other.transferCount == transferCount)&&const DeepCollectionEquality().equals(other._legs, _legs)&&const DeepCollectionEquality().equals(other._transfers, _transfers)&&const DeepCollectionEquality().equals(other._stationTrail, _stationTrail)&&(identical(other.rawPathCount, rawPathCount) || other.rawPathCount == rawPathCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ParsedRoute&&(identical(other.totalDurationSeconds, totalDurationSeconds) || other.totalDurationSeconds == totalDurationSeconds)&&(identical(other.totalFare, totalFare) || other.totalFare == totalFare)&&(identical(other.transferCount, transferCount) || other.transferCount == transferCount)&&const DeepCollectionEquality().equals(other._legs, _legs)&&const DeepCollectionEquality().equals(other._transfers, _transfers)&&const DeepCollectionEquality().equals(other._stationTrail, _stationTrail)&&const DeepCollectionEquality().equals(other._stationTrailCodes, _stationTrailCodes)&&(identical(other.rawPathCount, rawPathCount) || other.rawPathCount == rawPathCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,totalDurationSeconds,totalFare,transferCount,const DeepCollectionEquality().hash(_legs),const DeepCollectionEquality().hash(_transfers),const DeepCollectionEquality().hash(_stationTrail),rawPathCount);
+int get hashCode => Object.hash(runtimeType,totalDurationSeconds,totalFare,transferCount,const DeepCollectionEquality().hash(_legs),const DeepCollectionEquality().hash(_transfers),const DeepCollectionEquality().hash(_stationTrail),const DeepCollectionEquality().hash(_stationTrailCodes),rawPathCount);
 
 @override
 String toString() {
-  return 'ParsedRoute(totalDurationSeconds: $totalDurationSeconds, totalFare: $totalFare, transferCount: $transferCount, legs: $legs, transfers: $transfers, stationTrail: $stationTrail, rawPathCount: $rawPathCount)';
+  return 'ParsedRoute(totalDurationSeconds: $totalDurationSeconds, totalFare: $totalFare, transferCount: $transferCount, legs: $legs, transfers: $transfers, stationTrail: $stationTrail, stationTrailCodes: $stationTrailCodes, rawPathCount: $rawPathCount)';
 }
 
 
@@ -586,7 +594,7 @@ abstract mixin class _$ParsedRouteCopyWith<$Res> implements $ParsedRouteCopyWith
   factory _$ParsedRouteCopyWith(_ParsedRoute value, $Res Function(_ParsedRoute) _then) = __$ParsedRouteCopyWithImpl;
 @override @useResult
 $Res call({
- int totalDurationSeconds, int totalFare, int transferCount, List<RouteLeg> legs, List<TransferSegment> transfers, List<String> stationTrail, int rawPathCount
+ int totalDurationSeconds, int totalFare, int transferCount, List<RouteLeg> legs, List<TransferSegment> transfers, List<String> stationTrail, List<String> stationTrailCodes, int rawPathCount
 });
 
 
@@ -603,7 +611,7 @@ class __$ParsedRouteCopyWithImpl<$Res>
 
 /// Create a copy of ParsedRoute
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? totalDurationSeconds = null,Object? totalFare = null,Object? transferCount = null,Object? legs = null,Object? transfers = null,Object? stationTrail = null,Object? rawPathCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? totalDurationSeconds = null,Object? totalFare = null,Object? transferCount = null,Object? legs = null,Object? transfers = null,Object? stationTrail = null,Object? stationTrailCodes = null,Object? rawPathCount = null,}) {
   return _then(_ParsedRoute(
 totalDurationSeconds: null == totalDurationSeconds ? _self.totalDurationSeconds : totalDurationSeconds // ignore: cast_nullable_to_non_nullable
 as int,totalFare: null == totalFare ? _self.totalFare : totalFare // ignore: cast_nullable_to_non_nullable
@@ -611,6 +619,7 @@ as int,transferCount: null == transferCount ? _self.transferCount : transferCoun
 as int,legs: null == legs ? _self._legs : legs // ignore: cast_nullable_to_non_nullable
 as List<RouteLeg>,transfers: null == transfers ? _self._transfers : transfers // ignore: cast_nullable_to_non_nullable
 as List<TransferSegment>,stationTrail: null == stationTrail ? _self._stationTrail : stationTrail // ignore: cast_nullable_to_non_nullable
+as List<String>,stationTrailCodes: null == stationTrailCodes ? _self._stationTrailCodes : stationTrailCodes // ignore: cast_nullable_to_non_nullable
 as List<String>,rawPathCount: null == rawPathCount ? _self.rawPathCount : rawPathCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -1242,7 +1251,7 @@ as String,
 /// @nodoc
 mixin _$TransferSegment {
 
- String get stationName; String get fromLineName; String get toLineName; int get durationSeconds; int get distanceMeters; int get waitingSeconds;
+ String get stationName; String? get stationCode; String get fromLineName; String get toLineName; int get durationSeconds; int get distanceMeters; int get waitingSeconds;
 /// Create a copy of TransferSegment
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1255,16 +1264,16 @@ $TransferSegmentCopyWith<TransferSegment> get copyWith => _$TransferSegmentCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferSegment&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.waitingSeconds, waitingSeconds) || other.waitingSeconds == waitingSeconds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransferSegment&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.stationCode, stationCode) || other.stationCode == stationCode)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.waitingSeconds, waitingSeconds) || other.waitingSeconds == waitingSeconds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,stationName,fromLineName,toLineName,durationSeconds,distanceMeters,waitingSeconds);
+int get hashCode => Object.hash(runtimeType,stationName,stationCode,fromLineName,toLineName,durationSeconds,distanceMeters,waitingSeconds);
 
 @override
 String toString() {
-  return 'TransferSegment(stationName: $stationName, fromLineName: $fromLineName, toLineName: $toLineName, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, waitingSeconds: $waitingSeconds)';
+  return 'TransferSegment(stationName: $stationName, stationCode: $stationCode, fromLineName: $fromLineName, toLineName: $toLineName, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, waitingSeconds: $waitingSeconds)';
 }
 
 
@@ -1275,7 +1284,7 @@ abstract mixin class $TransferSegmentCopyWith<$Res>  {
   factory $TransferSegmentCopyWith(TransferSegment value, $Res Function(TransferSegment) _then) = _$TransferSegmentCopyWithImpl;
 @useResult
 $Res call({
- String stationName, String fromLineName, String toLineName, int durationSeconds, int distanceMeters, int waitingSeconds
+ String stationName, String? stationCode, String fromLineName, String toLineName, int durationSeconds, int distanceMeters, int waitingSeconds
 });
 
 
@@ -1292,10 +1301,11 @@ class _$TransferSegmentCopyWithImpl<$Res>
 
 /// Create a copy of TransferSegment
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stationName = null,Object? fromLineName = null,Object? toLineName = null,Object? durationSeconds = null,Object? distanceMeters = null,Object? waitingSeconds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stationName = null,Object? stationCode = freezed,Object? fromLineName = null,Object? toLineName = null,Object? durationSeconds = null,Object? distanceMeters = null,Object? waitingSeconds = null,}) {
   return _then(_self.copyWith(
 stationName: null == stationName ? _self.stationName : stationName // ignore: cast_nullable_to_non_nullable
-as String,fromLineName: null == fromLineName ? _self.fromLineName : fromLineName // ignore: cast_nullable_to_non_nullable
+as String,stationCode: freezed == stationCode ? _self.stationCode : stationCode // ignore: cast_nullable_to_non_nullable
+as String?,fromLineName: null == fromLineName ? _self.fromLineName : fromLineName // ignore: cast_nullable_to_non_nullable
 as String,toLineName: null == toLineName ? _self.toLineName : toLineName // ignore: cast_nullable_to_non_nullable
 as String,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int,distanceMeters: null == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
@@ -1385,10 +1395,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String stationName,  String fromLineName,  String toLineName,  int durationSeconds,  int distanceMeters,  int waitingSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String stationName,  String? stationCode,  String fromLineName,  String toLineName,  int durationSeconds,  int distanceMeters,  int waitingSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransferSegment() when $default != null:
-return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.durationSeconds,_that.distanceMeters,_that.waitingSeconds);case _:
+return $default(_that.stationName,_that.stationCode,_that.fromLineName,_that.toLineName,_that.durationSeconds,_that.distanceMeters,_that.waitingSeconds);case _:
   return orElse();
 
 }
@@ -1406,10 +1416,10 @@ return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.dura
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String stationName,  String fromLineName,  String toLineName,  int durationSeconds,  int distanceMeters,  int waitingSeconds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String stationName,  String? stationCode,  String fromLineName,  String toLineName,  int durationSeconds,  int distanceMeters,  int waitingSeconds)  $default,) {final _that = this;
 switch (_that) {
 case _TransferSegment():
-return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.durationSeconds,_that.distanceMeters,_that.waitingSeconds);case _:
+return $default(_that.stationName,_that.stationCode,_that.fromLineName,_that.toLineName,_that.durationSeconds,_that.distanceMeters,_that.waitingSeconds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1426,10 +1436,10 @@ return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.dura
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String stationName,  String fromLineName,  String toLineName,  int durationSeconds,  int distanceMeters,  int waitingSeconds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String stationName,  String? stationCode,  String fromLineName,  String toLineName,  int durationSeconds,  int distanceMeters,  int waitingSeconds)?  $default,) {final _that = this;
 switch (_that) {
 case _TransferSegment() when $default != null:
-return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.durationSeconds,_that.distanceMeters,_that.waitingSeconds);case _:
+return $default(_that.stationName,_that.stationCode,_that.fromLineName,_that.toLineName,_that.durationSeconds,_that.distanceMeters,_that.waitingSeconds);case _:
   return null;
 
 }
@@ -1441,10 +1451,11 @@ return $default(_that.stationName,_that.fromLineName,_that.toLineName,_that.dura
 @JsonSerializable()
 
 class _TransferSegment implements TransferSegment {
-  const _TransferSegment({required this.stationName, required this.fromLineName, required this.toLineName, required this.durationSeconds, required this.distanceMeters, required this.waitingSeconds});
+  const _TransferSegment({required this.stationName, this.stationCode, required this.fromLineName, required this.toLineName, required this.durationSeconds, required this.distanceMeters, required this.waitingSeconds});
   factory _TransferSegment.fromJson(Map<String, dynamic> json) => _$TransferSegmentFromJson(json);
 
 @override final  String stationName;
+@override final  String? stationCode;
 @override final  String fromLineName;
 @override final  String toLineName;
 @override final  int durationSeconds;
@@ -1464,16 +1475,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferSegment&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.waitingSeconds, waitingSeconds) || other.waitingSeconds == waitingSeconds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransferSegment&&(identical(other.stationName, stationName) || other.stationName == stationName)&&(identical(other.stationCode, stationCode) || other.stationCode == stationCode)&&(identical(other.fromLineName, fromLineName) || other.fromLineName == fromLineName)&&(identical(other.toLineName, toLineName) || other.toLineName == toLineName)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.waitingSeconds, waitingSeconds) || other.waitingSeconds == waitingSeconds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,stationName,fromLineName,toLineName,durationSeconds,distanceMeters,waitingSeconds);
+int get hashCode => Object.hash(runtimeType,stationName,stationCode,fromLineName,toLineName,durationSeconds,distanceMeters,waitingSeconds);
 
 @override
 String toString() {
-  return 'TransferSegment(stationName: $stationName, fromLineName: $fromLineName, toLineName: $toLineName, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, waitingSeconds: $waitingSeconds)';
+  return 'TransferSegment(stationName: $stationName, stationCode: $stationCode, fromLineName: $fromLineName, toLineName: $toLineName, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, waitingSeconds: $waitingSeconds)';
 }
 
 
@@ -1484,7 +1495,7 @@ abstract mixin class _$TransferSegmentCopyWith<$Res> implements $TransferSegment
   factory _$TransferSegmentCopyWith(_TransferSegment value, $Res Function(_TransferSegment) _then) = __$TransferSegmentCopyWithImpl;
 @override @useResult
 $Res call({
- String stationName, String fromLineName, String toLineName, int durationSeconds, int distanceMeters, int waitingSeconds
+ String stationName, String? stationCode, String fromLineName, String toLineName, int durationSeconds, int distanceMeters, int waitingSeconds
 });
 
 
@@ -1501,10 +1512,11 @@ class __$TransferSegmentCopyWithImpl<$Res>
 
 /// Create a copy of TransferSegment
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stationName = null,Object? fromLineName = null,Object? toLineName = null,Object? durationSeconds = null,Object? distanceMeters = null,Object? waitingSeconds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stationName = null,Object? stationCode = freezed,Object? fromLineName = null,Object? toLineName = null,Object? durationSeconds = null,Object? distanceMeters = null,Object? waitingSeconds = null,}) {
   return _then(_TransferSegment(
 stationName: null == stationName ? _self.stationName : stationName // ignore: cast_nullable_to_non_nullable
-as String,fromLineName: null == fromLineName ? _self.fromLineName : fromLineName // ignore: cast_nullable_to_non_nullable
+as String,stationCode: freezed == stationCode ? _self.stationCode : stationCode // ignore: cast_nullable_to_non_nullable
+as String?,fromLineName: null == fromLineName ? _self.fromLineName : fromLineName // ignore: cast_nullable_to_non_nullable
 as String,toLineName: null == toLineName ? _self.toLineName : toLineName // ignore: cast_nullable_to_non_nullable
 as String,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int,distanceMeters: null == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
@@ -1520,7 +1532,7 @@ as int,
 /// @nodoc
 mixin _$RouteLeg {
 
- String get lineName; String get fromStationName; String get toStationName; List<String> get stationNames; int get stationCount; String get directionLabel; String? get apiDirection; String? get terminalStationName; String get servicePatternKey; String get branchKey; String get nextStationName; int get durationSeconds; int get distanceMeters; int get segmentCount;
+ String get lineName; String get fromStationName; String? get fromStationCode; String get toStationName; String? get toStationCode; List<String> get stationNames; List<String> get stationCodes; int get stationCount; String get directionLabel; String? get apiDirection; String? get terminalStationName; String? get terminalStationCode; String get servicePatternKey; String get branchKey; String get nextStationName; String? get nextStationCode; int get durationSeconds; int get distanceMeters; int get segmentCount;
 /// Create a copy of RouteLeg
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1533,16 +1545,16 @@ $RouteLegCopyWith<RouteLeg> get copyWith => _$RouteLegCopyWithImpl<RouteLeg>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RouteLeg&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&const DeepCollectionEquality().equals(other.stationNames, stationNames)&&(identical(other.stationCount, stationCount) || other.stationCount == stationCount)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.apiDirection, apiDirection) || other.apiDirection == apiDirection)&&(identical(other.terminalStationName, terminalStationName) || other.terminalStationName == terminalStationName)&&(identical(other.servicePatternKey, servicePatternKey) || other.servicePatternKey == servicePatternKey)&&(identical(other.branchKey, branchKey) || other.branchKey == branchKey)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.segmentCount, segmentCount) || other.segmentCount == segmentCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RouteLeg&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.fromStationCode, fromStationCode) || other.fromStationCode == fromStationCode)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&(identical(other.toStationCode, toStationCode) || other.toStationCode == toStationCode)&&const DeepCollectionEquality().equals(other.stationNames, stationNames)&&const DeepCollectionEquality().equals(other.stationCodes, stationCodes)&&(identical(other.stationCount, stationCount) || other.stationCount == stationCount)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.apiDirection, apiDirection) || other.apiDirection == apiDirection)&&(identical(other.terminalStationName, terminalStationName) || other.terminalStationName == terminalStationName)&&(identical(other.terminalStationCode, terminalStationCode) || other.terminalStationCode == terminalStationCode)&&(identical(other.servicePatternKey, servicePatternKey) || other.servicePatternKey == servicePatternKey)&&(identical(other.branchKey, branchKey) || other.branchKey == branchKey)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.nextStationCode, nextStationCode) || other.nextStationCode == nextStationCode)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.segmentCount, segmentCount) || other.segmentCount == segmentCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lineName,fromStationName,toStationName,const DeepCollectionEquality().hash(stationNames),stationCount,directionLabel,apiDirection,terminalStationName,servicePatternKey,branchKey,nextStationName,durationSeconds,distanceMeters,segmentCount);
+int get hashCode => Object.hashAll([runtimeType,lineName,fromStationName,fromStationCode,toStationName,toStationCode,const DeepCollectionEquality().hash(stationNames),const DeepCollectionEquality().hash(stationCodes),stationCount,directionLabel,apiDirection,terminalStationName,terminalStationCode,servicePatternKey,branchKey,nextStationName,nextStationCode,durationSeconds,distanceMeters,segmentCount]);
 
 @override
 String toString() {
-  return 'RouteLeg(lineName: $lineName, fromStationName: $fromStationName, toStationName: $toStationName, stationNames: $stationNames, stationCount: $stationCount, directionLabel: $directionLabel, apiDirection: $apiDirection, terminalStationName: $terminalStationName, servicePatternKey: $servicePatternKey, branchKey: $branchKey, nextStationName: $nextStationName, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, segmentCount: $segmentCount)';
+  return 'RouteLeg(lineName: $lineName, fromStationName: $fromStationName, fromStationCode: $fromStationCode, toStationName: $toStationName, toStationCode: $toStationCode, stationNames: $stationNames, stationCodes: $stationCodes, stationCount: $stationCount, directionLabel: $directionLabel, apiDirection: $apiDirection, terminalStationName: $terminalStationName, terminalStationCode: $terminalStationCode, servicePatternKey: $servicePatternKey, branchKey: $branchKey, nextStationName: $nextStationName, nextStationCode: $nextStationCode, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, segmentCount: $segmentCount)';
 }
 
 
@@ -1553,7 +1565,7 @@ abstract mixin class $RouteLegCopyWith<$Res>  {
   factory $RouteLegCopyWith(RouteLeg value, $Res Function(RouteLeg) _then) = _$RouteLegCopyWithImpl;
 @useResult
 $Res call({
- String lineName, String fromStationName, String toStationName, List<String> stationNames, int stationCount, String directionLabel, String? apiDirection, String? terminalStationName, String servicePatternKey, String branchKey, String nextStationName, int durationSeconds, int distanceMeters, int segmentCount
+ String lineName, String fromStationName, String? fromStationCode, String toStationName, String? toStationCode, List<String> stationNames, List<String> stationCodes, int stationCount, String directionLabel, String? apiDirection, String? terminalStationName, String? terminalStationCode, String servicePatternKey, String branchKey, String nextStationName, String? nextStationCode, int durationSeconds, int distanceMeters, int segmentCount
 });
 
 
@@ -1570,20 +1582,25 @@ class _$RouteLegCopyWithImpl<$Res>
 
 /// Create a copy of RouteLeg
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? lineName = null,Object? fromStationName = null,Object? toStationName = null,Object? stationNames = null,Object? stationCount = null,Object? directionLabel = null,Object? apiDirection = freezed,Object? terminalStationName = freezed,Object? servicePatternKey = null,Object? branchKey = null,Object? nextStationName = null,Object? durationSeconds = null,Object? distanceMeters = null,Object? segmentCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? lineName = null,Object? fromStationName = null,Object? fromStationCode = freezed,Object? toStationName = null,Object? toStationCode = freezed,Object? stationNames = null,Object? stationCodes = null,Object? stationCount = null,Object? directionLabel = null,Object? apiDirection = freezed,Object? terminalStationName = freezed,Object? terminalStationCode = freezed,Object? servicePatternKey = null,Object? branchKey = null,Object? nextStationName = null,Object? nextStationCode = freezed,Object? durationSeconds = null,Object? distanceMeters = null,Object? segmentCount = null,}) {
   return _then(_self.copyWith(
 lineName: null == lineName ? _self.lineName : lineName // ignore: cast_nullable_to_non_nullable
 as String,fromStationName: null == fromStationName ? _self.fromStationName : fromStationName // ignore: cast_nullable_to_non_nullable
-as String,toStationName: null == toStationName ? _self.toStationName : toStationName // ignore: cast_nullable_to_non_nullable
-as String,stationNames: null == stationNames ? _self.stationNames : stationNames // ignore: cast_nullable_to_non_nullable
+as String,fromStationCode: freezed == fromStationCode ? _self.fromStationCode : fromStationCode // ignore: cast_nullable_to_non_nullable
+as String?,toStationName: null == toStationName ? _self.toStationName : toStationName // ignore: cast_nullable_to_non_nullable
+as String,toStationCode: freezed == toStationCode ? _self.toStationCode : toStationCode // ignore: cast_nullable_to_non_nullable
+as String?,stationNames: null == stationNames ? _self.stationNames : stationNames // ignore: cast_nullable_to_non_nullable
+as List<String>,stationCodes: null == stationCodes ? _self.stationCodes : stationCodes // ignore: cast_nullable_to_non_nullable
 as List<String>,stationCount: null == stationCount ? _self.stationCount : stationCount // ignore: cast_nullable_to_non_nullable
 as int,directionLabel: null == directionLabel ? _self.directionLabel : directionLabel // ignore: cast_nullable_to_non_nullable
 as String,apiDirection: freezed == apiDirection ? _self.apiDirection : apiDirection // ignore: cast_nullable_to_non_nullable
 as String?,terminalStationName: freezed == terminalStationName ? _self.terminalStationName : terminalStationName // ignore: cast_nullable_to_non_nullable
+as String?,terminalStationCode: freezed == terminalStationCode ? _self.terminalStationCode : terminalStationCode // ignore: cast_nullable_to_non_nullable
 as String?,servicePatternKey: null == servicePatternKey ? _self.servicePatternKey : servicePatternKey // ignore: cast_nullable_to_non_nullable
 as String,branchKey: null == branchKey ? _self.branchKey : branchKey // ignore: cast_nullable_to_non_nullable
 as String,nextStationName: null == nextStationName ? _self.nextStationName : nextStationName // ignore: cast_nullable_to_non_nullable
-as String,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
+as String,nextStationCode: freezed == nextStationCode ? _self.nextStationCode : nextStationCode // ignore: cast_nullable_to_non_nullable
+as String?,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int,distanceMeters: null == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
 as int,segmentCount: null == segmentCount ? _self.segmentCount : segmentCount // ignore: cast_nullable_to_non_nullable
 as int,
@@ -1671,10 +1688,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String lineName,  String fromStationName,  String toStationName,  List<String> stationNames,  int stationCount,  String directionLabel,  String? apiDirection,  String? terminalStationName,  String servicePatternKey,  String branchKey,  String nextStationName,  int durationSeconds,  int distanceMeters,  int segmentCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String lineName,  String fromStationName,  String? fromStationCode,  String toStationName,  String? toStationCode,  List<String> stationNames,  List<String> stationCodes,  int stationCount,  String directionLabel,  String? apiDirection,  String? terminalStationName,  String? terminalStationCode,  String servicePatternKey,  String branchKey,  String nextStationName,  String? nextStationCode,  int durationSeconds,  int distanceMeters,  int segmentCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RouteLeg() when $default != null:
-return $default(_that.lineName,_that.fromStationName,_that.toStationName,_that.stationNames,_that.stationCount,_that.directionLabel,_that.apiDirection,_that.terminalStationName,_that.servicePatternKey,_that.branchKey,_that.nextStationName,_that.durationSeconds,_that.distanceMeters,_that.segmentCount);case _:
+return $default(_that.lineName,_that.fromStationName,_that.fromStationCode,_that.toStationName,_that.toStationCode,_that.stationNames,_that.stationCodes,_that.stationCount,_that.directionLabel,_that.apiDirection,_that.terminalStationName,_that.terminalStationCode,_that.servicePatternKey,_that.branchKey,_that.nextStationName,_that.nextStationCode,_that.durationSeconds,_that.distanceMeters,_that.segmentCount);case _:
   return orElse();
 
 }
@@ -1692,10 +1709,10 @@ return $default(_that.lineName,_that.fromStationName,_that.toStationName,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String lineName,  String fromStationName,  String toStationName,  List<String> stationNames,  int stationCount,  String directionLabel,  String? apiDirection,  String? terminalStationName,  String servicePatternKey,  String branchKey,  String nextStationName,  int durationSeconds,  int distanceMeters,  int segmentCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String lineName,  String fromStationName,  String? fromStationCode,  String toStationName,  String? toStationCode,  List<String> stationNames,  List<String> stationCodes,  int stationCount,  String directionLabel,  String? apiDirection,  String? terminalStationName,  String? terminalStationCode,  String servicePatternKey,  String branchKey,  String nextStationName,  String? nextStationCode,  int durationSeconds,  int distanceMeters,  int segmentCount)  $default,) {final _that = this;
 switch (_that) {
 case _RouteLeg():
-return $default(_that.lineName,_that.fromStationName,_that.toStationName,_that.stationNames,_that.stationCount,_that.directionLabel,_that.apiDirection,_that.terminalStationName,_that.servicePatternKey,_that.branchKey,_that.nextStationName,_that.durationSeconds,_that.distanceMeters,_that.segmentCount);case _:
+return $default(_that.lineName,_that.fromStationName,_that.fromStationCode,_that.toStationName,_that.toStationCode,_that.stationNames,_that.stationCodes,_that.stationCount,_that.directionLabel,_that.apiDirection,_that.terminalStationName,_that.terminalStationCode,_that.servicePatternKey,_that.branchKey,_that.nextStationName,_that.nextStationCode,_that.durationSeconds,_that.distanceMeters,_that.segmentCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1712,10 +1729,10 @@ return $default(_that.lineName,_that.fromStationName,_that.toStationName,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String lineName,  String fromStationName,  String toStationName,  List<String> stationNames,  int stationCount,  String directionLabel,  String? apiDirection,  String? terminalStationName,  String servicePatternKey,  String branchKey,  String nextStationName,  int durationSeconds,  int distanceMeters,  int segmentCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String lineName,  String fromStationName,  String? fromStationCode,  String toStationName,  String? toStationCode,  List<String> stationNames,  List<String> stationCodes,  int stationCount,  String directionLabel,  String? apiDirection,  String? terminalStationName,  String? terminalStationCode,  String servicePatternKey,  String branchKey,  String nextStationName,  String? nextStationCode,  int durationSeconds,  int distanceMeters,  int segmentCount)?  $default,) {final _that = this;
 switch (_that) {
 case _RouteLeg() when $default != null:
-return $default(_that.lineName,_that.fromStationName,_that.toStationName,_that.stationNames,_that.stationCount,_that.directionLabel,_that.apiDirection,_that.terminalStationName,_that.servicePatternKey,_that.branchKey,_that.nextStationName,_that.durationSeconds,_that.distanceMeters,_that.segmentCount);case _:
+return $default(_that.lineName,_that.fromStationName,_that.fromStationCode,_that.toStationName,_that.toStationCode,_that.stationNames,_that.stationCodes,_that.stationCount,_that.directionLabel,_that.apiDirection,_that.terminalStationName,_that.terminalStationCode,_that.servicePatternKey,_that.branchKey,_that.nextStationName,_that.nextStationCode,_that.durationSeconds,_that.distanceMeters,_that.segmentCount);case _:
   return null;
 
 }
@@ -1727,12 +1744,14 @@ return $default(_that.lineName,_that.fromStationName,_that.toStationName,_that.s
 @JsonSerializable()
 
 class _RouteLeg implements RouteLeg {
-  const _RouteLeg({required this.lineName, required this.fromStationName, required this.toStationName, required final  List<String> stationNames, required this.stationCount, required this.directionLabel, required this.apiDirection, required this.terminalStationName, required this.servicePatternKey, required this.branchKey, required this.nextStationName, required this.durationSeconds, required this.distanceMeters, required this.segmentCount}): _stationNames = stationNames;
+  const _RouteLeg({required this.lineName, required this.fromStationName, this.fromStationCode, required this.toStationName, this.toStationCode, required final  List<String> stationNames, final  List<String> stationCodes = const <String>[], required this.stationCount, required this.directionLabel, required this.apiDirection, required this.terminalStationName, this.terminalStationCode, required this.servicePatternKey, required this.branchKey, required this.nextStationName, this.nextStationCode, required this.durationSeconds, required this.distanceMeters, required this.segmentCount}): _stationNames = stationNames,_stationCodes = stationCodes;
   factory _RouteLeg.fromJson(Map<String, dynamic> json) => _$RouteLegFromJson(json);
 
 @override final  String lineName;
 @override final  String fromStationName;
+@override final  String? fromStationCode;
 @override final  String toStationName;
+@override final  String? toStationCode;
  final  List<String> _stationNames;
 @override List<String> get stationNames {
   if (_stationNames is EqualUnmodifiableListView) return _stationNames;
@@ -1740,13 +1759,22 @@ class _RouteLeg implements RouteLeg {
   return EqualUnmodifiableListView(_stationNames);
 }
 
+ final  List<String> _stationCodes;
+@override@JsonKey() List<String> get stationCodes {
+  if (_stationCodes is EqualUnmodifiableListView) return _stationCodes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_stationCodes);
+}
+
 @override final  int stationCount;
 @override final  String directionLabel;
 @override final  String? apiDirection;
 @override final  String? terminalStationName;
+@override final  String? terminalStationCode;
 @override final  String servicePatternKey;
 @override final  String branchKey;
 @override final  String nextStationName;
+@override final  String? nextStationCode;
 @override final  int durationSeconds;
 @override final  int distanceMeters;
 @override final  int segmentCount;
@@ -1764,16 +1792,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RouteLeg&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&const DeepCollectionEquality().equals(other._stationNames, _stationNames)&&(identical(other.stationCount, stationCount) || other.stationCount == stationCount)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.apiDirection, apiDirection) || other.apiDirection == apiDirection)&&(identical(other.terminalStationName, terminalStationName) || other.terminalStationName == terminalStationName)&&(identical(other.servicePatternKey, servicePatternKey) || other.servicePatternKey == servicePatternKey)&&(identical(other.branchKey, branchKey) || other.branchKey == branchKey)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.segmentCount, segmentCount) || other.segmentCount == segmentCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RouteLeg&&(identical(other.lineName, lineName) || other.lineName == lineName)&&(identical(other.fromStationName, fromStationName) || other.fromStationName == fromStationName)&&(identical(other.fromStationCode, fromStationCode) || other.fromStationCode == fromStationCode)&&(identical(other.toStationName, toStationName) || other.toStationName == toStationName)&&(identical(other.toStationCode, toStationCode) || other.toStationCode == toStationCode)&&const DeepCollectionEquality().equals(other._stationNames, _stationNames)&&const DeepCollectionEquality().equals(other._stationCodes, _stationCodes)&&(identical(other.stationCount, stationCount) || other.stationCount == stationCount)&&(identical(other.directionLabel, directionLabel) || other.directionLabel == directionLabel)&&(identical(other.apiDirection, apiDirection) || other.apiDirection == apiDirection)&&(identical(other.terminalStationName, terminalStationName) || other.terminalStationName == terminalStationName)&&(identical(other.terminalStationCode, terminalStationCode) || other.terminalStationCode == terminalStationCode)&&(identical(other.servicePatternKey, servicePatternKey) || other.servicePatternKey == servicePatternKey)&&(identical(other.branchKey, branchKey) || other.branchKey == branchKey)&&(identical(other.nextStationName, nextStationName) || other.nextStationName == nextStationName)&&(identical(other.nextStationCode, nextStationCode) || other.nextStationCode == nextStationCode)&&(identical(other.durationSeconds, durationSeconds) || other.durationSeconds == durationSeconds)&&(identical(other.distanceMeters, distanceMeters) || other.distanceMeters == distanceMeters)&&(identical(other.segmentCount, segmentCount) || other.segmentCount == segmentCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lineName,fromStationName,toStationName,const DeepCollectionEquality().hash(_stationNames),stationCount,directionLabel,apiDirection,terminalStationName,servicePatternKey,branchKey,nextStationName,durationSeconds,distanceMeters,segmentCount);
+int get hashCode => Object.hashAll([runtimeType,lineName,fromStationName,fromStationCode,toStationName,toStationCode,const DeepCollectionEquality().hash(_stationNames),const DeepCollectionEquality().hash(_stationCodes),stationCount,directionLabel,apiDirection,terminalStationName,terminalStationCode,servicePatternKey,branchKey,nextStationName,nextStationCode,durationSeconds,distanceMeters,segmentCount]);
 
 @override
 String toString() {
-  return 'RouteLeg(lineName: $lineName, fromStationName: $fromStationName, toStationName: $toStationName, stationNames: $stationNames, stationCount: $stationCount, directionLabel: $directionLabel, apiDirection: $apiDirection, terminalStationName: $terminalStationName, servicePatternKey: $servicePatternKey, branchKey: $branchKey, nextStationName: $nextStationName, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, segmentCount: $segmentCount)';
+  return 'RouteLeg(lineName: $lineName, fromStationName: $fromStationName, fromStationCode: $fromStationCode, toStationName: $toStationName, toStationCode: $toStationCode, stationNames: $stationNames, stationCodes: $stationCodes, stationCount: $stationCount, directionLabel: $directionLabel, apiDirection: $apiDirection, terminalStationName: $terminalStationName, terminalStationCode: $terminalStationCode, servicePatternKey: $servicePatternKey, branchKey: $branchKey, nextStationName: $nextStationName, nextStationCode: $nextStationCode, durationSeconds: $durationSeconds, distanceMeters: $distanceMeters, segmentCount: $segmentCount)';
 }
 
 
@@ -1784,7 +1812,7 @@ abstract mixin class _$RouteLegCopyWith<$Res> implements $RouteLegCopyWith<$Res>
   factory _$RouteLegCopyWith(_RouteLeg value, $Res Function(_RouteLeg) _then) = __$RouteLegCopyWithImpl;
 @override @useResult
 $Res call({
- String lineName, String fromStationName, String toStationName, List<String> stationNames, int stationCount, String directionLabel, String? apiDirection, String? terminalStationName, String servicePatternKey, String branchKey, String nextStationName, int durationSeconds, int distanceMeters, int segmentCount
+ String lineName, String fromStationName, String? fromStationCode, String toStationName, String? toStationCode, List<String> stationNames, List<String> stationCodes, int stationCount, String directionLabel, String? apiDirection, String? terminalStationName, String? terminalStationCode, String servicePatternKey, String branchKey, String nextStationName, String? nextStationCode, int durationSeconds, int distanceMeters, int segmentCount
 });
 
 
@@ -1801,20 +1829,25 @@ class __$RouteLegCopyWithImpl<$Res>
 
 /// Create a copy of RouteLeg
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? lineName = null,Object? fromStationName = null,Object? toStationName = null,Object? stationNames = null,Object? stationCount = null,Object? directionLabel = null,Object? apiDirection = freezed,Object? terminalStationName = freezed,Object? servicePatternKey = null,Object? branchKey = null,Object? nextStationName = null,Object? durationSeconds = null,Object? distanceMeters = null,Object? segmentCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? lineName = null,Object? fromStationName = null,Object? fromStationCode = freezed,Object? toStationName = null,Object? toStationCode = freezed,Object? stationNames = null,Object? stationCodes = null,Object? stationCount = null,Object? directionLabel = null,Object? apiDirection = freezed,Object? terminalStationName = freezed,Object? terminalStationCode = freezed,Object? servicePatternKey = null,Object? branchKey = null,Object? nextStationName = null,Object? nextStationCode = freezed,Object? durationSeconds = null,Object? distanceMeters = null,Object? segmentCount = null,}) {
   return _then(_RouteLeg(
 lineName: null == lineName ? _self.lineName : lineName // ignore: cast_nullable_to_non_nullable
 as String,fromStationName: null == fromStationName ? _self.fromStationName : fromStationName // ignore: cast_nullable_to_non_nullable
-as String,toStationName: null == toStationName ? _self.toStationName : toStationName // ignore: cast_nullable_to_non_nullable
-as String,stationNames: null == stationNames ? _self._stationNames : stationNames // ignore: cast_nullable_to_non_nullable
+as String,fromStationCode: freezed == fromStationCode ? _self.fromStationCode : fromStationCode // ignore: cast_nullable_to_non_nullable
+as String?,toStationName: null == toStationName ? _self.toStationName : toStationName // ignore: cast_nullable_to_non_nullable
+as String,toStationCode: freezed == toStationCode ? _self.toStationCode : toStationCode // ignore: cast_nullable_to_non_nullable
+as String?,stationNames: null == stationNames ? _self._stationNames : stationNames // ignore: cast_nullable_to_non_nullable
+as List<String>,stationCodes: null == stationCodes ? _self._stationCodes : stationCodes // ignore: cast_nullable_to_non_nullable
 as List<String>,stationCount: null == stationCount ? _self.stationCount : stationCount // ignore: cast_nullable_to_non_nullable
 as int,directionLabel: null == directionLabel ? _self.directionLabel : directionLabel // ignore: cast_nullable_to_non_nullable
 as String,apiDirection: freezed == apiDirection ? _self.apiDirection : apiDirection // ignore: cast_nullable_to_non_nullable
 as String?,terminalStationName: freezed == terminalStationName ? _self.terminalStationName : terminalStationName // ignore: cast_nullable_to_non_nullable
+as String?,terminalStationCode: freezed == terminalStationCode ? _self.terminalStationCode : terminalStationCode // ignore: cast_nullable_to_non_nullable
 as String?,servicePatternKey: null == servicePatternKey ? _self.servicePatternKey : servicePatternKey // ignore: cast_nullable_to_non_nullable
 as String,branchKey: null == branchKey ? _self.branchKey : branchKey // ignore: cast_nullable_to_non_nullable
 as String,nextStationName: null == nextStationName ? _self.nextStationName : nextStationName // ignore: cast_nullable_to_non_nullable
-as String,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
+as String,nextStationCode: freezed == nextStationCode ? _self.nextStationCode : nextStationCode // ignore: cast_nullable_to_non_nullable
+as String?,durationSeconds: null == durationSeconds ? _self.durationSeconds : durationSeconds // ignore: cast_nullable_to_non_nullable
 as int,distanceMeters: null == distanceMeters ? _self.distanceMeters : distanceMeters // ignore: cast_nullable_to_non_nullable
 as int,segmentCount: null == segmentCount ? _self.segmentCount : segmentCount // ignore: cast_nullable_to_non_nullable
 as int,

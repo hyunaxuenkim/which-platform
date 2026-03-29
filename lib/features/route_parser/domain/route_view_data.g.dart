@@ -29,11 +29,34 @@ Map<String, dynamic> _$RouteViewDataToJson(_RouteViewData instance) =>
       'transferItems': instance.transferItems,
     };
 
+_StationDisplayNameViewData _$StationDisplayNameViewDataFromJson(
+  Map<String, dynamic> json,
+) => _StationDisplayNameViewData(
+  primary: json['primary'] as String,
+  secondary: json['secondary'] as String?,
+  fullText: json['fullText'] as String,
+);
+
+Map<String, dynamic> _$StationDisplayNameViewDataToJson(
+  _StationDisplayNameViewData instance,
+) => <String, dynamic>{
+  'primary': instance.primary,
+  'secondary': instance.secondary,
+  'fullText': instance.fullText,
+};
+
 _RouteSummaryViewData _$RouteSummaryViewDataFromJson(
   Map<String, dynamic> json,
 ) => _RouteSummaryViewData(
-  departureStationName: json['departureStationName'] as String,
-  arrivalStationName: json['arrivalStationName'] as String,
+  departureStation: StationDisplayNameViewData.fromJson(
+    json['departureStation'] as Map<String, dynamic>,
+  ),
+  arrivalStation: StationDisplayNameViewData.fromJson(
+    json['arrivalStation'] as Map<String, dynamic>,
+  ),
+  totalDurationSeconds: (json['totalDurationSeconds'] as num).toInt(),
+  totalFare: (json['totalFare'] as num).toInt(),
+  transferCount: (json['transferCount'] as num).toInt(),
   totalDurationText: json['totalDurationText'] as String,
   totalFareText: json['totalFareText'] as String,
   transferCountText: json['transferCountText'] as String,
@@ -42,8 +65,11 @@ _RouteSummaryViewData _$RouteSummaryViewDataFromJson(
 Map<String, dynamic> _$RouteSummaryViewDataToJson(
   _RouteSummaryViewData instance,
 ) => <String, dynamic>{
-  'departureStationName': instance.departureStationName,
-  'arrivalStationName': instance.arrivalStationName,
+  'departureStation': instance.departureStation,
+  'arrivalStation': instance.arrivalStation,
+  'totalDurationSeconds': instance.totalDurationSeconds,
+  'totalFare': instance.totalFare,
+  'transferCount': instance.transferCount,
   'totalDurationText': instance.totalDurationText,
   'totalFareText': instance.totalFareText,
   'transferCountText': instance.transferCountText,
@@ -54,19 +80,33 @@ _RouteLegItemViewData _$RouteLegItemViewDataFromJson(
 ) => _RouteLegItemViewData(
   lineName: json['lineName'] as String,
   lineColorHex: json['lineColorHex'] as String,
+  stationCount: (json['stationCount'] as num).toInt(),
+  durationSeconds: (json['durationSeconds'] as num).toInt(),
   directionLabel: json['directionLabel'] as String,
   directionPositiveExamplesText:
       json['directionPositiveExamplesText'] as String,
   directionNegativeExamplesText:
       json['directionNegativeExamplesText'] as String,
-  fromStationName: json['fromStationName'] as String,
-  toStationName: json['toStationName'] as String,
-  nextStationName: json['nextStationName'] as String,
-  nextNegativeStationName: json['nextNegativeStationName'] as String,
+  fromStation: StationDisplayNameViewData.fromJson(
+    json['fromStation'] as Map<String, dynamic>,
+  ),
+  toStation: StationDisplayNameViewData.fromJson(
+    json['toStation'] as Map<String, dynamic>,
+  ),
+  stations: (json['stations'] as List<dynamic>)
+      .map(
+        (e) => StationDisplayNameViewData.fromJson(e as Map<String, dynamic>),
+      )
+      .toList(),
+  nextStation: StationDisplayNameViewData.fromJson(
+    json['nextStation'] as Map<String, dynamic>,
+  ),
+  nextNegativeStation: StationDisplayNameViewData.fromJson(
+    json['nextNegativeStation'] as Map<String, dynamic>,
+  ),
   stationTrailText: json['stationTrailText'] as String,
   stationCountText: json['stationCountText'] as String,
   durationText: json['durationText'] as String,
-  instructionText: json['instructionText'] as String,
 );
 
 Map<String, dynamic> _$RouteLegItemViewDataToJson(
@@ -74,35 +114,41 @@ Map<String, dynamic> _$RouteLegItemViewDataToJson(
 ) => <String, dynamic>{
   'lineName': instance.lineName,
   'lineColorHex': instance.lineColorHex,
+  'stationCount': instance.stationCount,
+  'durationSeconds': instance.durationSeconds,
   'directionLabel': instance.directionLabel,
   'directionPositiveExamplesText': instance.directionPositiveExamplesText,
   'directionNegativeExamplesText': instance.directionNegativeExamplesText,
-  'fromStationName': instance.fromStationName,
-  'toStationName': instance.toStationName,
-  'nextStationName': instance.nextStationName,
-  'nextNegativeStationName': instance.nextNegativeStationName,
+  'fromStation': instance.fromStation,
+  'toStation': instance.toStation,
+  'stations': instance.stations,
+  'nextStation': instance.nextStation,
+  'nextNegativeStation': instance.nextNegativeStation,
   'stationTrailText': instance.stationTrailText,
   'stationCountText': instance.stationCountText,
   'durationText': instance.durationText,
-  'instructionText': instance.instructionText,
 };
 
 _RouteTransferItemViewData _$RouteTransferItemViewDataFromJson(
   Map<String, dynamic> json,
 ) => _RouteTransferItemViewData(
-  stationName: json['stationName'] as String,
+  station: StationDisplayNameViewData.fromJson(
+    json['station'] as Map<String, dynamic>,
+  ),
   fromLineName: json['fromLineName'] as String,
   toLineName: json['toLineName'] as String,
   toLineColorHex: json['toLineColorHex'] as String,
+  walkingTimeSeconds: (json['walkingTimeSeconds'] as num).toInt(),
   walkingTimeText: json['walkingTimeText'] as String,
 );
 
 Map<String, dynamic> _$RouteTransferItemViewDataToJson(
   _RouteTransferItemViewData instance,
 ) => <String, dynamic>{
-  'stationName': instance.stationName,
+  'station': instance.station,
   'fromLineName': instance.fromLineName,
   'toLineName': instance.toLineName,
   'toLineColorHex': instance.toLineColorHex,
+  'walkingTimeSeconds': instance.walkingTimeSeconds,
   'walkingTimeText': instance.walkingTimeText,
 };

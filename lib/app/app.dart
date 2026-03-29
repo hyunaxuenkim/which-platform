@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/settings/domain/app_language_extensions.dart';
+import '../features/settings/providers/app_language_providers.dart';
 import 'router/app_router.dart';
 
-class WhichPlatformApp extends StatelessWidget {
+class WhichPlatformApp extends ConsumerWidget {
   const WhichPlatformApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const Color scaffoldColor = Color(0xFFF5F6F7);
+    final language = ref.watch(appLanguageProvider);
 
     return MaterialApp.router(
       title: 'Wayfinder',
       debugShowCheckedModeBanner: false,
+      locale: language.locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF0049E6),

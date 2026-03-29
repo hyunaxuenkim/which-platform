@@ -1,13 +1,18 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:which_platform/core/database/app_database.dart';
 import 'package:which_platform/core/database/import/subway_line_info_importer.dart';
 import 'package:which_platform/features/route_parser/domain/parsed_route_models.dart';
+import 'package:which_platform/features/route_parser/domain/route_view_data.dart';
 import 'package:which_platform/features/route_parser/domain/route_view_data_mapper.dart';
+import 'package:which_platform/features/settings/domain/app_language.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test(
     'resolves line colors from DB-backed map using canonical line names',
     () {
@@ -48,13 +53,19 @@ void main() {
       final viewData = mapper.map(route);
 
       expect(viewData.legItems.single.lineColorHex, '#77C4A3');
+      expect(
+        viewData.legItems.single.stations.map((station) => station.fullText),
+        <String>['서울역', '회현'],
+      );
     },
   );
 
   test(
     'resolves negative direction label and opposite adjacent station from database',
     () async {
-      final AppDatabase database = AppDatabase.forTesting(NativeDatabase.memory());
+      final AppDatabase database = AppDatabase.forTesting(
+        NativeDatabase.memory(),
+      );
       final SubwayLineInfoImporter importer = SubwayLineInfoImporter(database);
 
       const String rawRouteCsv = '''
@@ -155,9 +166,190 @@ line_name,line_key,current_station_code,next_station_code,api_terminal_station_c
       final viewData = await mapper.mapWithDatabase(route, database: database);
 
       expect(viewData.legItems.single.directionNegativeExamplesText, '연천행');
-      expect(viewData.legItems.single.nextNegativeStationName, '신도림');
+      expect(viewData.legItems.single.nextNegativeStation.fullText, 'Sindorim');
 
       await database.close();
+    },
+  );
+
+  test('localizes summary, legs, and transfers with station codes', () async {
+    final AppDatabase database = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+    );
+    addTearDown(database.close);
+
+    final SubwayLineInfoImporter importer = SubwayLineInfoImporter(database);
+    await importer.importFromAsset();
+
+    const ParsedRoute route = ParsedRoute(
+      totalDurationSeconds: 180,
+      totalFare: 1400,
+      transferCount: 1,
+      stationTrail: <String>['서울역', '동대문역사문화공원', '상왕십리'],
+      stationTrailCodes: <String>['0426', '0422', '0207'],
+      rawPathCount: 3,
+      legs: <RouteLeg>[
+        RouteLeg(
+          lineName: '4호선',
+          fromStationName: '서울역',
+          fromStationCode: '0426',
+          toStationName: '동대문역사문화공원',
+          toStationCode: '0422',
+          stationNames: <String>['서울역', '회현', '명동', '충무로', '동대문역사문화공원'],
+          stationCodes: <String>['0426', '0425', '0424', '0423', '0422'],
+          stationCount: 5,
+          directionLabel: '진접행',
+          apiDirection: '상행',
+          terminalStationName: '진접',
+          terminalStationCode: '0405',
+          servicePatternKey: 'LOCAL',
+          branchKey: 'MAIN',
+          nextStationName: '회현',
+          nextStationCode: '0425',
+          durationSeconds: 120,
+          distanceMeters: 1000,
+          segmentCount: 4,
+        ),
+        RouteLeg(
+          lineName: '2호선',
+          fromStationName: '동대문역사문화공원',
+          fromStationCode: '0205',
+          toStationName: '상왕십리',
+          toStationCode: '0207',
+          stationNames: <String>['동대문역사문화공원', '신당', '상왕십리'],
+          stationCodes: <String>['0205', '0206', '0207'],
+          stationCount: 3,
+          directionLabel: '내선순환',
+          apiDirection: '내선',
+          terminalStationName: '성수',
+          terminalStationCode: '0211',
+          servicePatternKey: 'LOCAL',
+          branchKey: 'MAIN',
+          nextStationName: '신당',
+          nextStationCode: '0206',
+          durationSeconds: 60,
+          distanceMeters: 500,
+          segmentCount: 2,
+        ),
+      ],
+      transfers: <TransferSegment>[
+        TransferSegment(
+          stationName: '동대문역사문화공원',
+          stationCode: '0422',
+          fromLineName: '4호선',
+          toLineName: '2호선',
+          durationSeconds: 43,
+          distanceMeters: 45,
+          waitingSeconds: 90,
+        ),
+      ],
+    );
+
+    final RouteViewDataMapper mapper = RouteViewDataMapper(
+      lineColorHexByName: await database.getLineColorHexByName(),
+    );
+    final viewData = await mapper.mapWithDatabase(
+      route,
+      database: database,
+      language: AppLanguage.zhHans,
+    );
+
+    expect(viewData.summary.departureStation.primary, '首尔');
+    expect(viewData.summary.departureStation.secondary, 'Seoul Station');
+    expect(viewData.summary.arrivalStation.fullText, '上往十里 (Sangwangsimni)');
+    expect(viewData.legItems.first.fromStation.fullText, '首尔 (Seoul Station)');
+    expect(
+      viewData.legItems.first.nextStation.fullText,
+      '会贤(南大门市场) (Hoehyeon)',
+    );
+    expect(
+      viewData.legItems.first.stations[4].fullText,
+      '东大门历史文化公园(DDP) (Dongdaemun History  Culture Park)',
+    );
+    expect(
+      viewData.transferItems.single.station.fullText,
+      '东大门历史文化公园(DDP) (Dongdaemun History  Culture Park)',
+    );
+  });
+
+  test(
+    'keeps fallback station names predictable when localized packs are missing',
+    () async {
+      final AppDatabase database = AppDatabase.forTesting(
+        NativeDatabase.memory(),
+      );
+      addTearDown(database.close);
+
+      final int stationId = await database
+          .into(database.stations)
+          .insert(
+            StationsCompanion.insert(
+              nameKo: '서울역',
+              nameEn: const Value('Seoul Station'),
+            ),
+          );
+      final int lineId = await database
+          .into(database.lines)
+          .insert(LinesCompanion.insert(name: '04호선'));
+      await database
+          .into(database.lineStations)
+          .insert(
+            LineStationsCompanion.insert(
+              lineId: lineId,
+              stationId: stationId,
+              stationCode: '0426',
+              orderIndex: 1,
+            ),
+          );
+
+      const ParsedRoute route = ParsedRoute(
+        totalDurationSeconds: 60,
+        totalFare: 1400,
+        transferCount: 0,
+        stationTrail: <String>['서울역', '임시종점'],
+        stationTrailCodes: <String>['0426', '9999'],
+        rawPathCount: 1,
+        legs: <RouteLeg>[
+          RouteLeg(
+            lineName: '4호선',
+            fromStationName: '서울역',
+            fromStationCode: '0426',
+            toStationName: '임시종점',
+            toStationCode: '9999',
+            stationNames: <String>['서울역', '임시종점'],
+            stationCodes: <String>['0426', '9999'],
+            stationCount: 2,
+            directionLabel: '임시종점행',
+            apiDirection: '상행',
+            terminalStationName: '임시종점',
+            terminalStationCode: '9999',
+            servicePatternKey: 'LOCAL',
+            branchKey: 'MAIN',
+            nextStationName: '임시종점',
+            nextStationCode: '9999',
+            durationSeconds: 60,
+            distanceMeters: 500,
+            segmentCount: 1,
+          ),
+        ],
+        transfers: <TransferSegment>[],
+      );
+
+      final RouteViewDataMapper mapper = RouteViewDataMapper(
+        lineColorHexByName: const <String, String>{'04호선': '#2F9D27'},
+      );
+      final RouteViewData viewData = await mapper.mapWithDatabase(
+        route,
+        database: database,
+        language: AppLanguage.zhHans,
+      );
+
+      expect(viewData.summary.departureStation.fullText, 'Seoul Station');
+      expect(viewData.summary.departureStation.secondary, isNull);
+      expect(viewData.summary.arrivalStation.fullText, '임시종점');
+      expect(viewData.legItems.single.fromStation.fullText, 'Seoul Station');
+      expect(viewData.legItems.single.toStation.fullText, '임시종점');
+      expect(viewData.legItems.single.nextStation.fullText, '임시종점');
     },
   );
 }

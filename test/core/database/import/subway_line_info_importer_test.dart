@@ -292,4 +292,112 @@ line_name,line_key,current_station_code,next_station_code,api_terminal_station_c
 
     await database.close();
   });
+
+  test('backfills missing Japanese station name when later line row provides it', () async {
+    final AppDatabase database = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+    );
+    final SubwayLineInfoImporter importer = SubwayLineInfoImporter(database);
+
+    const String pangyoRouteCsv = '''
+권역,권역명,철도운영기관명,노선명,순번,역명
+01,수도권,경강선,경강선,1,판교
+01,수도권,네오트랜스,신분당,11,판교
+''';
+
+    final String rawJson = jsonEncode(<String, Object?>{
+      'DESCRIPTION': <String, Object?>{},
+      'DATA': <Map<String, Object?>>[
+        <String, Object?>{
+          'line_num': '경강선',
+          'station_nm': '판교',
+          'station_nm_eng': 'Pangyo',
+          'station_nm_jpn': '',
+          'station_nm_chn': '板橋',
+          'station_cd': '1501',
+          'fr_code': 'K409',
+        },
+        <String, Object?>{
+          'line_num': '신분당선',
+          'station_nm': '판교',
+          'station_nm_eng': 'Pangyo',
+          'station_nm_jpn': 'パンギョ',
+          'station_nm_chn': '板橋',
+          'station_cd': '4311',
+          'fr_code': 'D11',
+        },
+      ],
+    });
+
+    await importer.importFromJsonString(
+      rawJson,
+      rawRouteCsv: pangyoRouteCsv,
+      rawBranchKeysCsv: rawBranchKeysCsv,
+      rawDirectionPoliciesCsv: rawDirectionPoliciesCsv,
+      rawStationTransitionOverridesCsv: rawStationTransitionOverridesCsv,
+    );
+
+    final stations = await database.select(database.stations).get();
+    final station = stations.singleWhere((row) => row.nameKo == '판교');
+
+    expect(station.nameEn, 'Pangyo');
+    expect(station.nameCh, '板橋');
+    expect(station.nameJp, 'パンギョ');
+
+    await database.close();
+  });
+
+  test('keeps first non-empty localized names when later line rows differ', () async {
+    final AppDatabase database = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+    );
+    final SubwayLineInfoImporter importer = SubwayLineInfoImporter(database);
+
+    const String gimpoRouteCsv = '''
+권역,권역명,철도운영기관명,노선명,순번,역명
+01,수도권,서울교통공사,9호선,2,김포공항
+01,수도권,공항철도,공항철도,7,김포공항
+''';
+
+    final String rawJson = jsonEncode(<String, Object?>{
+      'DESCRIPTION': <String, Object?>{},
+      'DATA': <Map<String, Object?>>[
+        <String, Object?>{
+          'line_num': '09호선',
+          'station_nm': '김포공항',
+          'station_nm_eng': 'Gimpo Int\'l Airport',
+          'station_nm_jpn': 'キンポゴンハン',
+          'station_nm_chn': '金浦机场',
+          'station_cd': '4102',
+          'fr_code': '902',
+        },
+        <String, Object?>{
+          'line_num': '공항철도',
+          'station_nm': '김포공항',
+          'station_nm_eng': 'Gimpo Intl. Airport',
+          'station_nm_jpn': 'キンポゴンハン',
+          'station_nm_chn': '金浦机场',
+          'station_cd': '4207',
+          'fr_code': 'A05',
+        },
+      ],
+    });
+
+    await importer.importFromJsonString(
+      rawJson,
+      rawRouteCsv: gimpoRouteCsv,
+      rawBranchKeysCsv: rawBranchKeysCsv,
+      rawDirectionPoliciesCsv: rawDirectionPoliciesCsv,
+      rawStationTransitionOverridesCsv: rawStationTransitionOverridesCsv,
+    );
+
+    final stations = await database.select(database.stations).get();
+    final station = stations.singleWhere((row) => row.nameKo == '김포공항');
+
+    expect(station.nameEn, 'Gimpo Int\'l Airport');
+    expect(station.nameCh, '金浦机场');
+    expect(station.nameJp, 'キンポゴンハン');
+
+    await database.close();
+  });
 }

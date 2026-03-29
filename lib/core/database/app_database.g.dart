@@ -485,9 +485,10 @@ class $LinesTable extends Lines with TableInfo<$LinesTable, Line> {
     'line_type',
     aliasedName,
     true,
-    check: () => lineType.isIn(const <String>['LINEAR', 'LOOP', 'BRANCH']),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+    $customConstraints:
+        'CHECK (line_type IS NULL OR line_type IN (\'LINEAR\', \'LOOP\', \'BRANCH\'))',
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -1497,16 +1498,10 @@ class $DirectionPoliciesTable extends DirectionPolicies
     'direction_kind',
     aliasedName,
     false,
-    check: () => directionKind.isIn(const <String>[
-      'UP',
-      'DOWN',
-      'INNER',
-      'OUTER',
-      'TERMINAL',
-      'BRANCH',
-    ]),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+    $customConstraints:
+        'CHECK (direction_kind IN (\'UP\', \'DOWN\', \'INNER\', \'OUTER\', \'TERMINAL\', \'BRANCH\'))',
   );
   static const VerificationMeta _apiDirectionMeta = const VerificationMeta(
     'apiDirection',
@@ -1516,9 +1511,10 @@ class $DirectionPoliciesTable extends DirectionPolicies
     'api_direction',
     aliasedName,
     true,
-    check: () => apiDirection.isIn(const <String>['상행', '하행', '내선', '외선']),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+    $customConstraints:
+        'CHECK (api_direction IS NULL OR api_direction IN (\'상행\', \'하행\', \'내선\', \'외선\'))',
   );
   static const VerificationMeta _apiTerminalStationCodeMeta =
       const VerificationMeta('apiTerminalStationCode');
@@ -2171,9 +2167,10 @@ class $StationTransitionOverridesTable extends StationTransitionOverrides
     'api_direction',
     aliasedName,
     true,
-    check: () => apiDirection.isIn(const <String>['상행', '하행', '내선', '외선']),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+    $customConstraints:
+        'CHECK (api_direction IS NULL OR api_direction IN (\'상행\', \'하행\', \'내선\', \'외선\'))',
   );
   static const VerificationMeta _resolvedBranchKeyMeta = const VerificationMeta(
     'resolvedBranchKey',

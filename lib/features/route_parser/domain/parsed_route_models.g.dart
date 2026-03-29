@@ -19,6 +19,11 @@ _ParsedRoute _$ParsedRouteFromJson(Map<String, dynamic> json) => _ParsedRoute(
   stationTrail: (json['stationTrail'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
+  stationTrailCodes:
+      (json['stationTrailCodes'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const <String>[],
   rawPathCount: (json['rawPathCount'] as num).toInt(),
 );
 
@@ -30,6 +35,7 @@ Map<String, dynamic> _$ParsedRouteToJson(_ParsedRoute instance) =>
       'legs': instance.legs,
       'transfers': instance.transfers,
       'stationTrail': instance.stationTrail,
+      'stationTrailCodes': instance.stationTrailCodes,
       'rawPathCount': instance.rawPathCount,
     };
 
@@ -117,6 +123,7 @@ Map<String, dynamic> _$RideSegmentToJson(_RideSegment instance) =>
 _TransferSegment _$TransferSegmentFromJson(Map<String, dynamic> json) =>
     _TransferSegment(
       stationName: json['stationName'] as String,
+      stationCode: json['stationCode'] as String?,
       fromLineName: json['fromLineName'] as String,
       toLineName: json['toLineName'] as String,
       durationSeconds: (json['durationSeconds'] as num).toInt(),
@@ -127,6 +134,7 @@ _TransferSegment _$TransferSegmentFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$TransferSegmentToJson(_TransferSegment instance) =>
     <String, dynamic>{
       'stationName': instance.stationName,
+      'stationCode': instance.stationCode,
       'fromLineName': instance.fromLineName,
       'toLineName': instance.toLineName,
       'durationSeconds': instance.durationSeconds,
@@ -137,17 +145,26 @@ Map<String, dynamic> _$TransferSegmentToJson(_TransferSegment instance) =>
 _RouteLeg _$RouteLegFromJson(Map<String, dynamic> json) => _RouteLeg(
   lineName: json['lineName'] as String,
   fromStationName: json['fromStationName'] as String,
+  fromStationCode: json['fromStationCode'] as String?,
   toStationName: json['toStationName'] as String,
+  toStationCode: json['toStationCode'] as String?,
   stationNames: (json['stationNames'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
+  stationCodes:
+      (json['stationCodes'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const <String>[],
   stationCount: (json['stationCount'] as num).toInt(),
   directionLabel: json['directionLabel'] as String,
   apiDirection: json['apiDirection'] as String?,
   terminalStationName: json['terminalStationName'] as String?,
+  terminalStationCode: json['terminalStationCode'] as String?,
   servicePatternKey: json['servicePatternKey'] as String,
   branchKey: json['branchKey'] as String,
   nextStationName: json['nextStationName'] as String,
+  nextStationCode: json['nextStationCode'] as String?,
   durationSeconds: (json['durationSeconds'] as num).toInt(),
   distanceMeters: (json['distanceMeters'] as num).toInt(),
   segmentCount: (json['segmentCount'] as num).toInt(),
@@ -156,15 +173,20 @@ _RouteLeg _$RouteLegFromJson(Map<String, dynamic> json) => _RouteLeg(
 Map<String, dynamic> _$RouteLegToJson(_RouteLeg instance) => <String, dynamic>{
   'lineName': instance.lineName,
   'fromStationName': instance.fromStationName,
+  'fromStationCode': instance.fromStationCode,
   'toStationName': instance.toStationName,
+  'toStationCode': instance.toStationCode,
   'stationNames': instance.stationNames,
+  'stationCodes': instance.stationCodes,
   'stationCount': instance.stationCount,
   'directionLabel': instance.directionLabel,
   'apiDirection': instance.apiDirection,
   'terminalStationName': instance.terminalStationName,
+  'terminalStationCode': instance.terminalStationCode,
   'servicePatternKey': instance.servicePatternKey,
   'branchKey': instance.branchKey,
   'nextStationName': instance.nextStationName,
+  'nextStationCode': instance.nextStationCode,
   'durationSeconds': instance.durationSeconds,
   'distanceMeters': instance.distanceMeters,
   'segmentCount': instance.segmentCount,

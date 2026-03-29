@@ -14,10 +14,7 @@ import 'package:which_platform/features/route_parser/domain/route_view_data_mapp
 void main() {
   const RouteResponseParser parser = RouteResponseParser();
   const RouteViewDataMapper mapper = RouteViewDataMapper(
-    lineColorHexByName: <String, String>{
-      '04호선': '#32A1C8',
-      '02호선': '#33A23D',
-    },
+    lineColorHexByName: <String, String>{'04호선': '#32A1C8', '02호선': '#33A23D'},
   );
 
   group('RouteResponseParser', () {
@@ -35,19 +32,32 @@ void main() {
       expect(route.legs.last.directionLabel, '내선순환');
       expect(route.stationTrail.first, '서울역');
       expect(route.stationTrail.last, '상왕십리');
+      expect(route.stationTrailCodes.first, '0426');
+      expect(route.stationTrailCodes.last, '0207');
+      expect(route.legs.first.fromStationCode, '0426');
+      expect(route.legs.first.stationCodes, <String>[
+        '0426',
+        '0425',
+        '0424',
+        '0423',
+        '0422',
+      ]);
+      expect(route.transfers.single.stationCode, '0422');
 
       final viewData = mapper.map(route);
       expect(viewData.summary.totalFareText, '1750 KRW');
       expect(viewData.summary.transferCountText, '1 transfer');
       expect(viewData.legItems.first.lineColorHex, '#32A1C8');
-      expect(viewData.legItems.first.directionPositiveExamplesText, '진접, 동대문역사문화공원');
-      expect(viewData.legItems.first.nextStationName, '회현');
-      expect(viewData.legItems.first.nextNegativeStationName, 'no information');
-      expect(viewData.legItems.first.instructionText, 'Follow signs to 진접');
       expect(
-        viewData.legItems.first.stationTrailText,
-        contains('서울역 -> 회현'),
+        viewData.legItems.first.directionPositiveExamplesText,
+        '진접, 동대문역사문화공원',
       );
+      expect(viewData.legItems.first.nextStation.fullText, '회현');
+      expect(
+        viewData.legItems.first.nextNegativeStation.fullText,
+        'no information',
+      );
+      expect(viewData.legItems.first.stationTrailText, contains('서울역 -> 회현'));
       expect(viewData.transferItems.single.toLineColorHex, '#33A23D');
       expect(viewData.transferItems.single.walkingTimeText, '43s');
     });
@@ -220,92 +230,98 @@ void main() {
       expect(route.legs.single.directionLabel, '인천행');
     });
 
-    test('applies database direction policies and station transition overrides', () async {
-      final AppDatabase database = AppDatabase.forTesting(
-        NativeDatabase.memory(),
-      );
-      final SubwayLineInfoImporter importer = SubwayLineInfoImporter(database);
+    test(
+      'applies database direction policies and station transition overrides',
+      () async {
+        final AppDatabase database = AppDatabase.forTesting(
+          NativeDatabase.memory(),
+        );
+        final SubwayLineInfoImporter importer = SubwayLineInfoImporter(
+          database,
+        );
 
-      const String rawRouteCsv = '''
+        const String rawRouteCsv = '''
 권역,권역명,철도운영기관명,노선명,순번,역명
 01,수도권,코레일,1호선,45,구로
 01,수도권,코레일,1호선,46,구일
 ''';
 
-      const String rawBranchKeysCsv = '''
+        const String rawBranchKeysCsv = '''
 line_name,line_key,branch_key,is_default,branch_kind,status,note
 01호선,LINE1,LINE1_MAIN,true,main,confirmed,
 01호선,LINE1,LINE1_GYEONGIN,false,branch,confirmed,
 ''';
 
-      const String rawDirectionPoliciesCsv = '''
+        const String rawDirectionPoliciesCsv = '''
 line_name,line_key,branch_key,direction_kind,api_direction,api_terminal_station_code,display_label_ko,is_active,note,status
 01호선,LINE1,LINE1_GYEONGIN,DOWN,하행,1812,인천행,true,,confirmed
 ''';
 
-      const String rawOverridesCsv = '''
+        const String rawOverridesCsv = '''
 line_name,line_key,current_station_code,next_station_code,api_terminal_station_code,api_terminal_station_name,api_direction,resolved_branch_key,prev_station_code,priority,is_active,note,status
 01호선,LINE1,1701,1813,1812,인천,하행,LINE1_GYEONGIN,,100,true,,confirmed
 ''';
 
-      final String rawJson = jsonEncode(<String, Object?>{
-        'DESCRIPTION': <String, Object?>{},
-        'DATA': <Map<String, Object?>>[
-          <String, Object?>{
-            'line_num': '01호선',
-            'station_nm': '구로',
-            'station_nm_eng': 'Guro',
-            'station_nm_jpn': 'クロ',
-            'station_nm_chn': '九老',
-            'station_cd': '1701',
-            'fr_code': '141',
-          },
-          <String, Object?>{
-            'line_num': '01호선',
-            'station_nm': '구일',
-            'station_nm_eng': 'Guil',
-            'station_nm_jpn': 'クイル',
-            'station_nm_chn': '九一',
-            'station_cd': '1813',
-            'fr_code': '142',
-          },
-        ],
-      });
+        final String rawJson = jsonEncode(<String, Object?>{
+          'DESCRIPTION': <String, Object?>{},
+          'DATA': <Map<String, Object?>>[
+            <String, Object?>{
+              'line_num': '01호선',
+              'station_nm': '구로',
+              'station_nm_eng': 'Guro',
+              'station_nm_jpn': 'クロ',
+              'station_nm_chn': '九老',
+              'station_cd': '1701',
+              'fr_code': '141',
+            },
+            <String, Object?>{
+              'line_num': '01호선',
+              'station_nm': '구일',
+              'station_nm_eng': 'Guil',
+              'station_nm_jpn': 'クイル',
+              'station_nm_chn': '九一',
+              'station_cd': '1813',
+              'fr_code': '142',
+            },
+          ],
+        });
 
-      await importer.importFromJsonString(
-        rawJson,
-        rawRouteCsv: rawRouteCsv,
-        rawBranchKeysCsv: rawBranchKeysCsv,
-        rawDirectionPoliciesCsv: rawDirectionPoliciesCsv,
-        rawStationTransitionOverridesCsv: rawOverridesCsv,
-      );
+        await importer.importFromJsonString(
+          rawJson,
+          rawRouteCsv: rawRouteCsv,
+          rawBranchKeysCsv: rawBranchKeysCsv,
+          rawDirectionPoliciesCsv: rawDirectionPoliciesCsv,
+          rawStationTransitionOverridesCsv: rawOverridesCsv,
+        );
 
-      final RouteApiResponseDto response = _responseWithPaths(<Map<String, Object?>>[
-        _ridePath(
-          departureCode: '1701',
-          departureName: '구로',
-          departureLine: '1호선',
-          arrivalCode: '1813',
-          arrivalName: '구일',
-          arrivalLine: '1호선',
-          terminalName: '인천',
-          terminalCode: '1812',
-          direction: '하행',
-          duration: 80,
-          distance: 600,
-        ),
-      ]);
+        final RouteApiResponseDto response =
+            _responseWithPaths(<Map<String, Object?>>[
+              _ridePath(
+                departureCode: '1701',
+                departureName: '구로',
+                departureLine: '1호선',
+                arrivalCode: '1813',
+                arrivalName: '구일',
+                arrivalLine: '1호선',
+                terminalName: '인천',
+                terminalCode: '1812',
+                direction: '하행',
+                duration: 80,
+                distance: 600,
+              ),
+            ]);
 
-      final ParsedRoute route =
-          (await parser.parseWithDatabase(response, database: database)
-                  as ParsedRouteParseSuccess)
-              .route;
+        final ParsedRoute route =
+            (await parser.parseWithDatabase(response, database: database)
+                    as ParsedRouteParseSuccess)
+                .route;
 
-      expect(route.legs.single.branchKey, 'LINE1_GYEONGIN');
-      expect(route.legs.single.directionLabel, '인천행');
+        expect(route.legs.single.branchKey, 'LINE1_GYEONGIN');
+        expect(route.legs.single.directionLabel, '인천행');
 
-      await database.close();
-    });
+        await database.close();
+      },
+    );
 
     test('supports one-path short movement', () {
       final ParsedRoute route =
@@ -486,8 +502,8 @@ line_name,line_key,current_station_code,next_station_code,api_terminal_station_c
         ),
       );
 
-      expect(viewData.summary.departureStationName, 'no information');
-      expect(viewData.summary.arrivalStationName, 'no information');
+      expect(viewData.summary.departureStation.fullText, 'no information');
+      expect(viewData.summary.arrivalStation.fullText, 'no information');
       expect(viewData.summary.totalDurationText, '0s');
       expect(viewData.summary.totalFareText, '0 KRW');
       expect(viewData.summary.transferCountText, '0 transfers');
@@ -502,11 +518,16 @@ line_name,line_key,current_station_code,next_station_code,api_terminal_station_c
         viewData.legItems.single.directionNegativeExamplesText,
         'no information',
       );
-      expect(viewData.legItems.single.nextStationName, 'no information');
-      expect(viewData.legItems.single.nextNegativeStationName, 'no information');
-      expect(viewData.legItems.single.stationTrailText, 'no information -> no information');
-      expect(viewData.legItems.single.instructionText, 'Follow signs to no information');
-      expect(viewData.transferItems.single.stationName, 'no information');
+      expect(viewData.legItems.single.nextStation.fullText, 'no information');
+      expect(
+        viewData.legItems.single.nextNegativeStation.fullText,
+        'no information',
+      );
+      expect(
+        viewData.legItems.single.stationTrailText,
+        'no information -> no information',
+      );
+      expect(viewData.transferItems.single.station.fullText, 'no information');
       expect(viewData.transferItems.single.fromLineName, 'no information');
       expect(viewData.transferItems.single.toLineName, 'no information');
       expect(viewData.transferItems.single.toLineColorHex, '#9E9E9E');
@@ -590,18 +611,19 @@ line_name,line_key,current_station_code,next_station_code,api_terminal_station_c
       final ParsedRouteParseResult result = parser.parse(
         _responseWithPaths(<Map<String, Object?>>[
           _ridePath(
-            departureCode: '0426',
-            departureName: '서울역',
-            departureLine: '4호선',
-            arrivalCode: '0425',
-            arrivalName: '회현',
-            arrivalLine: '4호선',
-            terminalName: '진접',
-            terminalCode: '0405',
-            direction: '상행',
-            duration: 90,
-            distance: 900,
-          )..['dptreStn'] = <String, Object?>{
+              departureCode: '0426',
+              departureName: '서울역',
+              departureLine: '4호선',
+              arrivalCode: '0425',
+              arrivalName: '회현',
+              arrivalLine: '4호선',
+              terminalName: '진접',
+              terminalCode: '0405',
+              direction: '상행',
+              duration: 90,
+              distance: 900,
+            )
+            ..['dptreStn'] = <String, Object?>{
               'stnCd': '0426',
               'stnNo': '0426',
               'stnNm': '',

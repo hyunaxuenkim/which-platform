@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:csv/csv.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/services.dart';
 
+import 'asset_string_loader_stub.dart'
+    if (dart.library.ui) 'asset_string_loader_flutter.dart' as asset_loader;
 import '../app_database.dart';
 import '../line_metadata_catalog.dart';
 
 typedef JsonMap = Map<String, Object?>;
+typedef AssetStringLoader = Future<String> Function(String path);
 
 class SubwayLineInfoImportResult {
   const SubwayLineInfoImportResult({
@@ -28,8 +30,8 @@ class SubwayLineInfoImportResult {
 }
 
 class SubwayLineInfoImporter {
-  SubwayLineInfoImporter(this._database, {AssetBundle? assetBundle})
-    : _assetBundle = assetBundle ?? rootBundle;
+  SubwayLineInfoImporter(this._database, {AssetStringLoader? assetLoader})
+    : _assetLoader = assetLoader ?? asset_loader.loadAssetString;
 
   static const String defaultAssetPath = 'assets/data/subway_line_info.json';
   static const String defaultRouteAssetPath = 'assets/data/full_route_info.csv';
@@ -66,7 +68,7 @@ class SubwayLineInfoImporter {
   };
 
   final AppDatabase _database;
-  final AssetBundle _assetBundle;
+  final AssetStringLoader _assetLoader;
 
   Future<SubwayLineInfoImportResult> importFromAsset({
     String assetPath = defaultAssetPath,
@@ -78,16 +80,17 @@ class SubwayLineInfoImporter {
     Set<String> includedLines = defaultIncludedLines,
     Map<String, LineMetadata> lineMetadataByName = defaultLineMetadataByName,
   }) async {
-    final String rawJson = await _assetBundle.loadString(assetPath);
-    final String rawRouteCsv = await _assetBundle.loadString(routeAssetPath);
-    final String rawBranchKeysCsv = await _assetBundle.loadString(
+    final String rawJson = await _assetLoader(assetPath);
+    final String rawRouteCsv = await _assetLoader(routeAssetPath);
+    final String rawBranchKeysCsv = await _assetLoader(
       branchKeysAssetPath,
     );
-    final String rawDirectionPoliciesCsv = await _assetBundle.loadString(
+    final String rawDirectionPoliciesCsv = await _assetLoader(
       directionPoliciesAssetPath,
     );
-    final String rawStationTransitionOverridesCsv = await _assetBundle
-        .loadString(stationTransitionOverridesAssetPath);
+    final String rawStationTransitionOverridesCsv = await _assetLoader(
+      stationTransitionOverridesAssetPath,
+    );
     return importFromJsonString(
       rawJson,
       rawRouteCsv: rawRouteCsv,

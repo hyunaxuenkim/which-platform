@@ -1,11 +1,16 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:drift/native.dart';
+import 'package:which_platform/core/database/app_database.dart';
+import 'package:which_platform/core/database/import/subway_line_info_importer.dart';
 import 'package:which_platform/features/route_parser/data/seoul_route_api_client.dart';
 import 'package:which_platform/features/route_parser/domain/parsed_route_models.dart';
 import 'package:which_platform/features/route_parser/domain/route_api_response_dto.dart';
 import 'package:which_platform/features/route_parser/domain/route_response_parser.dart';
 import 'package:which_platform/features/route_parser/domain/route_view_data_mapper.dart';
+import 'package:which_platform/features/route_parser/domain/wrong_platform_localization_audit.dart';
+import 'package:which_platform/features/settings/domain/app_language.dart';
 
 void main(List<String> args) async {
   if (args.length == 3) {
@@ -47,10 +52,33 @@ Future<void> _runCases({
   required String label,
   required List<ApiRouteTestCase> testCases,
 }) async {
-  final SeoulRouteApiClient apiClient = SeoulRouteApiClient();
+  final _RunnerConfig config = await _loadRunnerConfig();
+  final SeoulRouteApiClient apiClient = SeoulRouteApiClient(
+    apiKey: config.apiKey,
+    baseUrl: config.baseUrl,
+  );
   const RouteResponseParser parser = RouteResponseParser();
   const RouteViewDataMapper mapper = RouteViewDataMapper();
+  const WrongPlatformLocalizationAuditor auditor =
+      WrongPlatformLocalizationAuditor();
   final DateTime requestDateTime = _buildTodayNoon();
+  final AppDatabase database = AppDatabase.forTesting(NativeDatabase.memory());
+  final SubwayLineInfoImporter importer = SubwayLineInfoImporter(database);
+  await importer.importFromJsonString(
+    await _readAssetFile(SubwayLineInfoImporter.defaultAssetPath),
+    rawRouteCsv: await _readAssetFile(
+      SubwayLineInfoImporter.defaultRouteAssetPath,
+    ),
+    rawBranchKeysCsv: await _readAssetFile(
+      SubwayLineInfoImporter.defaultBranchKeysAssetPath,
+    ),
+    rawDirectionPoliciesCsv: await _readAssetFile(
+      SubwayLineInfoImporter.defaultDirectionPoliciesAssetPath,
+    ),
+    rawStationTransitionOverridesCsv: await _readAssetFile(
+      SubwayLineInfoImporter.defaultStationTransitionOverridesAssetPath,
+    ),
+  );
 
   stdout.writeln(
     'Running $label with ${testCases.length} cases at ${_formatDateTime(requestDateTime)}',
@@ -61,71 +89,100 @@ Future<void> _runCases({
   int apiFailureCount = 0;
   int exceptionCount = 0;
 
-  for (final ApiRouteTestCase testCase in testCases) {
-    stdout.writeln('');
-    stdout.writeln('=== ${testCase.id} | ${testCase.start} -> ${testCase.end}');
+  try {
+    for (final ApiRouteTestCase testCase in testCases) {
+      stdout.writeln('');
+      stdout.writeln('=== ${testCase.id} | ${testCase.start} -> ${testCase.end}');
 
-    try {
-      final RouteApiResponseDto response = await apiClient.fetchShortestPath(
-        departureStation: testCase.start,
-        arrivalStation: testCase.end,
-        requestDateTime: requestDateTime,
-      );
+      try {
+        final RouteApiResponseDto response = await apiClient.fetchShortestPath(
+          departureStation: testCase.start,
+          arrivalStation: testCase.end,
+          requestDateTime: requestDateTime,
+        );
 
-      final String resultCode = response.header?.resultCode ?? 'null';
-      final String resultMessage = response.header?.resultMsg ?? 'null';
-      final int rawPathCount = response.body?.paths?.length ?? 0;
-      stdout.writeln(
-        'API header: resultCode=$resultCode, resultMsg=$resultMessage, rawPathCount=$rawPathCount',
-      );
+        final String resultCode = response.header?.resultCode ?? 'null';
+        final String resultMessage = response.header?.resultMsg ?? 'null';
+        final int rawPathCount = response.body?.paths?.length ?? 0;
+        stdout.writeln(
+          'API header: resultCode=$resultCode, resultMsg=$resultMessage, rawPathCount=$rawPathCount',
+        );
 
-      if (resultCode != '00') {
-        apiFailureCount += 1;
-        stdout.writeln('API status: FAILED');
-        continue;
+        if (resultCode != '00') {
+          apiFailureCount += 1;
+          stdout.writeln('API status: FAILED');
+          continue;
+        }
+
+        final ParsedRouteParseResult parsed = await parser.parseWithDatabase(
+          response,
+          database: database,
+        );
+        switch (parsed) {
+          case ParsedRouteParseSuccess(:final route):
+            successCount += 1;
+            final String stationTrail = route.stationTrail.join(' -> ');
+            stdout.writeln(
+              'Parser status: SUCCESS | legs=${route.legs.length}, transfers=${route.transfers.length}, totalDurationSeconds=${route.totalDurationSeconds}',
+            );
+            stdout.writeln('Station trail: $stationTrail');
+
+            for (int i = 0; i < route.legs.length; i++) {
+              final RouteLeg leg = route.legs[i];
+              stdout.writeln(
+                'Leg ${i + 1}: ${leg.lineName} | direction=${leg.directionLabel} | next=${leg.nextStationName} | stations=${leg.stationNames.join(' -> ')}',
+              );
+            }
+
+            for (int i = 0; i < route.transfers.length; i++) {
+              final TransferSegment transfer = route.transfers[i];
+              stdout.writeln(
+                'Transfer ${i + 1}: ${transfer.stationName} | ${transfer.fromLineName} -> ${transfer.toLineName} | durationSeconds=${transfer.durationSeconds}',
+              );
+            }
+
+            for (final AppLanguage language in AppLanguage.values) {
+              final routeViewData = await mapper.mapWithDatabase(
+                route,
+                database: database,
+                language: language,
+              );
+              final List<WrongPlatformLegLocalizationAudit> audit = auditor
+                  .auditRoute(
+                    route: route,
+                    viewData: routeViewData,
+                    language: language,
+                  );
+              stdout.writeln('RouteViewData JSON [${language.name}]:');
+              stdout.writeln(
+                const JsonEncoder.withIndent('  ').convert(routeViewData.toJson()),
+              );
+              stdout.writeln(
+                'WrongPlatform audit [${language.name}]:',
+              );
+              stdout.writeln(
+                const JsonEncoder.withIndent('  ').convert(
+                  audit
+                      .map(
+                        (WrongPlatformLegLocalizationAudit item) => item.toJson(),
+                      )
+                      .toList(growable: false),
+                ),
+              );
+            }
+          case ParsedRouteParseFailure(:final code, :final message):
+            parserFailureCount += 1;
+            stdout.writeln(
+              'Parser status: FAILED | code=${code.name} | message=${message ?? 'null'}',
+            );
+        }
+      } catch (error) {
+        exceptionCount += 1;
+        stdout.writeln('Request exception: $error');
       }
-
-      final ParsedRouteParseResult parsed = parser.parse(response);
-      parsed.when(
-        success: (ParsedRoute route) {
-          successCount += 1;
-          final routeViewData = mapper.map(route);
-          final String stationTrail = route.stationTrail.join(' -> ');
-          stdout.writeln(
-            'Parser status: SUCCESS | legs=${route.legs.length}, transfers=${route.transfers.length}, totalDurationSeconds=${route.totalDurationSeconds}',
-          );
-          stdout.writeln('Station trail: $stationTrail');
-
-          for (int i = 0; i < route.legs.length; i++) {
-            final RouteLeg leg = route.legs[i];
-            stdout.writeln(
-              'Leg ${i + 1}: ${leg.lineName} | direction=${leg.directionLabel} | next=${leg.nextStationName} | stations=${leg.stationNames.join(' -> ')}',
-            );
-          }
-
-          for (int i = 0; i < route.transfers.length; i++) {
-            final TransferSegment transfer = route.transfers[i];
-            stdout.writeln(
-              'Transfer ${i + 1}: ${transfer.stationName} | ${transfer.fromLineName} -> ${transfer.toLineName} | durationSeconds=${transfer.durationSeconds}',
-            );
-          }
-
-          stdout.writeln('RouteViewData JSON:');
-          stdout.writeln(
-            const JsonEncoder.withIndent('  ').convert(routeViewData.toJson()),
-          );
-        },
-        failure: (ParseFailureCode code, String? message) {
-          parserFailureCount += 1;
-          stdout.writeln(
-            'Parser status: FAILED | code=${code.name} | message=${message ?? 'null'}',
-          );
-        },
-      );
-    } catch (error) {
-      exceptionCount += 1;
-      stdout.writeln('Request exception: $error');
     }
+  } finally {
+    await database.close();
   }
 
   stdout.writeln('');
@@ -134,6 +191,46 @@ Future<void> _runCases({
   stdout.writeln('Parser failures: $parserFailureCount');
   stdout.writeln('API failures: $apiFailureCount');
   stdout.writeln('Request exceptions: $exceptionCount');
+}
+
+Future<String> _readAssetFile(String relativePath) {
+  return File(relativePath).readAsString();
+}
+
+Future<_RunnerConfig> _loadRunnerConfig() async {
+  final Map<String, String> env = await _readDotEnv('.env.local');
+  final String apiKey =
+      env['SEOUL_ROUTE_API_KEY'] ?? Platform.environment['SEOUL_ROUTE_API_KEY'] ?? '';
+  final String baseUrl =
+      env['SEOUL_ROUTE_API_BASE_URL'] ??
+      Platform.environment['SEOUL_ROUTE_API_BASE_URL'] ??
+      'http://openapi.seoul.go.kr:8088';
+
+  return _RunnerConfig(apiKey: apiKey, baseUrl: baseUrl);
+}
+
+Future<Map<String, String>> _readDotEnv(String path) async {
+  final File file = File(path);
+  if (!await file.exists()) {
+    return <String, String>{};
+  }
+
+  final List<String> lines = await file.readAsLines();
+  final Map<String, String> values = <String, String>{};
+  for (final String line in lines) {
+    final String trimmed = line.trim();
+    if (trimmed.isEmpty || trimmed.startsWith('#')) {
+      continue;
+    }
+    final int separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex <= 0) {
+      continue;
+    }
+    final String key = trimmed.substring(0, separatorIndex).trim();
+    final String value = trimmed.substring(separatorIndex + 1).trim();
+    values[key] = value;
+  }
+  return values;
 }
 
 DateTime _buildTodayNoon() {
@@ -190,4 +287,14 @@ class ApiRouteTestCase {
   final String id;
   final String start;
   final String end;
+}
+
+class _RunnerConfig {
+  const _RunnerConfig({
+    required this.apiKey,
+    required this.baseUrl,
+  });
+
+  final String apiKey;
+  final String baseUrl;
 }
