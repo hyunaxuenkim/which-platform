@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/database/app_database.dart';
 import '../../../core/database/database_provider.dart';
 import '../../route_parser/domain/parsed_route_models.dart';
 import '../../route_parser/domain/route_api_response_dto.dart';
@@ -13,6 +12,7 @@ import '../../route_parser/domain/route_view_data.dart';
 import '../../route_parser/domain/route_view_data_mapper.dart';
 import '../../route_parser/providers/route_parser_providers.dart';
 import '../../search/domain/station_search_lookup.dart';
+import '../../search/providers/station_search_lookup_provider.dart';
 import '../../search/presentation/search_route_params.dart';
 import '../../settings/domain/app_language.dart';
 import '../../settings/domain/app_strings.dart';
@@ -69,7 +69,6 @@ class _RoutePageState extends ConsumerState<RoutePage> {
       final database = ref.read(appDatabaseProvider);
       final _NormalizedStations normalizedStations =
           await _normalizeStationsForRequest(
-            database: database,
             origin: origin,
             destination: destination,
           );
@@ -127,11 +126,12 @@ class _RoutePageState extends ConsumerState<RoutePage> {
   }
 
   Future<_NormalizedStations> _normalizeStationsForRequest({
-    required AppDatabase database,
     required String origin,
     required String destination,
   }) async {
-    final StationSearchLookup lookup = await StationSearchLookup.load(database);
+    final StationSearchLookup lookup = await ref.read(
+      stationSearchLookupProvider.future,
+    );
     final AppLanguage language = ref.read(appLanguageProvider);
     return _NormalizedStations(
       origin: lookup.normalizeToCanonicalKorean(
@@ -166,6 +166,7 @@ class _RoutePageState extends ConsumerState<RoutePage> {
 
     final importer = ref.read(subwayLineInfoImporterProvider);
     await importer.importFromAsset();
+    ref.invalidate(stationSearchLookupProvider);
   }
 
   DateTime _buildTodayNoon() {

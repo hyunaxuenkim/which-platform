@@ -10,10 +10,11 @@
 
 ### 2. `topic/<topic-name>`
 - The integration branch for a single topic
-- Associated with the topic's `plan.md` at `docs/archive/<topic-name>/plan.md`
+- Associated with the topic's active `plan.md` at `docs/topics/<topic-name>/plan.md`
 - Collects the results of all milestones defined in that plan
 - Each milestone branch opens its PR against this branch
 - Once the topic is complete, this branch opens a final PR to `main`
+- After the topic is complete, move the finalized plan to `docs/archive/<topic-name>/plan.md`
 
 ### 3. `milestone/<topic-name>/mX-<short-name>`
 - A branch for implementing exactly one milestone
@@ -26,13 +27,14 @@
 ## Workflow
 
 1. A new topic starts with a `topic/<topic-name>` branch and a `plan.md`.
-2. The canonical topic plan path is `docs/archive/<topic-name>/plan.md`.
+2. The canonical path for an active topic plan is `docs/topics/<topic-name>/plan.md`.
 3. The `plan.md` defines the milestones for that topic.
 4. Each milestone is implemented in `milestone/<topic-name>/mX-<short-name>`.
 5. After completing a milestone, run validation and open a PR against `topic/<topic-name>`.
 6. The user reviews and approves each milestone PR.
 7. After all milestones are merged, open a final PR from `topic/<topic-name>` to `main`.
 8. Merge into `main` only after the final PR is approved.
+9. Only after the topic is fully complete, move `docs/topics/<topic-name>/plan.md` to `docs/archive/<topic-name>/plan.md`.
 
 ---
 
