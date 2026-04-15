@@ -533,6 +533,7 @@ class _GoButton extends StatelessWidget {
         height: 64,
         width: double.infinity,
         child: FilledButton(
+          key: const ValueKey<String>('search-go-button'),
           onPressed: onPressed,
           style: FilledButton.styleFrom(
             backgroundColor: Colors.transparent,
