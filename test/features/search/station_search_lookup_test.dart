@@ -224,6 +224,41 @@ void main() {
       );
     });
 
+    test('deduplicates suggestions by canonical Korean name', () async {
+      final AppDatabase database = AppDatabase.forTesting(
+        NativeDatabase.memory(),
+      );
+      addTearDown(database.close);
+
+      await database
+          .into(database.stations)
+          .insert(
+            StationsCompanion.insert(
+              nameKo: '서울역',
+              nameEn: const Value('Seoul Station'),
+            ),
+          );
+      await database
+          .into(database.stations)
+          .insert(
+            StationsCompanion.insert(
+              nameKo: '서울역',
+              nameEn: const Value('Seoul'),
+            ),
+          );
+
+      final StationSearchLookup lookup = await StationSearchLookup.load(
+        database,
+      );
+
+      expect(
+        lookup
+            .filterSuggestions('Seo', preferredLanguage: AppLanguage.en)
+            .map((StationSearchSuggestion item) => item.canonicalKoreanName),
+        <String>['서울역'],
+      );
+    });
+
     test(
       'prefers aliases that match the current UI language for filtering',
       () async {

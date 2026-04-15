@@ -144,9 +144,17 @@ class StationSearchLookup {
       return left.loadOrder.compareTo(right.loadOrder);
     });
 
-    return matches
-        .map((_RankedSuggestion match) => match.suggestion)
-        .toList(growable: false);
+    final Set<String> seenCanonicalNames = <String>{};
+    final List<StationSearchSuggestion> suggestions =
+        <StationSearchSuggestion>[];
+    for (final _RankedSuggestion match in matches) {
+      if (!seenCanonicalNames.add(match.suggestion.canonicalKoreanName)) {
+        continue;
+      }
+      suggestions.add(match.suggestion);
+    }
+
+    return suggestions;
   }
 
   _SuggestionMatch? _matchEntry(
